@@ -51,13 +51,23 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <cassert>
 
 #ifdef _DEBUG
 #define DCONSOLE
+#define DLOG_WIN_MSG
 #endif  // _DEBUG
+
+#ifdef DLOG_WIN_MSG
+#include "WinMsgFormatter.hpp"
+#endif
 
 static LRESULT WINAPI WindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
                                   _In_ WPARAM wParam, _In_ LPARAM lParam) {
+#if defined(DCONSOLE) && defined(DLOG_WIN_MSG)
+  static WinMsgFormatter msg_formatter{};
+  std::wclog << msg_formatter(Msg, wParam, lParam) << std::endl;
+#endif  // DCONSOLE && DLOG_WIN_MSG
   switch (Msg) {
     case WM_CLOSE: {
       PostQuitMessage(EXIT_SUCCESS);
@@ -91,7 +101,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   (void)SetConsoleOutputCP(CP_UNICODE);
   (void)SetConsoleCP(CP_UNICODE);
 
-  (void)_setmode(_fileno(stdout), _O_U8TEXT);  // UTF-8 without BOM
+  (void)_setmode(_fileno(stdout), _O_U8TEXT);
   (void)_setmode(_fileno(stderr), _O_U8TEXT);
 
   (void)std::ios::sync_with_stdio(true);

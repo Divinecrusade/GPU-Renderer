@@ -22,4 +22,9 @@
   <ItemGroup>
     <None Include=".clang-tidy" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="WinMsgFormatter.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
