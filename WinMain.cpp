@@ -1,4 +1,4 @@
-#ifdef _DEBUG
+﻿#ifdef _DEBUG
 #define _ALLOW_RTCc_IN_STL
 #include <cassert>
 #define __CRTDBG_MAP_ALLOC
@@ -43,36 +43,35 @@
 #pragma warning(disable : 4005 4668 5039 4514 4820 4711)
 #pragma warning(disable : 6001 6011 6387)
 #include <Windows.h>
-#include <io.h>
 #include <fcntl.h>
+#include <io.h>
 #pragma warning(pop)
 
-#include <iostream>
 #include <cstdio>
+#include <iostream>
+#include <string>
 #include <utility>
 
 #ifdef _DEBUG
 #define DCONSOLE
 #endif  // _DEBUG
 
-static LRESULT WINAPI WindowProcW(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam) {
+static LRESULT WINAPI WindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
+                                  _In_ WPARAM wParam, _In_ LPARAM lParam) {
   switch (Msg) {
-    case WM_CLOSE:
-    {
+    case WM_CLOSE: {
       PostQuitMessage(EXIT_SUCCESS);
-    }
-    break;
+    } break;
   }
   return DefWindowProcW(hWnd, Msg, wParam, lParam);
 }
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                     [[maybe_unused]] _In_opt_ HINSTANCE,
-                    [[maybe_unused]] _In_ LPWSTR,
+                    [[maybe_unused]] _In_ LPWSTR, 
                     _In_ int nCmdShow) {
 #ifdef _DEBUG
-  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | 
-                 _CRTDBG_LEAK_CHECK_DF |
+  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF |
                  _CRTDBG_CHECK_ALWAYS_DF);
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 #endif
@@ -82,17 +81,24 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     return static_cast<int>(GetLastError());
   }
   FILE* cout_stream{nullptr};
-  (void) freopen_s(&cout_stream, "CONOUT$", "w", stdout);
+  (void)freopen_s(&cout_stream, "CONOUT$", "w", stdout);
   FILE* cerr_stream{nullptr};
-  (void) freopen_s(&cerr_stream, "CONOUT$", "w", stderr);
+  (void)freopen_s(&cerr_stream, "CONOUT$", "w", stderr);
   FILE* cin_stream{nullptr};
-  (void) freopen_s(&cin_stream, "CONIN$", "r", stdin);
-  
-  std::ios::sync_with_stdio(true);
-  std::cin.clear();
-  std::cout.clear();
-  std::cerr.clear();
-  std::clog.clear();
+  (void)freopen_s(&cin_stream, "CONIN$", "r", stdin);
+
+  static constexpr UINT CP_UNICODE{65001u};
+  (void)SetConsoleOutputCP(CP_UNICODE);
+  (void)SetConsoleCP(CP_UNICODE);
+
+  (void)_setmode(_fileno(stdout), _O_U8TEXT);  // UTF-8 without BOM
+  (void)_setmode(_fileno(stderr), _O_U8TEXT);
+
+  (void)std::ios::sync_with_stdio(true);
+  std::wcin.clear();
+  std::wcout.clear();
+  std::wcerr.clear();
+  std::wclog.clear();
 
   SetConsoleTitleW(L"GPU-Renderer Debug Console");
 #endif  // DCONSOLE
@@ -129,7 +135,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   static constexpr LPVOID NO_EXTRA_DATA{NULL};
 
   static constexpr auto WINDOW_EXTRA_STYLE{NO_EXTRA_STYLE};
-  //auto const WINDOW_CLASS{MAKEINTATOM(aClass)};
+  // auto const WINDOW_CLASS{MAKEINTATOM(aClass)};
   static constexpr LPCWSTR WINDOW_CLASS{CLASS_NAME};
   static constexpr LPCWSTR WINDOW_NAME{L"GPU-Renderer"};
   static constexpr DWORD WINDOW_STYLE{WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU};
@@ -147,7 +153,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   if (WindowCreationFailed(hWnd)) {
     return static_cast<int>(GetLastError());
   }
-  (void) ShowWindow(hWnd, nCmdShow);
+  (void)ShowWindow(hWnd, nCmdShow);
 
   static constexpr HWND ALL_WINDOWS{NULL};
   static constexpr UINT NO_MIN_RANGE_FILTER_MSG{NULL};
@@ -156,17 +162,18 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   static constexpr auto ErrorHappened = [](BOOL result) {
     return result == -1;
   };
-  while (auto operation_done{GetMessageW(&msg, ALL_WINDOWS, NO_MIN_RANGE_FILTER_MSG, NO_MAX_RANGE_FILTER_MSG)}) {
+  while (auto operation_done{GetMessageW(
+      &msg, ALL_WINDOWS, NO_MIN_RANGE_FILTER_MSG, NO_MAX_RANGE_FILTER_MSG)}) {
     if (ErrorHappened(operation_done)) {
       return static_cast<int>(GetLastError());
     } else {
-      (void) TranslateMessage(&msg);
-      (void) DispatchMessageW(&msg);
+      (void)TranslateMessage(&msg);
+      (void)DispatchMessageW(&msg);
     }
   }
 
 #ifdef DCONSOLE
-  (void) FreeConsole();
+  (void)FreeConsole();
 #endif  // DCONSOLE
 
   assert(_CrtDumpMemoryLeaks() == FALSE);
