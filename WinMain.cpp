@@ -43,9 +43,17 @@
 #pragma warning(disable : 4005 4668 5039 4514 4820 4711)
 #pragma warning(disable : 6001 6011 6387)
 #include <Windows.h>
+#include <io.h>
+#include <fcntl.h>
 #pragma warning(pop)
 
+#include <iostream>
+#include <cstdio>
 #include <utility>
+
+#ifdef _DEBUG
+#define DCONSOLE
+#endif  // _DEBUG
 
 static LRESULT WINAPI WindowProcW(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam) {
   switch (Msg) {
@@ -68,6 +76,26 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                  _CRTDBG_CHECK_ALWAYS_DF);
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 #endif
+
+#ifdef DCONSOLE
+  if (BOOL const console_allocated{AllocConsole()}; !console_allocated) {
+    return static_cast<int>(GetLastError());
+  }
+  FILE* cout_stream{nullptr};
+  (void) freopen_s(&cout_stream, "CONOUT$", "w", stdout);
+  FILE* cerr_stream{nullptr};
+  (void) freopen_s(&cerr_stream, "CONOUT$", "w", stderr);
+  FILE* cin_stream{nullptr};
+  (void) freopen_s(&cin_stream, "CONIN$", "r", stdin);
+  
+  std::ios::sync_with_stdio(true);
+  std::cin.clear();
+  std::cout.clear();
+  std::cerr.clear();
+  std::clog.clear();
+
+  SetConsoleTitleW(L"GPU-Renderer Debug Console");
+#endif  // DCONSOLE
 
   static constexpr HICON DEFAULT_ICON{NULL};
   static constexpr HCURSOR DEFAULT_CURSOR{NULL};
@@ -136,6 +164,10 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
       (void) DispatchMessageW(&msg);
     }
   }
+
+#ifdef DCONSOLE
+  (void) FreeConsole();
+#endif  // DCONSOLE
 
   assert(_CrtDumpMemoryLeaks() == FALSE);
   return static_cast<int>(msg.wParam);
