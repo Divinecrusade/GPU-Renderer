@@ -1,6 +1,6 @@
 ﻿#include "DebugHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
-#include "WindowClass.hpp"
+#include "CachedDC.hpp"
 
 #include <string>
 #include <utility>
@@ -70,20 +70,9 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   SetConsoleTitleW(L"GPU-Renderer Debug Console");
 #endif  // DCONSOLE
 
-  using gpu_renderer::WindowClass;
+  using gpu_renderer::CachedDC;
 
-  static constexpr LPCWSTR CLASS_NAME{L"Canvas for DirectX"};
-  WindowClass const wc{CS_OWNDC,
-                       WindowProcW,
-                       0,
-                       0,
-                       hInstance,
-                       WindowClass::DEFAULT_ICON,
-                       WindowClass::DEFAULT_CURSOR,
-                       WindowClass::NO_BACKGROUND,
-                       WindowClass::NO_MENU_NAME,
-                       CLASS_NAME,
-                       WindowClass::DEFAULT_ICON};
+  CachedDC const wc{hInstance, WindowProcW};
 
   static constexpr DWORD NO_EXTRA_STYLE{NULL};
   static constexpr HWND NO_PARENT{NULL};
@@ -91,8 +80,6 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   static constexpr LPVOID NO_EXTRA_DATA{NULL};
 
   static constexpr auto WINDOW_EXTRA_STYLE{NO_EXTRA_STYLE};
-  // auto const WINDOW_CLASS{MAKEINTATOM(aClass)};
-  static constexpr LPCWSTR WINDOW_CLASS{CLASS_NAME};
   static constexpr LPCWSTR WINDOW_NAME{L"GPU-Renderer"};
   static constexpr DWORD WINDOW_STYLE{WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU};
   static constexpr int WINDOW_X_POS{30};
@@ -102,7 +89,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   static constexpr auto WindowCreationFailed = [](HWND const& wnd) {
     return wnd == NULL;
   };
-  HWND const hWnd{CreateWindowExW(WINDOW_EXTRA_STYLE, WINDOW_CLASS, WINDOW_NAME,
+  HWND const hWnd{CreateWindowExW(WINDOW_EXTRA_STYLE, wc.CLASS_NAME, WINDOW_NAME,
                                   WINDOW_STYLE, WINDOW_X_POS, WINDOW_Y_POS,
                                   WINDOW_WIDTH, WINDOW_HEIGHT, NO_PARENT,
                                   NO_MENU, hInstance, NO_EXTRA_DATA)};
