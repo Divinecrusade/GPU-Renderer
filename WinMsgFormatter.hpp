@@ -10,19 +10,20 @@ struct WinMsgFormatter {
  private:
   static constexpr std::wstring_view UNKNOWN_MESSAGE_NAME{L"UNKNOWN"};
   static constexpr std::wstring_view HEX_LITERAL{L"0x"};
+  static constexpr auto HEX_DIGITS_IN_BYTE{2};
   static constexpr std::streamsize MESSAGE_NAME_WIDTH{24};
   static constexpr std::streamsize MESSAGE_CODE_WIDTH{
-      static_cast<std::streamsize>(sizeof(UINT) + HEX_LITERAL.size())};
+      static_cast<std::streamsize>(sizeof(UINT)) * HEX_DIGITS_IN_BYTE};
   static constexpr std::streamsize MESSAGE_WPARAM_WIDTH{
-      static_cast<std::streamsize>(sizeof(WPARAM) + HEX_LITERAL.size())};
+      static_cast<std::streamsize>(sizeof(WPARAM)) * HEX_DIGITS_IN_BYTE};
   static constexpr std::streamsize MESSAGE_LPARAM_WIDTH{
-      static_cast<std::streamsize>(sizeof(LPARAM) + HEX_LITERAL.size())};
+      static_cast<std::streamsize>(sizeof(LPARAM)) * HEX_DIGITS_IN_BYTE};
 
  public:
   std::wstring operator()(UINT Msg, WPARAM wParam, LPARAM lParam) {
     std::wostringstream wsout{};
     wsout << L"Msg: ";
-    wsout << std::setw(MESSAGE_NAME_WIDTH) << std::left;
+    wsout << std::setw(MESSAGE_NAME_WIDTH) << std::right;
 
     switch (Msg) {
 #define KNOWN_MESSAGE_NAME(Msg) \
@@ -127,13 +128,12 @@ struct WinMsgFormatter {
         wsout << UNKNOWN_MESSAGE_NAME;
         break;
     }
-
-    wsout << L" " << HEX_LITERAL << std::hex << std::setfill(L'0')
-          << std::setw(MESSAGE_CODE_WIDTH) << Msg;
-    wsout << L" LP: " << HEX_LITERAL << std::hex << std::setfill(L'0')
-          << std::setw(MESSAGE_WPARAM_WIDTH) << lParam;
-    wsout << L" WP: " << HEX_LITERAL << std::hex << std::setfill(L'0')
-          << std::setw(MESSAGE_LPARAM_WIDTH) << wParam;
+    wsout << L" " << HEX_LITERAL << std::uppercase << std::hex
+          << std::setfill(L'0') << std::setw(MESSAGE_CODE_WIDTH) << Msg;
+    wsout << L" LP: " << HEX_LITERAL << std::uppercase << std::hex
+          << std::setfill(L'0') << std::setw(MESSAGE_WPARAM_WIDTH) << lParam;
+    wsout << L" WP: " << HEX_LITERAL << std::uppercase << std::hex
+          << std::setfill(L'0') << std::setw(MESSAGE_LPARAM_WIDTH) << wParam;
     return wsout.str();
   }
 };
