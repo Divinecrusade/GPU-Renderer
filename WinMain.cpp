@@ -1,66 +1,23 @@
-﻿#ifdef _DEBUG
-#define _ALLOW_RTCc_IN_STL
-#include <cassert>
-#define __CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#define DEBUG_NEW new (_NORMAL_BLOCK, __FILE__, __LINE__)
-#define new DEBUG_NEW
-#endif  // _DEBUG
+﻿#include "DebugHeader.hpp"
+#include "OptimisedWindowsHeader.hpp"
+#include "WindowClass.hpp"
 
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#define STRICT
-
-#define NOGDICAPMASKS
-#define NOMENUS
-#define NOICONS
-#define NOSYSCOMMANDS
-#define NORASTEROPS
-#define NOATOM
-#define NOCLIPBOARD
-#define NOCOLOR
-#define NOCTLMGR
-#define NODRAWTEXT
-#define NONLS
-#define NOMETAFILE
-#define NOOPENFILE
-#define NOSCROLL
-#define NOSERVICE
-#define NOSOUND
-#define NOTEXTMETRIC
-#define NOWH
-#define NOCOMM
-#define NOKANJI
-#define NOHELP
-#define NOPROFILER
-#define NODEFERWINDOWPOS
-#define NOMCX
-#define NORPC
-#define NOPROXYSTUB
-#define NOIMAGE
-#define NOTAPE
-#pragma warning(push)
-#pragma warning(disable : 4005 4668 5039 4514 4820 4711)
-#pragma warning(disable : 6001 6011 6387)
-#include <Windows.h>
-#include <fcntl.h>
-#include <io.h>
-#pragma warning(pop)
-
-#include <cstdio>
-#include <iostream>
 #include <string>
 #include <utility>
 #include <cassert>
 
-#ifdef _DEBUG
-#define DCONSOLE
+#ifdef DCONSOLE
+#include <fcntl.h>
+#include <io.h>
+#include <cstdio>
+#include <iostream>
+
 #define DLOG_WIN_MSG
-#endif  // _DEBUG
+#endif  // DCONSOLE
 
 #ifdef DLOG_WIN_MSG
 #include "WinMsgFormatter.hpp"
-#endif
+#endif // DLOG_WIN_MSG
 
 static LRESULT WINAPI WindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
                                   _In_ WPARAM wParam, _In_ LPARAM lParam) {
@@ -84,7 +41,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF |
                  _CRTDBG_CHECK_ALWAYS_DF);
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
-#endif
+#endif // _DEBUG
 
 #ifdef DCONSOLE
   if (BOOL const console_allocated{AllocConsole()}; !console_allocated) {
@@ -113,31 +70,20 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   SetConsoleTitleW(L"GPU-Renderer Debug Console");
 #endif  // DCONSOLE
 
-  static constexpr HICON DEFAULT_ICON{NULL};
-  static constexpr HCURSOR DEFAULT_CURSOR{NULL};
-  static constexpr HBRUSH NO_BACKGROUND{NULL};
-  static constexpr LPCWSTR NO_MENU_NAME{NULL};
-  static constexpr LPCWSTR CLASS_NAME{L"Canvas for DirectX"};
-  WNDCLASSEXW const wc{.cbSize = sizeof(WNDCLASSEX),
-                       .style = CS_OWNDC,
-                       .lpfnWndProc = WindowProcW,
-                       .cbClsExtra = 0,
-                       .cbWndExtra = 0,
-                       .hInstance = hInstance,
-                       .hIcon = DEFAULT_ICON,
-                       .hCursor = DEFAULT_CURSOR,
-                       .hbrBackground = NO_BACKGROUND,
-                       .lpszMenuName = NO_MENU_NAME,
-                       .lpszClassName = CLASS_NAME,
-                       .hIconSm = DEFAULT_ICON};
+  using gpu_renderer::WindowClass;
 
-  static constexpr auto ClassRegistrationFailed = [](ATOM aClass) {
-    return aClass == NULL;
-  };
-  ATOM const aClass{RegisterClassExW(&wc)};
-  if (ClassRegistrationFailed(aClass)) {
-    return static_cast<int>(GetLastError());
-  }
+  static constexpr LPCWSTR CLASS_NAME{L"Canvas for DirectX"};
+  WindowClass const wc{CS_OWNDC,
+                       WindowProcW,
+                       0,
+                       0,
+                       hInstance,
+                       WindowClass::DEFAULT_ICON,
+                       WindowClass::DEFAULT_CURSOR,
+                       WindowClass::NO_BACKGROUND,
+                       WindowClass::NO_MENU_NAME,
+                       CLASS_NAME,
+                       WindowClass::DEFAULT_ICON};
 
   static constexpr DWORD NO_EXTRA_STYLE{NULL};
   static constexpr HWND NO_PARENT{NULL};
@@ -183,7 +129,11 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   }
 
 #ifdef DCONSOLE
-  (void)FreeConsole();
+  if (!FreeConsole()) {
+    auto const err{GetLastError()};
+    OutputDebugStringW(std::to_wstring(err).c_str());
+    OutputDebugStringW(L"\n");
+  }
 #endif  // DCONSOLE
 
   assert(_CrtDumpMemoryLeaks() == FALSE);

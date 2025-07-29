@@ -150,12 +150,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="WindowClass.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DebugHeader.hpp" />
+    <ClInclude Include="OptimisedWindowsHeader.hpp" />
+    <ClInclude Include="WindowClass.hpp" />
     <ClInclude Include="WinMsgFormatter.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
