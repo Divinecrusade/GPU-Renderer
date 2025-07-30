@@ -107,9 +107,9 @@ TEST_F(WindowClassTest, DestructorUnregistersWhenLastInstanceDestroyed) {
     EXPECT_STREQ(wc.GetLpClassName(), unique_class_name.c_str());
   }  // WindowClass деструктор
 
-  HWND test_window = CreateWindowExW(0, unique_class_name.c_str(), L"Test",
+  HWND const test_window{CreateWindowExW(0, unique_class_name.c_str(), L"Test",
                                      WS_OVERLAPPEDWINDOW, 0, 0, 100, 100,
-                                     nullptr, nullptr, hInstance_, nullptr);
+                                     nullptr, nullptr, hInstance_, nullptr)};
 
   EXPECT_EQ(test_window, nullptr);
   EXPECT_EQ(GetLastError(), ERROR_CANNOT_FIND_WND_CLASS);
@@ -141,9 +141,9 @@ TEST_F(WindowClassTest, ReferenceCountingWithMultipleInstancesAndDestruction) {
 
   EXPECT_STREQ(second_instance->GetLpClassName(), ref_count_class_name.c_str());
 
-  HWND test_window = CreateWindowExW(0, ref_count_class_name.c_str(), L"Test",
+  HWND test_window{CreateWindowExW(0, ref_count_class_name.c_str(), L"Test",
                                      WS_OVERLAPPEDWINDOW, 0, 0, 100, 100,
-                                     nullptr, nullptr, hInstance_, nullptr);
+                                     nullptr, nullptr, hInstance_, nullptr)};
 
   EXPECT_NE(test_window, nullptr);
   if (test_window) {
@@ -206,18 +206,18 @@ TEST_F(WindowClassTest, WindowCreationWorksWithRegisteredClass) {
                        test_class_name_.c_str(),
                        WindowClass::kDefaultIcon};
 
-  HWND const test_window =
+  HWND const test_window{
       CreateWindowExW(0, wc.GetLpClassName(), L"Test Window",
                       WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 640,
-                      480, nullptr, nullptr, hInstance_, nullptr);
+                      480, nullptr, nullptr, hInstance_, nullptr)};
 
   EXPECT_NE(test_window, nullptr);
 
   if (test_window) {
-    wchar_t retrieved_class_name[256];
-    int const result =
+    wchar_t retrieved_class_name[256]{L'0'};
+    int const result{
         GetClassNameW(test_window, retrieved_class_name,
-                      sizeof(retrieved_class_name) / sizeof(wchar_t));
+                      sizeof(retrieved_class_name) / sizeof(wchar_t))};
     EXPECT_GT(result, 0);
     EXPECT_STREQ(retrieved_class_name, test_class_name_.c_str());
 
