@@ -6,24 +6,25 @@
 #include <sstream>
 #include <string>
 
+namespace gpu_renderer {
 struct WinMsgFormatter {
  private:
-  static constexpr std::wstring_view UNKNOWN_MESSAGE_NAME{L"UNKNOWN"};
-  static constexpr std::wstring_view HEX_LITERAL{L"0x"};
-  static constexpr auto HEX_DIGITS_IN_BYTE{2};
-  static constexpr std::streamsize MESSAGE_NAME_WIDTH{24};
-  static constexpr std::streamsize MESSAGE_CODE_WIDTH{
-      static_cast<std::streamsize>(sizeof(UINT)) * HEX_DIGITS_IN_BYTE};
-  static constexpr std::streamsize MESSAGE_WPARAM_WIDTH{
-      static_cast<std::streamsize>(sizeof(WPARAM)) * HEX_DIGITS_IN_BYTE};
-  static constexpr std::streamsize MESSAGE_LPARAM_WIDTH{
-      static_cast<std::streamsize>(sizeof(LPARAM)) * HEX_DIGITS_IN_BYTE};
+  static constexpr std::wstring_view kUnknownMessageName{L"UNKNOWN"};
+  static constexpr std::wstring_view kHexLiteral{L"0x"};
+  static constexpr auto kHexDigitsInByte{2};
+  static constexpr std::streamsize kMessageNameWidth{24};
+  static constexpr std::streamsize kMessageCodeWidth{
+      static_cast<std::streamsize>(sizeof(UINT)) * kHexDigitsInByte};
+  static constexpr std::streamsize kMessageWparamWidth{
+      static_cast<std::streamsize>(sizeof(WPARAM)) * kHexDigitsInByte};
+  static constexpr std::streamsize kMessageLparamWidth{
+      static_cast<std::streamsize>(sizeof(LPARAM)) * kHexDigitsInByte};
 
  public:
   std::wstring operator()(UINT Msg, WPARAM wParam, LPARAM lParam) {
     std::wostringstream wsout{};
     wsout << L"Msg: ";
-    wsout << std::setw(MESSAGE_NAME_WIDTH) << std::right;
+    wsout << std::setw(kMessageNameWidth) << std::right;
 
     switch (Msg) {
 #define KNOWN_MESSAGE_NAME(Msg) \
@@ -125,17 +126,18 @@ struct WinMsgFormatter {
       KNOWN_MESSAGE_NAME(WM_POWERBROADCAST)
 #undef KNOWN_MESSAGE_NAME
       default:
-        wsout << UNKNOWN_MESSAGE_NAME;
+        wsout << kUnknownMessageName;
         break;
     }
-    wsout << L" " << HEX_LITERAL << std::uppercase << std::hex
-          << std::setfill(L'0') << std::setw(MESSAGE_CODE_WIDTH) << Msg;
-    wsout << L" LP: " << HEX_LITERAL << std::uppercase << std::hex
-          << std::setfill(L'0') << std::setw(MESSAGE_WPARAM_WIDTH) << lParam;
-    wsout << L" WP: " << HEX_LITERAL << std::uppercase << std::hex
-          << std::setfill(L'0') << std::setw(MESSAGE_LPARAM_WIDTH) << wParam;
+    wsout << L" " << kHexLiteral << std::uppercase << std::hex
+          << std::setfill(L'0') << std::setw(kMessageCodeWidth) << Msg;
+    wsout << L" LP: " << kHexLiteral << std::uppercase << std::hex
+          << std::setfill(L'0') << std::setw(kMessageWparamWidth) << lParam;
+    wsout << L" WP: " << kHexLiteral << std::uppercase << std::hex
+          << std::setfill(L'0') << std::setw(kMessageLparamWidth) << wParam;
     return wsout.str();
   }
 };
+}  // namespace gpu_renderer
 
 #endif  // !WIN_MSG_FORMATTER_HPP

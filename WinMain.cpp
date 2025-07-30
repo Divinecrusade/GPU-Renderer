@@ -22,7 +22,7 @@
 static LRESULT WINAPI WindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
                                   _In_ WPARAM wParam, _In_ LPARAM lParam) {
 #if defined(DCONSOLE) && defined(DLOG_WIN_MSG)
-  static WinMsgFormatter msg_formatter{};
+  static gpu_renderer::WinMsgFormatter msg_formatter{};
   std::wclog << msg_formatter(Msg, wParam, lParam) << std::endl;
 #endif  // DCONSOLE && DLOG_WIN_MSG
   switch (Msg) {

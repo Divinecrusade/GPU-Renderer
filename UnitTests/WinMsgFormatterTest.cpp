@@ -3,16 +3,18 @@
 #include "WinMsgFormatter.hpp"
 
 namespace debug_loggin {
+using gpu_renderer::WinMsgFormatter;
+
 class WinMsgFormatterTest : public ::testing::Test {
  protected:
   WinMsgFormatter formatter;
 };
 
 TEST_F(WinMsgFormatterTest, LeftButtonDownAtOrigin) {
-  static constexpr POINT LEFT_TOP{0, 0};
+  static constexpr POINT kLeftTop{0, 0};
   UINT const msg{WM_LBUTTONDOWN};
   WPARAM const wParam{MK_LBUTTON};
-  LPARAM const lParam{MAKELPARAM(LEFT_TOP.x, LEFT_TOP.y)};
+  LPARAM const lParam{MAKELPARAM(kLeftTop.x, kLeftTop.y)};
 
   std::wstring const result{formatter(msg, wParam, lParam)};
 
@@ -22,10 +24,10 @@ TEST_F(WinMsgFormatterTest, LeftButtonDownAtOrigin) {
 }
 
 TEST_F(WinMsgFormatterTest, LeftButtonDownAtBottomRight) {
-  static constexpr POINT RIGHT_BOTTOM{640, 480};
+  static constexpr POINT kRightBottom{640, 480};
   UINT const msg{WM_LBUTTONDOWN};
   WPARAM const wParam{MK_LBUTTON};
-  LPARAM const lParam{MAKELPARAM(RIGHT_BOTTOM.x, RIGHT_BOTTOM.y)};
+  LPARAM const lParam{MAKELPARAM(kRightBottom.x, kRightBottom.y)};
 
   std::wstring const result{formatter(msg, wParam, lParam)};
 
