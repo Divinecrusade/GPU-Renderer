@@ -1,7 +1,7 @@
 ﻿#include "DebugHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "CachedDC.hpp"
-#include "Window.hpp"
+#include "Canvas.hpp"
 
 #include <string>
 #include <utility>
@@ -57,17 +57,13 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 #endif  // DCONSOLE
 
   using gpu_renderer::CachedDC;
-  using gpu_renderer::Window;
-  CachedDC const wc{hInstance, Window::GetlpfnWndProc()};
+  using gpu_renderer::Canvas;
+  CachedDC wc{hInstance, Canvas::GetlpfnWndProc()};
 
-  static constexpr LPCWSTR WINDOW_NAME{L"GPU-Renderer"};
-  static constexpr DWORD WINDOW_STYLE{WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU};
-  static constexpr int WINDOW_X_POS{30};
-  static constexpr int WINDOW_Y_POS{60};
-  static constexpr int WINDOW_WIDTH{640};
-  static constexpr int WINDOW_HEIGHT{480};
-
-  Window wnd{wc, WINDOW_NAME, WINDOW_STYLE, WINDOW_X_POS, WINDOW_Y_POS, WINDOW_WIDTH, WINDOW_HEIGHT, hInstance, Window::kNoExtraStyle};
+  static constexpr LPCWSTR kWindowName{L"GPU-Renderer"};
+  static constexpr int kWindowWidth{640};
+  static constexpr int kWindowHeight{480};
+  Canvas wnd{wc, kWindowName, kWindowWidth, kWindowHeight, hInstance};
   wnd.Show(nCmdShow);
 
   static constexpr HWND ALL_WINDOWS{NULL};

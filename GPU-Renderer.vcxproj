@@ -153,6 +153,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CachedDC.cpp" />
+    <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowClass.cpp" />
     <ClCompile Include="WinMain.cpp" />
@@ -162,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CachedDC.hpp" />
+    <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="DebugHeader.hpp" />
     <ClInclude Include="OptimisedWindowsHeader.hpp" />
     <ClInclude Include="Window.hpp" />
