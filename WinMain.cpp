@@ -1,6 +1,7 @@
 ﻿#include "DebugHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "CachedDC.hpp"
+#include "Window.hpp"
 
 #include <string>
 #include <utility>
@@ -19,20 +20,6 @@
 #include "WinMsgFormatter.hpp"
 #endif // DLOG_WIN_MSG
 
-static LRESULT WINAPI WindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
-                                  _In_ WPARAM wParam, _In_ LPARAM lParam) {
-#if defined(DCONSOLE) && defined(DLOG_WIN_MSG)
-  static gpu_renderer::WinMsgFormatter msg_formatter{};
-  std::wclog << msg_formatter(Msg, wParam, lParam) << std::endl;
-#endif  // DCONSOLE && DLOG_WIN_MSG
-  switch (Msg) {
-    case WM_CLOSE: {
-      PostQuitMessage(EXIT_SUCCESS);
-    } break;
-  }
-  return DefWindowProcW(hWnd, Msg, wParam, lParam);
-}
-
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                     [[maybe_unused]] _In_opt_ HINSTANCE,
                     [[maybe_unused]] _In_ LPWSTR, 
@@ -42,7 +29,6 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                  _CRTDBG_CHECK_ALWAYS_DF);
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 #endif // _DEBUG
-
 #ifdef DCONSOLE
   if (BOOL const console_allocated{AllocConsole()}; !console_allocated) {
     return static_cast<int>(GetLastError());
@@ -71,32 +57,18 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 #endif  // DCONSOLE
 
   using gpu_renderer::CachedDC;
+  using gpu_renderer::Window;
+  CachedDC const wc{hInstance, Window::GetlpfnWndProc()};
 
-  CachedDC const wc{hInstance, WindowProcW};
-
-  static constexpr DWORD NO_EXTRA_STYLE{NULL};
-  static constexpr HWND NO_PARENT{NULL};
-  static constexpr HMENU NO_MENU{NULL};
-  static constexpr LPVOID NO_EXTRA_DATA{NULL};
-
-  static constexpr auto WINDOW_EXTRA_STYLE{NO_EXTRA_STYLE};
   static constexpr LPCWSTR WINDOW_NAME{L"GPU-Renderer"};
   static constexpr DWORD WINDOW_STYLE{WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU};
   static constexpr int WINDOW_X_POS{30};
   static constexpr int WINDOW_Y_POS{60};
   static constexpr int WINDOW_WIDTH{640};
   static constexpr int WINDOW_HEIGHT{480};
-  static constexpr auto WindowCreationFailed = [](HWND const& wnd) {
-    return wnd == NULL;
-  };
-  HWND const hWnd{CreateWindowExW(WINDOW_EXTRA_STYLE, wc.GetLpClassName(), WINDOW_NAME,
-                                  WINDOW_STYLE, WINDOW_X_POS, WINDOW_Y_POS,
-                                  WINDOW_WIDTH, WINDOW_HEIGHT, NO_PARENT,
-                                  NO_MENU, hInstance, NO_EXTRA_DATA)};
-  if (WindowCreationFailed(hWnd)) {
-    return static_cast<int>(GetLastError());
-  }
-  (void)ShowWindow(hWnd, nCmdShow);
+
+  Window wnd{wc, WINDOW_NAME, WINDOW_STYLE, WINDOW_X_POS, WINDOW_Y_POS, WINDOW_WIDTH, WINDOW_HEIGHT, hInstance, Window::kNoExtraStyle};
+  wnd.Show(nCmdShow);
 
   static constexpr HWND ALL_WINDOWS{NULL};
   static constexpr UINT NO_MIN_RANGE_FILTER_MSG{NULL};
