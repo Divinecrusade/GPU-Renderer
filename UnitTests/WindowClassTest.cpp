@@ -105,7 +105,7 @@ TEST_F(WindowClassTest, DestructorUnregistersWhenLastInstanceDestroyed) {
                    WindowClass::kDefaultIcon};
 
     EXPECT_STREQ(wc.GetLpClassName(), unique_class_name.c_str());
-  }  // WindowClass destructor called here
+  }  // WindowClass деструктор
 
   HWND test_window = CreateWindowExW(0, unique_class_name.c_str(), L"Test",
                                      WS_OVERLAPPEDWINDOW, 0, 0, 100, 100,
@@ -121,7 +121,6 @@ TEST_F(WindowClassTest, ReferenceCountingWithMultipleInstancesAndDestruction) {
   std::unique_ptr<WindowClass> first_instance{};
   std::unique_ptr<WindowClass> second_instance{};
 
-  // Create first instance
   ASSERT_NO_THROW({
     first_instance = std::make_unique<WindowClass>(
         CS_HREDRAW | CS_VREDRAW, TestWndProc, 0, 0, hInstance_,
@@ -130,7 +129,6 @@ TEST_F(WindowClassTest, ReferenceCountingWithMultipleInstancesAndDestruction) {
         ref_count_class_name.c_str(), WindowClass::kDefaultIcon);
   });
 
-  // Create second instance
   ASSERT_NO_THROW({
     second_instance = std::make_unique<WindowClass>(
         CS_HREDRAW | CS_VREDRAW, TestWndProc, 0, 0, hInstance_,
@@ -139,10 +137,8 @@ TEST_F(WindowClassTest, ReferenceCountingWithMultipleInstancesAndDestruction) {
         ref_count_class_name.c_str(), WindowClass::kDefaultIcon);
   });
 
-  // Destroy first instance
   first_instance.reset();
 
-  // Second instance should still work
   EXPECT_STREQ(second_instance->GetLpClassName(), ref_count_class_name.c_str());
 
   HWND test_window = CreateWindowExW(0, ref_count_class_name.c_str(), L"Test",
