@@ -6,9 +6,9 @@ gpu_renderer::CachedDC::CachedDC(HINSTANCE hInstance, WNDPROC lpfnWndProc) noexc
                   0,
                   0,
                   hInstance,
-                  WindowClass::DEFAULT_ICON,
-                  WindowClass::DEFAULT_CURSOR,
-                  WindowClass::NO_BACKGROUND,
-                  WindowClass::NO_MENU_NAME,
-                  CLASS_NAME,
-                  WindowClass::DEFAULT_ICON} {}
+                  WindowClass::kDefaultIcon,
+                  WindowClass::kDefaultCursor,
+                  WindowClass::kNoBackground,
+                  WindowClass::kMenuName,
+                  kClassName,
+                  WindowClass::kDefaultIcon} {}

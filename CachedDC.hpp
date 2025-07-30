@@ -5,8 +5,8 @@
 
 namespace gpu_renderer {
 class CachedDC : public WindowClass {
- public:
-  static constexpr LPCWSTR CLASS_NAME{L"Cached DC"}; 
+ private:
+  static constexpr LPCWSTR kClassName{L"Cached DC"}; 
 
  public:
   CachedDC() = delete;

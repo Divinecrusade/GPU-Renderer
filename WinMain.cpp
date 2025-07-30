@@ -89,7 +89,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   static constexpr auto WindowCreationFailed = [](HWND const& wnd) {
     return wnd == NULL;
   };
-  HWND const hWnd{CreateWindowExW(WINDOW_EXTRA_STYLE, wc.CLASS_NAME, WINDOW_NAME,
+  HWND const hWnd{CreateWindowExW(WINDOW_EXTRA_STYLE, wc.GetLpClassname(), WINDOW_NAME,
                                   WINDOW_STYLE, WINDOW_X_POS, WINDOW_Y_POS,
                                   WINDOW_WIDTH, WINDOW_HEIGHT, NO_PARENT,
                                   NO_MENU, hInstance, NO_EXTRA_DATA)};
