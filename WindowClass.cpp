@@ -113,6 +113,6 @@ gpu_renderer::WindowClass::~WindowClass() noexcept {
   }
 }
 
-LPCWSTR gpu_renderer::WindowClass::GetLpClassname() const noexcept {
+LPCWSTR gpu_renderer::WindowClass::GetLpClassName() const noexcept {
   return class_name_.data();
 }

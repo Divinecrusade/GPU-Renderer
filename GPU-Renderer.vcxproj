@@ -80,6 +80,8 @@
     <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <ClangTidyChecks>*,-llvm-header-guard,-hicpp-*,-google-*,-modernize-use-auto,-modernize-deprecated-headers,-modernize-use-trailing-return-type,-modernize-redundant-void-arg,-modernize-loop-convert,-modernize-pass-by-value,-modernize-make-unique,-modernize-make-shared,-modernize-avoid-c-arrays</ClangTidyChecks>
+    <AllProjectBMIsArePublic>false</AllProjectBMIsArePublic>
+    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

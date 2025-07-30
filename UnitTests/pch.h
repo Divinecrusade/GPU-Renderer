@@ -8,4 +8,9 @@
 #pragma warning(disable : 26495)
 #include "gtest/gtest.h"
 #pragma warning(pop)
-#include <Windows.h>
+#include "OptimisedWindowsHeader.hpp"
+#include "DebugHeader.hpp"
+
+#include <string>
+#include <memory>
+#include <iostream>
