@@ -2,17 +2,15 @@
 #include "OptimisedWindowsHeader.hpp"
 #include "CachedDC.hpp"
 #include "Canvas.hpp"
+#ifdef DCONSOLE
+#include "Console.hpp"
+#endif // DCSONSOLE
 
 #include <string>
 #include <utility>
 #include <cassert>
 
 #ifdef DCONSOLE
-#include <fcntl.h>
-#include <io.h>
-#include <cstdio>
-#include <iostream>
-
 #define DLOG_WIN_MSG
 #endif  // DCONSOLE
 
@@ -29,32 +27,10 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                  _CRTDBG_CHECK_ALWAYS_DF);
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 #endif // _DEBUG
+
 #ifdef DCONSOLE
-  if (BOOL const console_allocated{AllocConsole()}; !console_allocated) {
-    return static_cast<int>(GetLastError());
-  }
-  FILE* cout_stream{nullptr};
-  (void)freopen_s(&cout_stream, "CONOUT$", "w", stdout);
-  FILE* cerr_stream{nullptr};
-  (void)freopen_s(&cerr_stream, "CONOUT$", "w", stderr);
-  FILE* cin_stream{nullptr};
-  (void)freopen_s(&cin_stream, "CONIN$", "r", stdin);
-
-  static constexpr UINT CP_UNICODE{65001u};
-  (void)SetConsoleOutputCP(CP_UNICODE);
-  (void)SetConsoleCP(CP_UNICODE);
-
-  (void)_setmode(_fileno(stdout), _O_U8TEXT);
-  (void)_setmode(_fileno(stderr), _O_U8TEXT);
-
-  (void)std::ios::sync_with_stdio(true);
-  std::wcin.clear();
-  std::wcout.clear();
-  std::wcerr.clear();
-  std::wclog.clear();
-
-  SetConsoleTitleW(L"GPU-Renderer Debug Console");
-#endif  // DCONSOLE
+  gpu_renderer::Console::InitStdStreams(L"GPU-Renderer Debug Console");
+#endif
 
   using gpu_renderer::CachedDC;
   using gpu_renderer::Canvas;
@@ -82,14 +58,6 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
       (void)DispatchMessageW(&msg);
     }
   }
-
-#ifdef DCONSOLE
-  if (!FreeConsole()) {
-    auto const err{GetLastError()};
-    OutputDebugStringW(std::to_wstring(err).c_str());
-    OutputDebugStringW(L"\n");
-  }
-#endif  // DCONSOLE
 
   assert(_CrtDumpMemoryLeaks() == FALSE);
   return static_cast<int>(msg.wParam);
