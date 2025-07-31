@@ -37,9 +37,10 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   CachedDC wc{hInstance, Canvas::GetlpfnWndProc()};
 
   static constexpr LPCWSTR kWindowName{L"GPU-Renderer"};
-  static constexpr int kWindowWidth{640};
-  static constexpr int kWindowHeight{480};
-  Canvas wnd{wc, kWindowName, kWindowWidth, kWindowHeight, hInstance};
+  static constexpr POINT kLeftTopCornerPos{15L, 30L};
+  static constexpr LONG kWindowWidth{640L};
+  static constexpr LONG kWindowHeight{480L};
+  Canvas wnd{wc, kWindowName, kLeftTopCornerPos, {kWindowWidth, kWindowHeight}, hInstance};
   wnd.Show(nCmdShow);
 
   static constexpr HWND ALL_WINDOWS{NULL};

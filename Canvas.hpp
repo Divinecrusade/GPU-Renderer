@@ -9,13 +9,14 @@
 namespace gpu_renderer {
 class Canvas : public Window {
  private:
-  static constexpr POINT kLeftTopWithPadding{10, 30};
-  static constexpr DWORD kFrameWithMinimize{WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU};
+  static constexpr DWORD kFrameWithMinimize{WS_MINIMIZEBOX | WS_CAPTION |
+                                            WS_SYSMENU};
 
  public:
   Canvas() = delete;
-  Canvas(CachedDC& window_class, LPCWSTR lpszWindowName, int nWidth,
-         int nHeight, HINSTANCE hInstance) noexcept;
+  Canvas(CachedDC& window_class, LPCWSTR lpszWindowName,
+         POINT left_top_corner_pos, SIZE window_dimension,
+         HINSTANCE hInstance) noexcept;
   Canvas(Canvas const&) = delete;
   Canvas(Canvas&&) = delete;
 
