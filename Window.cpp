@@ -2,11 +2,12 @@
 
 #include "DebugHeader.hpp"
 
-#ifdef DCONSOLE
+#if defined(LOG_WINDOW_MESSAGES) || defined(LOG_WINDOW)
 #include <iostream>
-
+#endif  // LOG_WINDOW_MESSAGES || LOG_WINDOW
+#ifdef LOG_WINDOW_MESSAGES
 #include "WinMsgFormatter.hpp"
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW_MESSAGES
 #include <cassert>
 
 bool gpu_renderer::Window::first_show_done_{false};
@@ -38,30 +39,32 @@ gpu_renderer::Window::Window(WindowClass const& window_class,
                           kNoMenu, hInstance, reinterpret_cast<LPVOID>(this));
 
   if (WindowCreationFailed(hwnd_)) {
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW
     std::wcerr << L"Window creation failed\n";
     std::wcerr << L"Error code: " << GetLastError() << L"\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW
     return;
   }
 
-#ifdef DCONSOLE
-  std::wclog << L"Window created successfully with handle\n";
-#endif  // DCONSOLE
+#ifdef LOG_WINDOW
+  std::wclog << L"Window '" << lpszWindowName << L"' of class '"
+             << window_class.GetLpClassName() << L"' created successfully\n";
+#endif  // LOG_WINDOW
 }
 
 gpu_renderer::Window::~Window() noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
   if (!DestroyWindow(hwnd_)) {
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW
     std::wcerr << L"Window destruction failed\n";
     std::wcerr << L"Error code: " << GetLastError() << L"\n";
-#endif  // DCONSOLE
-  } else {
-#ifdef DCONSOLE
-    std::wclog << L"Window destroyed successfully\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW
   }
+#ifdef LOG_WINDOW
+  else {
+    std::wclog << L"Window destroyed successfully\n";
+  }
+#endif  // LOG_WINDOW
 }
 
 void gpu_renderer::Window::Show() noexcept {
@@ -74,10 +77,10 @@ void gpu_renderer::Window::Show() noexcept {
 void gpu_renderer::Window::Show(int nCmdShow) noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
   if (first_show_done_) {
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW
     std::wcerr << L"Warning: This overloaded option of Show called but "
                   L"application first show already occurred\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW
     return Show();
   }
 
@@ -100,10 +103,10 @@ LRESULT WINAPI gpu_renderer::Window::SetupWindowProcW(
     _In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam,
     _In_ LPARAM lParam) noexcept {
   if (Msg == WM_CREATE) {
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW_MESSAGES
     std::wclog << L"Installing wndproc for new instance of Window...\n";
     std::wclog << WinMsgFormatter{}(Msg, wParam, lParam) << "\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW_MESSAGES
     CREATESTRUCTW const* const creation_params{
         reinterpret_cast<CREATESTRUCTW const*>(lParam)};
     assert(((void)"lParam must be a pointer to window creation struct",
@@ -117,9 +120,9 @@ LRESULT WINAPI gpu_renderer::Window::SetupWindowProcW(
                             reinterpret_cast<LONG_PTR>(window_instance));
     (void)SetWindowLongPtrW(hWnd, GWLP_WNDPROC,
                             reinterpret_cast<LONG_PTR>(DisptachWindowProcW));
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW
     std::wclog << L"Done installing wndproc for new instance of Window\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW
   }
   return DefWindowProcW(hWnd, Msg, wParam, lParam);
 }
@@ -127,25 +130,25 @@ LRESULT WINAPI gpu_renderer::Window::SetupWindowProcW(
 LRESULT WINAPI gpu_renderer::Window::DisptachWindowProcW(
     _In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam,
     _In_ LPARAM lParam) noexcept {
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW_MESSAGES
   std::wclog << L"Dispatcher get windows message...\n";
   std::wclog << WinMsgFormatter{}(Msg, wParam, lParam) << "\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW_MESSAGES
   Window* const window_instance{
       reinterpret_cast<Window*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA))};
   assert(((void)"Window data must have the pointer to Window class object",
           window_instance != nullptr));
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW_MESSAGES
   std::wclog << L"...forward this message to Window object\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW_MESSAGES
   return window_instance->HandleWinMessage(Msg, wParam, lParam);
 }
 
 LRESULT gpu_renderer::Window::HandleWinMessage(UINT Msg, WPARAM wParam,
                                                LPARAM lParam) {
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW_MESSAGES
   std::wclog << L"Message catched in Window object\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW_MESSAGES
   switch (Msg) {
     case WM_CLOSE: {
       PostQuitMessage(EXIT_SUCCESS);

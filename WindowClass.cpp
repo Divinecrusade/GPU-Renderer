@@ -2,9 +2,9 @@
 
 #include "DebugHeader.hpp"
 
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW_CLASS
 #include <iostream>
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW_CLASS
 #include <cassert>
 
 std::unordered_map<std::wstring, std::size_t,
@@ -50,27 +50,27 @@ gpu_renderer::WindowClass::WindowClass(
 
     if (ATOM const aClass{RegisterClassExW(&wc)};
         ClassRegistrationFailed(aClass)) {
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW_CLASS
       std::wcerr << L"Class with name '" << class_name_
                  << L"' was not registered\n";
       std::wcerr << L"Error code: " << GetLastError() << L"\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW_CLASS
       assert(((void)"Reference count must remain zero on registration failure",
               it->second == 0ull));
       return;
     } else {
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW_CLASS
       std::wclog << L"Class '" << class_name_ << L"' registered successfully\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW_CLASS
     }
   }
 
   ++it->second;
 
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW_CLASS
   std::wclog << L"Class '" << class_name_ << L"' ref count: " << it->second
              << L"\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW_CLASS
 }
 
 gpu_renderer::WindowClass::~WindowClass() noexcept {
@@ -84,24 +84,25 @@ gpu_renderer::WindowClass::~WindowClass() noexcept {
     assert(((void)"Reference count must be positive before decrement",
             it->second > 0ull));
     --it->second;
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW_CLASS
     std::wclog << L"Class '" << class_name_ << L"' ref count: " << it->second
                << L"\n";
-#endif  // DCONSOLE
+#endif  // LOG_WINDOW_CLASS
 
     if (it->second == 0) {
       if (!UnregisterClassW(class_name_.data(), hInstance_)) {
-#ifdef DCONSOLE
+#ifdef LOG_WINDOW_CLASS
         std::wcerr << L"Class with name '" << class_name_
                    << L"' was not unregistered\n";
         std::wcerr << L"Error code: " << GetLastError() << L"\n";
-#endif  // DCONSOLE
-      } else {
-#ifdef DCONSOLE
+#endif  // LOG_WINDOW_CLASS
+      } 
+#ifdef LOG_WINDOW_CLASS
+      else {
         std::wclog << L"Class '" << class_name_
                    << L"' unregistered successfully\n";
-#endif  // DCONSOLE
       }
+#endif  // LOG_WINDOW_CLASS
       assert(((void)"Reference count must be zero before map erase",
               it->second == 0ull));
       class_ref_counts_.erase(it);

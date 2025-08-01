@@ -2,21 +2,13 @@
 #include "OptimisedWindowsHeader.hpp"
 #include "CachedDC.hpp"
 #include "Canvas.hpp"
-#ifdef DCONSOLE
+#ifdef _DEBUG
 #include "Console.hpp"
 #endif // DCSONSOLE
 
 #include <string>
 #include <utility>
 #include <cassert>
-
-#ifdef DCONSOLE
-#define DLOG_WIN_MSG
-#endif  // DCONSOLE
-
-#ifdef DLOG_WIN_MSG
-#include "WinMsgFormatter.hpp"
-#endif // DLOG_WIN_MSG
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                     [[maybe_unused]] _In_opt_ HINSTANCE,
@@ -26,11 +18,9 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF |
                  _CRTDBG_CHECK_ALWAYS_DF);
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
-#endif // _DEBUG
 
-#ifdef DCONSOLE
   gpu_renderer::Console::InitStdStreams(L"GPU-Renderer Debug Console");
-#endif
+#endif // _DEBUG
 
   using gpu_renderer::CachedDC;
   using gpu_renderer::Canvas;
