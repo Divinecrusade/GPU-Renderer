@@ -67,14 +67,14 @@ gpu_renderer::Window::~Window() noexcept {
 #endif  // LOG_WINDOW
 }
 
-void gpu_renderer::Window::Show() noexcept {
+void gpu_renderer::Window::Show() const noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
   assert(((void)"Window must be showed first with wWinaMain nCmdShow param",
           first_show_done_));
   (void)ShowWindow(hwnd_, SW_SHOW);
 }
 
-void gpu_renderer::Window::Show(int nCmdShow) noexcept {
+void gpu_renderer::Window::Show(int nCmdShow) const noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
   if (first_show_done_) {
 #ifdef LOG_WINDOW

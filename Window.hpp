@@ -27,8 +27,8 @@ class Window {
 
   virtual ~Window() noexcept;
 
-  void Show() noexcept;
-  void Show(int nCmdShow) noexcept;
+  void Show() const noexcept;
+  void Show(int nCmdShow) const noexcept;
   void Hide() const noexcept;
 
   static WNDPROC GetlpfnWndProc() noexcept;
