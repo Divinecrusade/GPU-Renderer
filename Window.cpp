@@ -20,6 +20,8 @@ gpu_renderer::Window::Window(WindowClass const& window_class,
   assert(((void)"Instance handle cannot be null", hInstance != NULL));
   assert(((void)"Width must be positive", nWidth > 0));
   assert(((void)"Height must be positive", nHeight > 0));
+  assert(((void)"Current implementation of window doesn't support child window type",
+          ((dwStyle & WS_CHILD) != WS_CHILD)));
 
   static constexpr auto WindowCreationFailed = [](HWND const& wnd) {
     return wnd == NULL;
