@@ -172,10 +172,17 @@
     <ClInclude Include="Console.hpp" />
     <ClInclude Include="DebugHeader.hpp" />
     <ClInclude Include="OptimisedWindowsHeader.hpp" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="WindowClass.hpp" />
     <ClInclude Include="WinError.hpp" />
     <ClInclude Include="WinMsgFormatter.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GPU-Renderer.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

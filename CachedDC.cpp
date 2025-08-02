@@ -1,4 +1,5 @@
 ﻿#include "CachedDC.hpp"
+#include "resource.h"
 
 gpu_renderer::CachedDC::CachedDC(HINSTANCE hInstance, WNDPROC lpfnWndProc) noexcept
     : WindowClass{CS_OWNDC,
@@ -6,9 +7,10 @@ gpu_renderer::CachedDC::CachedDC(HINSTANCE hInstance, WNDPROC lpfnWndProc) noexc
                   0,
                   0,
                   hInstance,
-                  WindowClass::kDefaultIcon,
+                  LoadIconW(hInstance, MAKEINTRESOURCE(IDI_APP_ICON)),
                   WindowClass::kDefaultCursor,
                   WindowClass::kNoBackground,
                   WindowClass::kMenuName,
                   kClassName,
-                  WindowClass::kDefaultIcon} {}
+                  LoadIconW(hInstance, MAKEINTRESOURCE(IDI_APP_ICON))} 
+{}
