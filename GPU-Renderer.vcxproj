@@ -123,7 +123,7 @@
       <SmallerTypeCheck>false</SmallerTypeCheck>
       <FloatingPointExceptions>true</FloatingPointExceptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <UndefinePreprocessorDefinitions>LOG_WINDOW_MESSAGES;LOG_WINDOW;LOG_WINDOW_CLASS;%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>LOG_WINDOW_MESSAGES;%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -158,6 +158,9 @@
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowClass.cpp" />
+    <ClCompile Include="WinError.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +174,7 @@
     <ClInclude Include="OptimisedWindowsHeader.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="WindowClass.hpp" />
+    <ClInclude Include="WinError.hpp" />
     <ClInclude Include="WinMsgFormatter.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

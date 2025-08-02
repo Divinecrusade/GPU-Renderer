@@ -9,6 +9,7 @@
 #include <string>
 
 #include "DebugHeader.hpp"
+#include "WinError.hpp"
 #include "OptimisedWindowsHeader.hpp"
 
 void gpu_renderer::Console::InitStdStreams(
@@ -21,16 +22,23 @@ void gpu_renderer::Console::InitStdStreams(
         << L"Called InitStdStreans but "
         << L"Std streams (wclog, wcout, wcerr, wcin) are already initialized";
   }
-  std_streams_initialized = true;
 #endif  // _DEBUG
+  if (!instance.valid_) {
+#ifdef _DEBUG
+    throw exception::WinError{
+        __FILEW__, __LINE__,
+        "Error happened during instantiation of console window",
+        GetLastError()};
+#else
+    throw exception::WinError{"Console was not created",
+                                          GetLastError()};
+#endif  // _DEBUG
+  }
 }
 
-gpu_renderer::Console::Console(std::wstring_view console_window_title) {
+gpu_renderer::Console::Console(std::wstring_view console_window_title) noexcept {
   if (!AllocConsole()) {
-    auto const err{GetLastError()};
-    OutputDebugStringW(L"Console wasn't allocated. Error code: ");
-    OutputDebugStringW(std::to_wstring(err).c_str());
-    OutputDebugStringW(L"\n");
+    OutputDebugStringW(L"Console wasn't allocated\n");
     return;
   }
   FILE* cout_stream{nullptr};
@@ -53,7 +61,11 @@ gpu_renderer::Console::Console(std::wstring_view console_window_title) {
   std::wcerr.clear();
   std::wclog.clear();
 
-  (void)SetConsoleTitleW(console_window_title.data());
+  valid_ = true;
+
+  if (!SetConsoleTitleW(console_window_title.data())) {
+    std::wcerr << L"Console title was not set, error code: " << GetLastError() << "\n";
+  }
 }
 
 gpu_renderer::Console::~Console() {

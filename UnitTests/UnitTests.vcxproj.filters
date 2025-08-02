@@ -4,6 +4,8 @@
     <ClCompile Include="WinMsgFormatterTest.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="..\WindowClass.cpp" />
+    <ClCompile Include="WindowClassTest.cpp" />
+    <ClCompile Include="..\WinError.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

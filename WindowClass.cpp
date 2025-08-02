@@ -1,6 +1,7 @@
 ﻿#include "WindowClass.hpp"
 
 #include "DebugHeader.hpp"
+#include "WinError.hpp"
 
 #ifdef LOG_WINDOW_CLASS
 #include <iostream>
@@ -14,7 +15,7 @@ std::unordered_map<std::wstring, std::size_t,
 gpu_renderer::WindowClass::WindowClass(
     UINT style, WNDPROC lpfnWndProc, int cbClsExtra, int cbWndExtra,
     HINSTANCE hInstance, HICON hIcon, HCURSOR hCursor, HBRUSH hbrBackground,
-    LPCWSTR lpszMenuName, LPCWSTR lpszClassName, HICON hIconSm) noexcept
+    LPCWSTR lpszMenuName, LPCWSTR lpszClassName, HICON hIconSm)
     : hInstance_{hInstance} {
   assert(((void)"Class name cannot be nullptr", lpszClassName != nullptr));
   assert(((void)"Class name should not be empty",
@@ -57,7 +58,12 @@ gpu_renderer::WindowClass::WindowClass(
 #endif  // LOG_WINDOW_CLASS
       assert(((void)"Reference count must remain zero on registration failure",
               it->second == 0ull));
-      return;
+      class_ref_counts_.erase(it->first);
+#ifdef _DEBUG
+      throw exception::WinError{__FILEW__, __LINE__, "RegisterClassExW failed", GetLastError()};
+#else
+      throw exception::WinError{"Class for window was not registered", GetLastError()};
+#endif  // _DEBUG
     } else {
 #ifdef LOG_WINDOW_CLASS
       std::wclog << L"Class '" << class_name_ << L"' registered successfully\n";
@@ -74,8 +80,7 @@ gpu_renderer::WindowClass::WindowClass(
 }
 
 gpu_renderer::WindowClass::~WindowClass() noexcept {
-  assert(
-      ((void)"Class name must be valid in destructor", !class_name_.empty()));
+  assert(((void)"Class name must be valid in destructor", !class_name_.empty()));
 
   if (auto const it = class_ref_counts_.find(class_name_);
       it != class_ref_counts_.end()) {

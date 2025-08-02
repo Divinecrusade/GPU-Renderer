@@ -22,7 +22,7 @@ class WindowClass {
   WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra, int cbWndExtra,
               HINSTANCE hInstance, HICON hIcon, HCURSOR hCursor,
               HBRUSH hbrBackground, LPCWSTR lpszMenuName, LPCWSTR lpszClassName,
-              HICON hIconSm) noexcept;
+              HICON hIconSm);
   WindowClass(WindowClass&) = delete;
   WindowClass(WindowClass&&) noexcept = delete;
 

@@ -1,4 +1,4 @@
-#ifndef CONSOLE_HPP
+﻿#ifndef CONSOLE_HPP
 #define CONSOLE_HPP
 
 #include <string_view>
@@ -10,7 +10,7 @@ class Console {
 
  private:
   Console() = delete;
-  Console(std::wstring_view console_window_title);
+  Console(std::wstring_view console_window_title) noexcept;
   Console(Console const&) = delete;
   Console(Console&&) = delete;
 
@@ -18,6 +18,9 @@ class Console {
   Console& operator=(Console&&) = delete;
 
   ~Console();
+
+private:
+  bool valid_{false};
 };
 }  // namespace gpu_renderer
 

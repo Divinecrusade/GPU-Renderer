@@ -18,7 +18,7 @@ class Window {
 
   Window(WindowClass const& window_class, LPCWSTR lpszWindowName, DWORD dwStyle,
          int x, int y, int nWidth, int nHeight, HINSTANCE hInstance,
-         DWORD dwExStyle) noexcept;
+         DWORD dwExStyle);
   Window(Window const&) = delete;
   Window(Window&&) noexcept = delete;
 
@@ -42,7 +42,7 @@ class Window {
                                             _In_ LPARAM lParam) noexcept;
 
  protected:
-  virtual LRESULT HandleWinMessage(UINT Msg, WPARAM wParam, LPARAM lParam);
+  virtual LRESULT HandleWinMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept;
 
  private:
   HWND hwnd_{NULL};

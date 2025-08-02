@@ -1,5 +1,5 @@
 ﻿#include "Window.hpp"
-
+#include "WinError.hpp"
 #include "DebugHeader.hpp"
 
 #if defined(LOG_WINDOW_MESSAGES) || defined(LOG_WINDOW)
@@ -15,7 +15,7 @@ bool gpu_renderer::Window::first_show_done_{false};
 gpu_renderer::Window::Window(WindowClass const& window_class,
                              LPCWSTR lpszWindowName, DWORD dwStyle, int x,
                              int y, int nWidth, int nHeight,
-                             HINSTANCE hInstance, DWORD dwExStyle) noexcept {
+                             HINSTANCE hInstance, DWORD dwExStyle) {
   assert(((void)"Window name cannot be nullptr", lpszWindowName != nullptr));
   assert(((void)"Instance handle cannot be null", hInstance != NULL));
   assert(((void)"Width must be positive", nWidth > 0));
@@ -30,7 +30,12 @@ gpu_renderer::Window::Window(WindowClass const& window_class,
   window_pos.right = window_pos.left + nWidth;
   window_pos.top = y;
   window_pos.bottom = window_pos.top + nHeight;
-  AdjustWindowRectEx(&window_pos, dwStyle, FALSE, dwExStyle);
+  if (!AdjustWindowRectEx(&window_pos, dwStyle, FALSE, dwExStyle)) {
+#ifdef LOG_WINDOW
+    std::wcerr << L"AdjustWindowRectEx failed during Window constructing,"
+               << L"error code: " << GetLastError() << "\n";
+#endif  // LOG_WINDOW
+  }
 
   hwnd_ = CreateWindowExW(dwExStyle, window_class.GetLpClassName(),
                           lpszWindowName, dwStyle, window_pos.left,
@@ -43,7 +48,11 @@ gpu_renderer::Window::Window(WindowClass const& window_class,
     std::wcerr << L"Window creation failed\n";
     std::wcerr << L"Error code: " << GetLastError() << L"\n";
 #endif  // LOG_WINDOW
-    return;
+#ifdef _DEBUG
+    throw exception::WinError{__FILEW__, __LINE__, "CreateWindowExW returned NULL hwnd", GetLastError()};
+#else
+    throw exception::WinError{"It was not able to create window", GetLastError()};
+#endif  // _DEBUG
   }
 
 #ifdef LOG_WINDOW
@@ -81,7 +90,6 @@ void gpu_renderer::Window::Show(int nCmdShow) const noexcept {
     std::wcerr << L"Warning: This overloaded option of Show called but "
                   L"application first show already occurred\n";
 #endif  // LOG_WINDOW
-    return Show();
   }
 
   (void)ShowWindow(hwnd_, nCmdShow);
@@ -145,7 +153,7 @@ LRESULT WINAPI gpu_renderer::Window::DisptachWindowProcW(
 }
 
 LRESULT gpu_renderer::Window::HandleWinMessage(UINT Msg, WPARAM wParam,
-                                               LPARAM lParam) {
+                                               LPARAM lParam) noexcept {
 #ifdef LOG_WINDOW_MESSAGES
   std::wclog << L"Message catched in Window object\n";
 #endif  // LOG_WINDOW_MESSAGES

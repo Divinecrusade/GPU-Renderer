@@ -107,6 +107,9 @@
     <ClCompile Include="..\WindowClass.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\WinError.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="WindowClassTest.cpp" />
     <ClCompile Include="WinMsgFormatterTest.cpp" />
     <ClCompile Include="pch.cpp">
