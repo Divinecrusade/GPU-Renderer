@@ -1,4 +1,4 @@
-#include "Console.hpp"
+﻿#include "Console.hpp"
 
 #include <fcntl.h>
 #include <io.h>
@@ -18,7 +18,8 @@ void gpu_renderer::Console::InitStdStreams(
   static bool std_streams_initialized{false};
   if (std_streams_initialized) {
     std::wcerr
-        << L"Std streams (wclog, wcout, wcerr, wcin) already initialized";
+        << L"Called InitStdStreans but "
+        << L"Std streams (wclog, wcout, wcerr, wcin) are already initialized";
   }
   std_streams_initialized = true;
 #endif  // _DEBUG
