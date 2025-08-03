@@ -46,8 +46,9 @@ class Window {
 
  private:
   HWND hwnd_{NULL};
-
+#ifdef _DEBUG
   static bool first_show_done_;
+#endif  // _DEBUG
 };
 }  // namespace gpu_renderer
 

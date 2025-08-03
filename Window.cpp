@@ -10,7 +10,9 @@
 #endif  // LOG_WINDOW_MESSAGES
 #include <cassert>
 
+#ifdef _DEBUG
 bool gpu_renderer::Window::first_show_done_{false};
+#endif  // _DEBUG
 
 gpu_renderer::Window::Window(WindowClass const& window_class,
                              LPCWSTR lpszWindowName, DWORD dwStyle, int x,
@@ -87,15 +89,19 @@ void gpu_renderer::Window::Show() const noexcept {
 
 void gpu_renderer::Window::Show(int nCmdShow) const noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
+#ifdef _DEBUG
   if (first_show_done_) {
 #ifdef LOG_WINDOW
     std::wcerr << L"Warning: This overloaded option of Show called but "
                   L"application first show already occurred\n";
 #endif  // LOG_WINDOW
   }
+#endif  // _DEBUG
 
   (void)ShowWindow(hwnd_, nCmdShow);
+#ifdef _DEBUG
   first_show_done_ = true;
+#endif  // _DEBUG
 }
 
 void gpu_renderer::Window::Hide() const noexcept {
