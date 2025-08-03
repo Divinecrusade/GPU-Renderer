@@ -15,7 +15,8 @@ class Canvas : public Window {
  public:
   Canvas() = delete;
   Canvas(CachedDC& window_class, LPCWSTR lpszWindowName,
-         POINT left_top_corner_pos, SIZE window_dimension,
+         int left_top_pos_x, int left_top_pos_y,
+         int width, int height,
          HINSTANCE hInstance) noexcept;
   Canvas(Canvas const&) = delete;
   Canvas(Canvas&&) = delete;
