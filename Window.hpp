@@ -31,6 +31,12 @@ class Window {
   void Show(int nCmdShow) const noexcept;
   void Hide() const noexcept;
 
+  void Enable() const noexcept;
+  void Disable() const noexcept;
+
+  bool IsEnabled() const noexcept;
+  bool IsShown() const noexcept;
+
   static WNDPROC GetlpfnWndProc() noexcept;
 
  private:
@@ -42,10 +48,16 @@ class Window {
                                             _In_ LPARAM lParam) noexcept;
 
  protected:
-  virtual LRESULT HandleWinMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept;
+  virtual LRESULT HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept;
+
+  static void IncreaseCounterOfActiveWindows(unsigned delta = 1u) noexcept;
+  static void DecreaseCounterOfActiveWindows(unsigned delta = 1u) noexcept;
+  static unsigned GetCountOfActiveWindows() noexcept;
 
  private:
   HWND hwnd_{NULL};
+  
+  static unsigned active_windows_count_;
 #ifdef _DEBUG
   static bool first_show_done_;
 #endif  // _DEBUG

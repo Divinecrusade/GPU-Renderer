@@ -119,20 +119,20 @@ class TestableWindow : public Window {
                hInstance, dwExStyle) {}
 
   LRESULT TestHandleWinMessage(UINT Msg, WPARAM wParam, LPARAM lParam) {
-    return HandleWinMessage(Msg, wParam, lParam);
+    return HandleMessage(Msg, wParam, lParam);
   }
 
   bool close_message_received_{false};
 
  protected:
-  LRESULT HandleWinMessage(UINT Msg, WPARAM wParam,
+  LRESULT HandleMessage(UINT Msg, WPARAM wParam,
                            LPARAM lParam) noexcept override {
     if (Msg == WM_CLOSE) {
       close_message_received_ = true;
       // Don't call PostQuitMessage in tests
       return 0;
     }
-    return Window::HandleWinMessage(Msg, wParam, lParam);
+    return Window::HandleMessage(Msg, wParam, lParam);
   }
 };
 

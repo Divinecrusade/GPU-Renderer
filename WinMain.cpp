@@ -31,17 +31,16 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 #endif  // _DEBUG
 
     CachedDC wc{hInstance, Canvas::GetlpfnWndProc()};
-
     static constexpr LPCWSTR kWindowName{L"GPU-Renderer"};
     static constexpr std::pair kLeftTopCornerPos{15, 30};
     static constexpr int kWindowWidth{640L};
     static constexpr int kWindowHeight{480L};
     Canvas wnd{wc,
-               kWindowName,
-               kLeftTopCornerPos.first,
-               kLeftTopCornerPos.second,
-               kWindowWidth, kWindowHeight,
-               hInstance};
+                kWindowName,
+                kLeftTopCornerPos.first,
+                kLeftTopCornerPos.second,
+                kWindowWidth, kWindowHeight,
+                hInstance};
     wnd.Show(nCmdShow);
 
     static constexpr HWND ALL_WINDOWS{NULL};

@@ -10,6 +10,7 @@
 #endif  // LOG_WINDOW_MESSAGES
 #include <cassert>
 
+unsigned gpu_renderer::Window::active_windows_count_{0u};
 #ifdef _DEBUG
 bool gpu_renderer::Window::first_show_done_{false};
 #endif  // _DEBUG
@@ -67,15 +68,15 @@ gpu_renderer::Window::Window(WindowClass const& window_class,
 
 gpu_renderer::Window::~Window() noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
-  if (!DestroyWindow(hwnd_)) {
+  if (DestroyWindow(hwnd_)) {
 #ifdef LOG_WINDOW
-    std::wcerr << L"Window destruction failed\n";
-    std::wcerr << L"Error code: " << GetLastError() << L"\n";
+    std::wclog << L"Window destroyed successfully\n";
 #endif  // LOG_WINDOW
   }
 #ifdef LOG_WINDOW
   else {
-    std::wclog << L"Window destroyed successfully\n";
+    std::wcerr << L"Window destruction failed. "
+               << L"Error code: " << GetLastError() << L"\n";
   }
 #endif  // LOG_WINDOW
 }
@@ -111,6 +112,33 @@ void gpu_renderer::Window::Hide() const noexcept {
   (void)ShowWindow(hwnd_, SW_HIDE);
 }
 
+void gpu_renderer::Window::Enable() const noexcept {
+  if (BOOL const was_disabled{EnableWindow(hwnd_, TRUE)}; 
+      !was_disabled) {
+#ifdef LOG_WINDOW
+    std::wcerr << L"Enable method called, but window has been enabled already\n";
+#endif  // LOG_WINDOW
+  }
+}
+
+void gpu_renderer::Window::Disable() const noexcept {
+  if (BOOL const was_disabled{EnableWindow(hwnd_, FALSE)}; 
+      was_disabled) {
+#ifdef LOG_WINDOW
+    std::wcerr
+        << L"Disable method called, but window has been disabled already\n";
+#endif  // LOG_WINDOW
+  }
+}
+
+bool gpu_renderer::Window::IsEnabled() const noexcept {
+  return IsWindowEnabled(hwnd_);
+}
+
+bool gpu_renderer::Window::IsShown() const noexcept { 
+  return IsWindowVisible(hwnd_);
+}
+
 WNDPROC gpu_renderer::Window::GetlpfnWndProc() noexcept {
   return SetupWindowProcW;
 }
@@ -136,8 +164,11 @@ LRESULT WINAPI gpu_renderer::Window::SetupWindowProcW(
                             reinterpret_cast<LONG_PTR>(window_instance));
     (void)SetWindowLongPtrW(hWnd, GWLP_WNDPROC,
                             reinterpret_cast<LONG_PTR>(DisptachWindowProcW));
+    ++active_windows_count_;
 #ifdef LOG_WINDOW
     std::wclog << L"Done installing wndproc for new instance of Window\n";
+    std::wclog << L"There're " << active_windows_count_
+               << L" active windows right now\n";
 #endif  // LOG_WINDOW
   }
   return DefWindowProcW(hWnd, Msg, wParam, lParam);
@@ -157,19 +188,47 @@ LRESULT WINAPI gpu_renderer::Window::DisptachWindowProcW(
 #ifdef LOG_WINDOW_MESSAGES
   std::wclog << L"...forward this message to Window object\n";
 #endif  // LOG_WINDOW_MESSAGES
-  return window_instance->HandleWinMessage(Msg, wParam, lParam);
+  return window_instance->HandleMessage(Msg, wParam, lParam);
 }
 
-LRESULT gpu_renderer::Window::HandleWinMessage(UINT Msg, WPARAM wParam,
+LRESULT gpu_renderer::Window::HandleMessage(UINT Msg, WPARAM wParam,
                                                LPARAM lParam) noexcept {
 #ifdef LOG_WINDOW_MESSAGES
   std::wclog << L"Message catched in Window object\n";
 #endif  // LOG_WINDOW_MESSAGES
   switch (Msg) {
     case WM_CLOSE: {
-      PostQuitMessage(EXIT_SUCCESS);
+      assert(((void)"Counter of windows cannot be equal to zero "
+                    "during closing of window",
+              active_windows_count_ != 0u));
+      --active_windows_count_;
+      Disable();
+      Hide();
+#ifdef LOG_WINDOW
+      std::wclog << L"Window disabled and hidden (inactive). There're " 
+                 << active_windows_count_
+                 << L" active windows right now\n";
+#endif  // LOG_WINDOW
+      if (active_windows_count_ == 0u) {
+#ifdef LOG_WINDOW
+        std::wclog << L"No active windows, posting quit message queue...\n";
+#endif  // LOG_WINDOW
+        PostQuitMessage(EXIT_SUCCESS);   
+      }
       return 0;
     }
   }
   return DefWindowProcW(hwnd_, Msg, wParam, lParam);
+}
+
+void gpu_renderer::Window::IncreaseCounterOfActiveWindows(unsigned delta) noexcept {
+  active_windows_count_ += delta;
+}
+
+void gpu_renderer::Window::DecreaseCounterOfActiveWindows(unsigned delta) noexcept {
+  active_windows_count_ -= delta;
+}
+
+unsigned gpu_renderer::Window::GetCountOfActiveWindows() noexcept {
+  return active_windows_count_;
 }
