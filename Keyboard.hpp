@@ -13,7 +13,7 @@
 #include "OptimisedWindowsHeader.hpp"
 
 namespace gpu_renderer {
-class Keyboard {
+class Keyboard final {
  public:
   class View;
 
@@ -60,7 +60,7 @@ class Keyboard {
   Keyboard& operator=(Keyboard const&) = delete;
   Keyboard& operator=(Keyboard&&) = delete;
 
-  virtual ~Keyboard() = default;
+  ~Keyboard() = default;
 
   void EnableAutoRepeat() noexcept;
   void DisableAutoRepeat() noexcept;
