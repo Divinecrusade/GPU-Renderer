@@ -1,15 +1,12 @@
 ﻿#include "CachedDC.hpp"
 #include "Canvas.hpp"
-#include "OptimisedWindowsHeader.hpp"
-#include "WinError.hpp"
 #ifdef _DEBUG
 #include "Console.hpp"
 #endif  // DCSONSOLE
+#include "OptimisedWindowsHeader.hpp"
+#include "WinError.hpp"
 
-#include <winnls.h>
-#include <cassert>
-#include <string>
-#include <utility>
+#include <gsl/gsl>
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                     [[maybe_unused]] _In_opt_ HINSTANCE,
@@ -35,11 +32,12 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     static constexpr int kWindowWidth{640L};
     static constexpr int kWindowHeight{480L};
     Canvas wnd{wc,
-                kWindowName,
-                kLeftTopCornerPos.first,
-                kLeftTopCornerPos.second,
-                kWindowWidth, kWindowHeight,
-                hInstance};
+               kWindowName,
+               kLeftTopCornerPos.first,
+               kLeftTopCornerPos.second,
+               kWindowWidth,
+               kWindowHeight,
+               hInstance};
     wnd.Show(nCmdShow);
 
     static constexpr HWND ALL_WINDOWS{NULL};
@@ -48,38 +46,38 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     static constexpr auto ErrorHappened = [](BOOL result) {
       return result == -1;
     };
-    while (auto operation_done{GetMessageW(
+    while (auto const operation_done{GetMessageW(
         &msg, ALL_WINDOWS, NO_MIN_RANGE_FILTER_MSG, NO_MAX_RANGE_FILTER_MSG)}) {
       if (ErrorHappened(operation_done)) {
 #ifdef _DEBUG
-        throw WinError{__FILEW__, __LINE__, "Handling message provokes error", GetLastError()};
+        throw WinError{__FILEW__, __LINE__, "Handling message provokes error",
+                       GetLastError()};
 #else
         throw WinError{"Event goes wrong", GetLastError()};
 #endif  // _DEBUG
-      } 
-      else {
+      } else {
         (void)TranslateMessage(&msg);
         (void)DispatchMessageW(&msg);
       }
     }
-  } 
-  catch (WinError const& e) {
+  } catch (WinError const& e) {
     MessageBoxW(NULL, e.WhatHappened().c_str(), e.kTypeOfException.data(),
-                  MB_OK | MB_ICONERROR);
-    return static_cast<int>(e.GetErrorCode());
-  } 
-  catch (std::exception const& e) {
-    std::string const narrow{e.what()};
-    MessageBoxW(NULL, std::wstring{narrow.begin(), narrow.end()}.c_str(), L"C++ standard exception",
                 MB_OK | MB_ICONERROR);
+    return static_cast<int>(e.GetErrorCode());
+  } catch (std::exception const& e) {
+    std::string const narrow{e.what()};
+    MessageBoxW(NULL, std::wstring{narrow.begin(), narrow.end()}.c_str(),
+                L"C++ standard exception", MB_OK | MB_ICONERROR);
     return EXIT_FAILURE;
-  } 
-  catch (...) {
+  } catch (...) {
     MessageBoxW(NULL, L"Something unexpected happened", L"Unknown error",
                 MB_OK | MB_ICONERROR);
     return EXIT_FAILURE;
   }
 
-  assert(_CrtDumpMemoryLeaks() == FALSE);
-  return static_cast<int>(msg.wParam);
+  if constexpr (sizeof(WPARAM) > sizeof(int)) {
+    return gsl::narrow<int>(msg.wParam);
+  } else {
+    return int(msg.wParam);
+  }
 }

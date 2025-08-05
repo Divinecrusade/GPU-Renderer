@@ -3,13 +3,14 @@
 #include <fcntl.h>
 #include <io.h>
 
+#include <cassert>
 #include <cstdio>
 #include <iostream>
 #include <optional>
 #include <string>
 
-#include "WinError.hpp"
 #include "OptimisedWindowsHeader.hpp"
+#include "WinError.hpp"
 
 void gpu_renderer::Console::InitStdStreams(
     std::wstring_view console_window_title) {
@@ -22,56 +23,74 @@ void gpu_renderer::Console::InitStdStreams(
         << L"Std streams (wclog, wcout, wcerr, wcin) are already initialized";
   }
 #endif  // _DEBUG
-  if (!instance.valid_) {
-#ifdef _DEBUG
-    throw exception::WinError{
-        __FILEW__, __LINE__,
-        "Error happened during instantiation of console window",
-        GetLastError()};
-#else
-    throw exception::WinError{"Console was not created",
-                                          GetLastError()};
-#endif  // _DEBUG
-  }
 }
 
-gpu_renderer::Console::Console(std::wstring_view console_window_title) noexcept {
+gpu_renderer::Console::Console(std::wstring_view console_window_title) {
   if (!AllocConsole()) {
-    OutputDebugStringW(L"Console wasn't allocated\n");
-    return;
+#ifdef _DEBUG
+    throw exception::WinError{__FILEW__, __LINE__, "Console wasn't allocated",
+                              GetLastError()};
+#else
+    throw exception::WinError{"Console wasn't allocated", GetLastError()};
+#endif  // _DEBUG
   }
   FILE* cout_stream{nullptr};
-  (void)freopen_s(&cout_stream, "CONOUT$", "w", stdout);
+  std::ignore = freopen_s(&cout_stream, "CONOUT$", "w", stdout);
   FILE* cerr_stream{nullptr};
-  (void)freopen_s(&cerr_stream, "CONOUT$", "w", stderr);
+  std::ignore = freopen_s(&cerr_stream, "CONOUT$", "w", stderr);
   FILE* cin_stream{nullptr};
-  (void)freopen_s(&cin_stream, "CONIN$", "r", stdin);
+  std::ignore = freopen_s(&cin_stream, "CONIN$", "r", stdin);
 
   static constexpr UINT kCpUnicode{65001u};
-  (void)SetConsoleOutputCP(kCpUnicode);
-  (void)SetConsoleCP(kCpUnicode);
+  if (!SetConsoleOutputCP(kCpUnicode)) {
+#ifdef _DEBUG
+    throw exception::WinError{__FILEW__, __LINE__,
+                              "Console output code page was not set to Unicode",
+                              GetLastError()};
+#else
+    throw exception::WinError{"Console code page was not properly set",
+                              GetLastError()};
+#endif  // _DEBUG
+  }
+  if (!SetConsoleCP(kCpUnicode)) {
+#ifdef _DEBUG
+    throw exception::WinError{__FILEW__, __LINE__,
+                              "Console input code page was not set to Unicode",
+                              GetLastError()};
+#else
+    throw exception::WinError{"Console code page was not properly set",
+                              GetLastError()};
+#endif  // _DEBUG
+  }
 
-  (void)_setmode(_fileno(stdout), _O_U8TEXT);
-  (void)_setmode(_fileno(stderr), _O_U8TEXT);
+  static constexpr auto SetModeFailed = [](auto op_status) {
+    return op_status < 0;
+  };
+  if (SetModeFailed(_setmode(_fileno(stdout), _O_U8TEXT))) {
+    assert(((void)"Console out/log setmode failed",
+            true));  // TODO: replace with corresponding exception
+                     //       for errno
+  }
+  if (SetModeFailed(_setmode(_fileno(stderr), _O_U8TEXT))) {
+    assert(((void)"Console err setmode failed",
+            true));  // TODO: replace with corresponding exception
+                     //       for errno
+  }
 
-  (void)std::ios::sync_with_stdio(true);
+  std::ignore = std::ios::sync_with_stdio(true);
   std::wcin.clear();
   std::wcout.clear();
   std::wcerr.clear();
   std::wclog.clear();
 
-  valid_ = true;
-
   if (!SetConsoleTitleW(console_window_title.data())) {
-    std::wcerr << L"Console title was not set, error code: " << GetLastError() << "\n";
+    std::wcerr << L"Console title was not set, error code: " << GetLastError()
+               << "\n";
   }
 }
 
-gpu_renderer::Console::~Console() {
+gpu_renderer::Console::~Console() noexcept {
   if (!FreeConsole()) {
-    auto const err{GetLastError()};
-    OutputDebugStringW(L"Console wasn't freed. Error code: ");
-    OutputDebugStringW(std::to_wstring(err).c_str());
-    OutputDebugStringW(L"\n");
+    OutputDebugStringW(L"Console wasn't freed because of error\n");
   }
 }

@@ -51,7 +51,8 @@ class Window {
                                             _In_ LPARAM lParam) noexcept;
 
  protected:
-  virtual LRESULT HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept;
+  virtual LRESULT HandleMessage(UINT Msg, WPARAM wParam,
+                                LPARAM lParam) noexcept;
 
   static void IncreaseCounterOfActiveWindows(unsigned delta = 1u) noexcept;
   static void DecreaseCounterOfActiveWindows(unsigned delta = 1u) noexcept;

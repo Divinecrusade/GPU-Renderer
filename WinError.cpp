@@ -7,10 +7,16 @@
 #ifdef _DEBUG
 gpu_renderer::exception::WinError::WinError(wchar_t const* file, int line,
                                             char const* message,
-                                            DWORD error_code) noexcept
-    : std::exception{message}, file_{file}, line_{line}, error_code_{error_code} {
-  assert(((void)"URL of file with code where exception throwed cannot be empty", file != nullptr));
-  assert(((void)"Line of code where exception throwed cannot be equal of less than zero", line > 0));
+                                            DWORD error_code)
+    : std::exception{message},
+      file_{file},
+      line_{line},
+      error_code_{error_code} {
+  assert(((void)"URL of file with code where exception throwed cannot be empty",
+          file != nullptr));
+  assert(((void)"Line of code where exception throwed cannot be equal of less "
+                "than zero",
+          line > 0));
   assert(((void)"WinAPI error code cannot be 0", error_code_ != 0));
 }
 
@@ -35,24 +41,30 @@ DWORD gpu_renderer::exception::WinError::GetErrorCode() const noexcept {
   return error_code_;
 }
 
-std::wstring gpu_renderer::exception::WinError::WhatHappened() const noexcept {
+std::wstring gpu_renderer::exception::WinError::WhatHappened() const {
   LPWSTR lpMsgBuf{nullptr};
 
+#pragma warning(push)
+#pragma warning(disable : 26490)
   DWORD const format_result{FormatMessageW(
       FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
           FORMAT_MESSAGE_IGNORE_INSERTS,
-      nullptr, error_code_,
-      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      nullptr, error_code_, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
       reinterpret_cast<LPWSTR>(&lpMsgBuf), 0, nullptr)};
+#pragma warning(pop)
 
   std::wstring error_description{};
   if (bool const format_succeded{format_result != 0 && lpMsgBuf != nullptr};
       format_succeded) {
     error_description = lpMsgBuf;
 #ifdef _DEBUG
-    if (bool const free_failed{LocalFree(lpMsgBuf) != NULL}; 
-        free_failed) {
-      std::wcerr << "Error happened during free FormatMessage buffer, code: " << GetLastError() << "\n";
+    if (bool const free_failed{LocalFree(lpMsgBuf) != NULL}; free_failed) {
+      try {
+        std::wcerr << "Error happened during free FormatMessage buffer, code: "
+                   << GetLastError() << "\n";
+      } catch (...) {
+        OutputDebugStringW(L"Exception raised in log WinError WhatHappened");
+      }
     }
 #else
     (void)LocalFree(lpMsgBuf);

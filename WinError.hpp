@@ -1,7 +1,6 @@
 ﻿#ifndef WIN_ERROR_HPP
 #define WIN_ERROR_HPP
 
-#include <stdexcept>
 #include <exception>
 #ifdef _DEBUG
 #include <filesystem>
@@ -12,20 +11,21 @@
 #include "OptimisedWindowsHeader.hpp"
 
 namespace gpu_renderer::exception {
-class WinError : std::exception {
+class WinError : public std::exception {
  public:
   static constexpr std::wstring_view kTypeOfException{L"WinAPI error"};
 
  public:
 #ifdef _DEBUG
-  WinError(wchar_t const* file, int line, char const* message, DWORD error_code) noexcept;
+  WinError(wchar_t const* file, int line, char const* message,
+           DWORD error_code);
   std::filesystem::path const& InWhatFileThrowed() const noexcept;
   int InWhatLineOfCodeThrowed() const noexcept;
 #endif  // _DEBUG
   WinError(char const* message, DWORD error_code_) noexcept;
-  
+
   DWORD GetErrorCode() const noexcept;
-  std::wstring WhatHappened() const noexcept;
+  std::wstring WhatHappened() const;
 
  private:
 #ifdef _DEBUG

@@ -6,17 +6,17 @@
 namespace gpu_renderer {
 class CachedDC : public WindowClass {
  private:
-  static constexpr LPCWSTR kClassName{L"Cached DC"}; 
+  static constexpr LPCWSTR kClassName{L"Cached DC"};
 
  public:
   CachedDC() = delete;
-  CachedDC(HINSTANCE hInstance, WNDPROC lpfnWndProc) noexcept;
+  CachedDC(HINSTANCE hInstance, WNDPROC lpfnWndProc);
   CachedDC(CachedDC const&) = delete;
   CachedDC(CachedDC&&) = delete;
 
   CachedDC& operator=(CachedDC const&) = delete;
   CachedDC& operator=(CachedDC&&) = delete;
 };
-}
+}  // namespace gpu_renderer
 
 #endif  // !CACHED_DC_HPP

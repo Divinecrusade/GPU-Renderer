@@ -1,7 +1,7 @@
 ﻿#include "CachedDC.hpp"
 #include "resource.h"
 
-gpu_renderer::CachedDC::CachedDC(HINSTANCE hInstance, WNDPROC lpfnWndProc) noexcept
+gpu_renderer::CachedDC::CachedDC(HINSTANCE hInstance, WNDPROC lpfnWndProc)
     : WindowClass{CS_OWNDC,
                   lpfnWndProc,
                   0,

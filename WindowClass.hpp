@@ -1,10 +1,7 @@
 ﻿#ifndef WINDOW_CLASS_HPP
 #define WINDOW_CLASS_HPP
 
-#pragma warning(push)
-#pragma warning(disable : 5045)
 #include <string>
-#pragma warning(pop)
 #include <unordered_map>
 
 #include "OptimisedWindowsHeader.hpp"
@@ -37,21 +34,25 @@ class WindowClass {
   struct wstring_hash {
     using is_transparent = void;
 
-    [[nodiscard]] size_t operator()(std::wstring_view txt) const {
+#pragma warning(push)
+#pragma warning(disable : 4514)
+    [[nodiscard]] size_t operator()(std::wstring_view txt) const noexcept {
       return std::hash<std::wstring_view>{}(txt);
     }
-    [[nodiscard]] size_t operator()(const std::wstring& txt) const {
+    [[nodiscard]] size_t operator()(const std::wstring& txt) const noexcept {
       return std::hash<std::wstring>{}(txt);
     }
+#pragma warning(pop)
   };
 
  private:
   HINSTANCE hInstance_;
   std::wstring_view class_name_;
 
-  static std::unordered_map<std::wstring, std::size_t, wstring_hash,
-                            std::equal_to<>>
-      class_ref_counts_;
+  static std::unordered_map<std::wstring, 
+                            std::size_t, 
+                            wstring_hash,
+                            std::equal_to<>> class_ref_counts_;
 };
 }  // namespace gpu_renderer
 

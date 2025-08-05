@@ -10,17 +10,14 @@ class Console {
 
  private:
   Console() = delete;
-  Console(std::wstring_view console_window_title) noexcept;
+  Console(std::wstring_view console_window_title);
   Console(Console const&) = delete;
   Console(Console&&) = delete;
 
   Console& operator=(Console const&) = delete;
   Console& operator=(Console&&) = delete;
 
-  ~Console();
-
-private:
-  bool valid_{false};
+  ~Console() noexcept;
 };
 }  // namespace gpu_renderer
 

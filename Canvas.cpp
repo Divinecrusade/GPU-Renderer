@@ -3,7 +3,7 @@
 gpu_renderer::Canvas::Canvas(CachedDC& window_class, LPCWSTR lpszWindowName,
                              int left_top_pos_x, int left_top_pos_y, 
                              int width, int height,
-                             HINSTANCE hInstance) noexcept
+                             HINSTANCE hInstance)
     : Window{window_class,
              lpszWindowName,
              kFrameWithMinimize,
