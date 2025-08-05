@@ -9,7 +9,6 @@
 #include <string>
 #include <string_view>
 
-#include "DebugHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 
 namespace gpu_renderer::exception {

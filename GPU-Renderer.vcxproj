@@ -86,6 +86,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -116,7 +119,7 @@
     <ClCompile>
       <WarningLevel>EnableAllWarnings</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;LOG_WINDOW_MESSAGES;LOG_WINDOW_CLASS;LOG_WINDOW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;LOG_WINDOW_MESSAGES;LOG_WINDOW_CLASS;LOG_WINDOW;LOG_KEYBOARD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
@@ -159,6 +162,7 @@
     <ClCompile Include="CachedDC.cpp" />
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Console.cpp" />
+    <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowClass.cpp" />
     <ClCompile Include="WinError.cpp">
@@ -168,12 +172,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
+    <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CachedDC.hpp" />
     <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="Console.hpp" />
-    <ClInclude Include="DebugHeader.hpp" />
+    <ClInclude Include="Keyboard.hpp" />
+    <ClInclude Include="OptimisedBoostHeader.hpp" />
     <ClInclude Include="OptimisedWindowsHeader.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Window.hpp" />

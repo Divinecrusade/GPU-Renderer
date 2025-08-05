@@ -1,6 +1,4 @@
 ﻿#include "WindowClass.hpp"
-
-#include "DebugHeader.hpp"
 #include "WinError.hpp"
 
 #ifdef LOG_WINDOW_CLASS

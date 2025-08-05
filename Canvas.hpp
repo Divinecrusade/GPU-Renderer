@@ -2,7 +2,6 @@
 #define CANVAS_HPP
 
 #include "CachedDC.hpp"
-#include "DebugHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "Window.hpp"
 

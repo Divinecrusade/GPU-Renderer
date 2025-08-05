@@ -1,6 +1,7 @@
 ﻿#ifndef WINDOW_HPP
 #define WINDOW_HPP
 
+#include "Keyboard.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "WindowClass.hpp"
 
@@ -37,6 +38,8 @@ class Window {
   bool IsEnabled() const noexcept;
   bool IsShown() const noexcept;
 
+  Keyboard::View GetKeyboard() noexcept;
+
   static WNDPROC GetlpfnWndProc() noexcept;
 
  private:
@@ -56,7 +59,8 @@ class Window {
 
  private:
   HWND hwnd_{NULL};
-  
+  Keyboard kbd_{};
+
   static unsigned active_windows_count_;
 #ifdef _DEBUG
   static bool first_show_done_;

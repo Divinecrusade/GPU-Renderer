@@ -1,6 +1,5 @@
 ﻿#include "CachedDC.hpp"
 #include "Canvas.hpp"
-#include "DebugHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "WinError.hpp"
 #ifdef _DEBUG

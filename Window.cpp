@@ -1,6 +1,5 @@
 ﻿#include "Window.hpp"
 #include "WinError.hpp"
-#include "DebugHeader.hpp"
 
 #if defined(LOG_WINDOW_MESSAGES) || defined(LOG_WINDOW)
 #include <iostream>
@@ -139,6 +138,10 @@ bool gpu_renderer::Window::IsShown() const noexcept {
   return IsWindowVisible(hwnd_);
 }
 
+gpu_renderer::Keyboard::View gpu_renderer::Window::GetKeyboard() noexcept {
+  return kbd_;
+}
+
 WNDPROC gpu_renderer::Window::GetlpfnWndProc() noexcept {
   return SetupWindowProcW;
 }
@@ -193,6 +196,7 @@ LRESULT WINAPI gpu_renderer::Window::DisptachWindowProcW(
 
 LRESULT gpu_renderer::Window::HandleMessage(UINT Msg, WPARAM wParam,
                                                LPARAM lParam) noexcept {
+  static constexpr auto kPreviousKeyStateMask{0b1000000000000000000000000000000};
 #ifdef LOG_WINDOW_MESSAGES
   std::wclog << L"Message catched in Window object\n";
 #endif  // LOG_WINDOW_MESSAGES
@@ -217,6 +221,22 @@ LRESULT gpu_renderer::Window::HandleMessage(UINT Msg, WPARAM wParam,
       }
       return 0;
     }
+    case WM_KILLFOCUS: {
+      kbd_.ClearKeysState();
+      kbd_.ClearKeyEventsQueue();
+    } break;
+    case WM_KEYDOWN:
+    case WM_SYSKEYDOWN: {
+      if (!(lParam & kPreviousKeyStateMask) || kbd_.IsAutoRepeating()) {
+        kbd_.OnKeyDown(static_cast<unsigned char>(wParam));
+      }
+    } break;
+    case WM_KEYUP: {
+      kbd_.OnKeyUp(static_cast<unsigned char>(wParam));
+    } break;
+    case WM_CHAR: {
+      kbd_.OnChar(static_cast<wchar_t>(wParam));
+    } break;
   }
   return DefWindowProcW(hwnd_, Msg, wParam, lParam);
 }

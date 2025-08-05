@@ -8,6 +8,7 @@
     <ClCompile Include="..\WinError.cpp" />
     <ClCompile Include="WindowTest.cpp" />
     <ClCompile Include="..\Window.cpp" />
+    <ClCompile Include="..\Keyboard.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

@@ -8,7 +8,6 @@
 #include <optional>
 #include <string>
 
-#include "DebugHeader.hpp"
 #include "WinError.hpp"
 #include "OptimisedWindowsHeader.hpp"
 

@@ -9,7 +9,6 @@
 #include "gtest/gtest.h"
 #pragma warning(pop)
 #include "OptimisedWindowsHeader.hpp"
-#include "DebugHeader.hpp"
 
 #include <string>
 #include <memory>
