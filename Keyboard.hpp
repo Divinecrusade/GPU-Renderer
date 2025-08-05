@@ -83,7 +83,7 @@ class Keyboard {
 #pragma warning(disable : 4820)
   bool auto_repeating_{false};
 #pragma warning(pop)
-  std::bitset<std::numeric_limits<KeyCode>::max()> keys_state_{};
+  std::bitset<std::numeric_limits<KeyCode>::max() + 1> keys_state_{};
   std::queue<KeyEvent, boost::circular_buffer<KeyEvent>> key_events_queue_{
       boost::circular_buffer<KeyEvent>{kKeyEventsQueueSize}};
   boost::circular_buffer<wchar_t> chars_buffer_{kCharsBufferSize};
