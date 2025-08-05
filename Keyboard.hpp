@@ -23,7 +23,7 @@ class Keyboard {
  public:
   using KeyCode = unsigned char;
   enum class EventType { kPressed, kReleased };
-  using KeyEvent = std::pair<KeyCode, EventType>;
+  using Event = std::pair<KeyCode, EventType>;
 
   class View {
    public:
@@ -44,7 +44,7 @@ class Keyboard {
     bool IsKeyEventHappened() const noexcept;
     bool IsCharTyped() const noexcept;
 
-    std::optional<KeyEvent> GetOldestKeyEvent() const;
+    std::optional<Event> GetOldestKeyEvent() const;
     std::optional<wchar_t> GetFirstChar() const;
     std::wstring GetChars() const;
 
@@ -84,8 +84,8 @@ class Keyboard {
   bool auto_repeating_{false};
 #pragma warning(pop)
   std::bitset<std::numeric_limits<KeyCode>::max() + 1> keys_state_{};
-  std::queue<KeyEvent, boost::circular_buffer<KeyEvent>> key_events_queue_{
-      boost::circular_buffer<KeyEvent>{kKeyEventsQueueSize}};
+  std::queue<Event, boost::circular_buffer<Event>> key_events_queue_{
+      boost::circular_buffer<Event>{kKeyEventsQueueSize}};
   boost::circular_buffer<wchar_t> chars_buffer_{kCharsBufferSize};
 };
 }  // namespace gpu_renderer

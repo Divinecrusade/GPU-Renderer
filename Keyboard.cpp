@@ -18,11 +18,11 @@ bool gpu_renderer::Keyboard::View::IsCharTyped() const noexcept {
   return !kbd_->chars_buffer_.empty();
 }
 
-std::optional<gpu_renderer::Keyboard::KeyEvent>
+std::optional<gpu_renderer::Keyboard::Event>
 gpu_renderer::Keyboard::View::GetOldestKeyEvent() const {
   if (kbd_->key_events_queue_.empty()) return std::nullopt;
 
-  KeyEvent const key_event{std::move(kbd_->key_events_queue_.front())};
+  Event const key_event{std::move(kbd_->key_events_queue_.front())};
   kbd_->key_events_queue_.pop();
   return key_event;
 }
@@ -126,8 +126,8 @@ void gpu_renderer::Keyboard::OnChar(wchar_t symbol) {
 void gpu_renderer::Keyboard::ClearKeysState() noexcept { keys_state_.reset(); }
 
 void gpu_renderer::Keyboard::ClearKeyEventsQueue() {
-  std::queue<KeyEvent, boost::circular_buffer<KeyEvent>> empty_key_events_queue{
-      boost::circular_buffer<KeyEvent>{kKeyEventsQueueSize}};
+  std::queue<Event, boost::circular_buffer<Event>> empty_key_events_queue{
+      boost::circular_buffer<Event>{kKeyEventsQueueSize}};
   key_events_queue_.swap(empty_key_events_queue);
 }
 
