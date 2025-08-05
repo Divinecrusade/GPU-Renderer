@@ -144,7 +144,7 @@ TEST_F(KeyboardTest, OnKeyDownGeneratesKeyEvent) {
 
   EXPECT_TRUE(view_->IsKeyEventHappened());
 
-  auto const event{view_->GetOldestKeyEvent()};
+  auto const event{view_->GetOldestEvent()};
   ASSERT_TRUE(event.has_value());
   EXPECT_EQ(event->first, kTestKeyA);
   EXPECT_EQ(event->second, Keyboard::EventType::kPressed);
@@ -155,7 +155,7 @@ TEST_F(KeyboardTest, OnKeyUpGeneratesKeyEvent) {
 
   EXPECT_TRUE(view_->IsKeyEventHappened());
 
-  auto const event{view_->GetOldestKeyEvent()};
+  auto const event{view_->GetOldestEvent()};
   ASSERT_TRUE(event.has_value());
   EXPECT_EQ(event->first, kTestKeyA);
   EXPECT_EQ(event->second, Keyboard::EventType::kReleased);
@@ -166,24 +166,24 @@ TEST_F(KeyboardTest, KeyEventsAreOrderedFIFO) {
   keyboard_->OnKeyUp(kTestKeyA);
   keyboard_->OnKeyDown(kTestKeyB);
 
-  auto const first_event{view_->GetOldestKeyEvent()};
+  auto const first_event{view_->GetOldestEvent()};
   ASSERT_TRUE(first_event.has_value());
   EXPECT_EQ(first_event->first, kTestKeyA);
   EXPECT_EQ(first_event->second, Keyboard::EventType::kPressed);
 
-  auto const second_event{view_->GetOldestKeyEvent()};
+  auto const second_event{view_->GetOldestEvent()};
   ASSERT_TRUE(second_event.has_value());
   EXPECT_EQ(second_event->first, kTestKeyA);
   EXPECT_EQ(second_event->second, Keyboard::EventType::kReleased);
 
-  auto const third_event{view_->GetOldestKeyEvent()};
+  auto const third_event{view_->GetOldestEvent()};
   ASSERT_TRUE(third_event.has_value());
   EXPECT_EQ(third_event->first, kTestKeyB);
   EXPECT_EQ(third_event->second, Keyboard::EventType::kPressed);
 }
 
 TEST_F(KeyboardTest, GetOldestKeyEventReturnsNulloptWhenEmpty) {
-  auto const event{view_->GetOldestKeyEvent()};
+  auto const event{view_->GetOldestEvent()};
   EXPECT_FALSE(event.has_value());
 }
 
@@ -198,7 +198,7 @@ TEST_F(KeyboardTest, ClearKeyEventsQueueRemovesAllEvents) {
   keyboard_->ClearKeyEventsQueue();
 
   EXPECT_FALSE(view_->IsKeyEventHappened());
-  EXPECT_FALSE(view_->GetOldestKeyEvent().has_value());
+  EXPECT_FALSE(view_->GetOldestEvent().has_value());
 }
 
 TEST_F(KeyboardTest, OnCharAddsCharacterToBuffer) {
@@ -300,9 +300,9 @@ TEST_F(KeyboardTest, SameKeyPressedMultipleTimesGeneratesMultipleEvents) {
   keyboard_->OnKeyDown(kTestKeyA);
   keyboard_->OnKeyDown(kTestKeyA);
 
-  auto const first_event{view_->GetOldestKeyEvent()};
-  auto const second_event{view_->GetOldestKeyEvent()};
-  auto const third_event{view_->GetOldestKeyEvent()};
+  auto const first_event{view_->GetOldestEvent()};
+  auto const second_event{view_->GetOldestEvent()};
+  auto const third_event{view_->GetOldestEvent()};
 
   EXPECT_TRUE(first_event.has_value());
   EXPECT_TRUE(second_event.has_value());
@@ -317,7 +317,7 @@ TEST_F(KeyboardTest, KeyUpWithoutKeyDownGeneratesEvent) {
   EXPECT_TRUE(view_->IsKeyEventHappened());
   EXPECT_FALSE(view_->IsKeyPressed(kTestKeyA));
 
-  auto const event{view_->GetOldestKeyEvent()};
+  auto const event{view_->GetOldestEvent()};
   ASSERT_TRUE(event.has_value());
   EXPECT_EQ(event->second, Keyboard::EventType::kReleased);
 }
@@ -360,7 +360,7 @@ TEST_F(KeyboardTest, KeyEventQueueHandlesOverflow) {
   EXPECT_TRUE(view_->IsKeyEventHappened());
 
   std::size_t event_count{0};
-  while (view_->GetOldestKeyEvent().has_value()) {
+  while (view_->GetOldestEvent().has_value()) {
     ++event_count;
   }
 

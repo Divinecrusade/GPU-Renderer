@@ -19,7 +19,7 @@ bool gpu_renderer::Keyboard::View::IsCharTyped() const noexcept {
 }
 
 std::optional<gpu_renderer::Keyboard::Event>
-gpu_renderer::Keyboard::View::GetOldestKeyEvent() const {
+gpu_renderer::Keyboard::View::GetOldestEvent() const {
   if (kbd_->key_events_queue_.empty()) return std::nullopt;
 
   Event const key_event{std::move(kbd_->key_events_queue_.front())};

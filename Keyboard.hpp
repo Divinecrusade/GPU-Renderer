@@ -44,7 +44,7 @@ class Keyboard {
     bool IsKeyEventHappened() const noexcept;
     bool IsCharTyped() const noexcept;
 
-    std::optional<Event> GetOldestKeyEvent() const;
+    std::optional<Event> GetOldestEvent() const;
     std::optional<wchar_t> GetFirstChar() const;
     std::wstring GetChars() const;
 
