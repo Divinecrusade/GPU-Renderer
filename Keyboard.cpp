@@ -11,7 +11,7 @@ bool gpu_renderer::Keyboard::View::IsKeyPressed(KeyCode key) const noexcept {
 }
 
 bool gpu_renderer::Keyboard::View::IsKeyEventHappened() const noexcept {
-  return !kbd_->key_events_queue_.empty();
+  return !kbd_->events_queue_.empty();
 }
 
 bool gpu_renderer::Keyboard::View::IsCharTyped() const noexcept {
@@ -20,10 +20,10 @@ bool gpu_renderer::Keyboard::View::IsCharTyped() const noexcept {
 
 std::optional<gpu_renderer::Keyboard::Event>
 gpu_renderer::Keyboard::View::GetOldestEvent() const {
-  if (kbd_->key_events_queue_.empty()) return std::nullopt;
+  if (kbd_->events_queue_.empty()) return std::nullopt;
 
-  Event const key_event{std::move(kbd_->key_events_queue_.front())};
-  kbd_->key_events_queue_.pop();
+  Event const key_event{std::move(kbd_->events_queue_.front())};
+  kbd_->events_queue_.pop();
   return key_event;
 }
 
@@ -97,7 +97,7 @@ void gpu_renderer::Keyboard::OnKeyDown(KeyCode key) {
   }
 #endif  // LOG_KEYBOARD
   keys_state_.set(key);
-  key_events_queue_.push(std::make_pair(key, EventType::kPressed));
+  events_queue_.push(std::make_pair(key, EventType::kPressed));
 }
 
 void gpu_renderer::Keyboard::OnKeyUp(KeyCode key) {
@@ -109,7 +109,7 @@ void gpu_renderer::Keyboard::OnKeyUp(KeyCode key) {
   }
 #endif  // LOG_KEYBOARD
   keys_state_.set(key, false);
-  key_events_queue_.push(std::make_pair(key, EventType::kReleased));
+  events_queue_.push(std::make_pair(key, EventType::kReleased));
 }
 
 void gpu_renderer::Keyboard::OnChar(wchar_t symbol) {
@@ -127,8 +127,8 @@ void gpu_renderer::Keyboard::ClearKeysState() noexcept { keys_state_.reset(); }
 
 void gpu_renderer::Keyboard::ClearKeyEventsQueue() {
   std::queue<Event, boost::circular_buffer<Event>> empty_key_events_queue{
-      boost::circular_buffer<Event>{kKeyEventsQueueSize}};
-  key_events_queue_.swap(empty_key_events_queue);
+      boost::circular_buffer<Event>{kEventsQueueSize}};
+  events_queue_.swap(empty_key_events_queue);
 }
 
 void gpu_renderer::Keyboard::ClearCharsBuffer() noexcept {
