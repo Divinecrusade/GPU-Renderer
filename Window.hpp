@@ -53,6 +53,8 @@ class Window {
   virtual LRESULT HandleMessage(UINT Msg, WPARAM wParam,
                                 LPARAM lParam) noexcept;
 
+  HWND GetHWND() const noexcept;
+
   static void IncreaseCounterOfActiveWindows(unsigned delta = 1u) noexcept;
   static void DecreaseCounterOfActiveWindows(unsigned delta = 1u) noexcept;
   static unsigned GetCountOfActiveWindows() noexcept;

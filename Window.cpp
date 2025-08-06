@@ -531,6 +531,10 @@ LRESULT gpu_renderer::Window::HandleMessage(UINT Msg, WPARAM wParam,
   return DefWindowProcW(hwnd_, Msg, wParam, lParam);
 }
 
+HWND gpu_renderer::Window::GetHWND() const noexcept { 
+  return hwnd_; 
+}
+
 void gpu_renderer::Window::IncreaseCounterOfActiveWindows(
     unsigned delta) noexcept {
   active_windows_count_ += delta;

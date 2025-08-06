@@ -22,6 +22,9 @@ class Canvas : public Window {
   Canvas& operator=(Canvas&&) = delete;
 
   ~Canvas() = default;
+
+ protected:
+  LRESULT HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept override;
 };
 }  // namespace gpu_renderer
 
