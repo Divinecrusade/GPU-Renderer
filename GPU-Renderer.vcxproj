@@ -121,7 +121,7 @@
     <ClCompile>
       <WarningLevel>EnableAllWarnings</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;LOG_WINDOW_MESSAGES;LOG_WINDOW_CLASS;LOG_WINDOW;LOG_KEYBOARD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;LOG_WINDOW_MESSAGES;LOG_WINDOW_CLASS;LOG_WINDOW;LOG_KEYBOARD;LOG_MOUSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
@@ -131,7 +131,7 @@
       <SmallerTypeCheck>false</SmallerTypeCheck>
       <FloatingPointExceptions>true</FloatingPointExceptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <UndefinePreprocessorDefinitions>LOG_WINDOW_MESSAGES;%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>LOG_WINDOW_MESSAGES;LOG_KEYBOARD;LOG_MOUSE;%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <EnablePREfast>true</EnablePREfast>
     </ClCompile>
     <Link>
@@ -166,6 +166,7 @@
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Keyboard.cpp" />
+    <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowClass.cpp" />
     <ClCompile Include="WinError.cpp">
@@ -182,6 +183,7 @@
     <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="Console.hpp" />
     <ClInclude Include="Keyboard.hpp" />
+    <ClInclude Include="Mouse.hpp" />
     <ClInclude Include="OptimisedBoostHeader.hpp" />
     <ClInclude Include="OptimisedWindowsHeader.hpp" />
     <ClInclude Include="resource.h" />

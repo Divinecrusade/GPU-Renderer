@@ -2,6 +2,7 @@
 #define WINDOW_HPP
 
 #include "Keyboard.hpp"
+#include "Mouse.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "WindowClass.hpp"
 
@@ -59,8 +60,13 @@ class Window {
   static unsigned GetCountOfActiveWindows() noexcept;
 
  private:
-  HWND hwnd_{NULL};
+  HWND hwnd_;
+  int width_;
+  int height_;
+  
   Keyboard kbd_{};
+  Mouse mse_{};
+
 
   static unsigned active_windows_count_;
 #ifdef _DEBUG

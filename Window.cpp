@@ -1,8 +1,8 @@
 ﻿#include "Window.hpp"
 
-#include "WinError.hpp"
-
 #include <cassert>
+
+#include "WinError.hpp"
 #if defined(LOG_WINDOW_MESSAGES) || defined(LOG_WINDOW)
 #include <iostream>
 #endif  // LOG_WINDOW_MESSAGES || LOG_WINDOW
@@ -20,7 +20,8 @@ bool gpu_renderer::Window::first_show_done_{false};
 gpu_renderer::Window::Window(WindowClass const& window_class,
                              LPCWSTR lpszWindowName, DWORD dwStyle, int x,
                              int y, int nWidth, int nHeight,
-                             HINSTANCE hInstance, DWORD dwExStyle) {
+                             HINSTANCE hInstance, DWORD dwExStyle)
+    : width_{nWidth}, height_{nHeight} {
   assert(((void)"Window name cannot be nullptr", lpszWindowName != nullptr));
   assert(((void)"Instance handle cannot be null", hInstance != NULL));
   assert(((void)"Width must be positive", nWidth > 0));
@@ -48,7 +49,6 @@ gpu_renderer::Window::Window(WindowClass const& window_class,
     }
 #endif  // LOG_WINDOW
   }
-
   hwnd_ = CreateWindowExW(
       dwExStyle, window_class.GetLpClassName(), lpszWindowName, dwStyle,
       window_pos.left, window_pos.top, window_pos.right - window_pos.left,
@@ -368,6 +368,130 @@ LRESULT gpu_renderer::Window::HandleMessage(UINT Msg, WPARAM wParam,
         }
 #endif  // LOG_WINDOW
         OutputDebugStringW(L"Keyboard OnChar raised exception\n");
+      }
+    } break;
+    case WM_LBUTTONDOWN: {
+      try {
+        mse_.OnLButtonDown(lParam);
+      } catch ([[maybe_unused]] std::exception const& e) {
+#ifdef LOG_WINDOW
+        try {
+          std::string const narrow_what{e.what()};
+          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          std::wcerr << L"Exception raised during Mouse "
+                        L"OnLButtonDown. What happened:"
+                     << wide_what << "\n";
+        } catch (...) {
+          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+        }
+#endif  // LOG_WINDOW
+        OutputDebugStringW(L"Mouse OnLButtonDown raised exception\n");
+      }
+    } break;
+    case WM_LBUTTONUP: {
+      try {
+        mse_.OnLButtonUp(lParam);
+      } catch ([[maybe_unused]] std::exception const& e) {
+#ifdef LOG_WINDOW
+        try {
+          std::string const narrow_what{e.what()};
+          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          std::wcerr << L"Exception raised during Mouse "
+                        L"OnLButtonUp. What happened:"
+                     << wide_what << "\n";
+        } catch (...) {
+          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+        }
+#endif  // LOG_WINDOW
+        OutputDebugStringW(L"Mouse OnLButtonUp raised exception\n");
+      }
+    } break;
+    case WM_RBUTTONDOWN: {
+      try {
+        mse_.OnRButtonDown(lParam);
+      } catch ([[maybe_unused]] std::exception const& e) {
+#ifdef LOG_WINDOW
+        try {
+          std::string const narrow_what{e.what()};
+          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          std::wcerr << L"Exception raised during Mouse "
+                        L"OnRButtonDown. What happened:"
+                     << wide_what << "\n";
+        } catch (...) {
+          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+        }
+#endif  // LOG_WINDOW
+        OutputDebugStringW(L"Mouse OnRButtonDown raised exception\n");
+      }
+    } break;
+    case WM_RBUTTONUP: {
+      try {
+        mse_.OnRButtonUp(lParam);
+      } catch ([[maybe_unused]] std::exception const& e) {
+#ifdef LOG_WINDOW
+        try {
+          std::string const narrow_what{e.what()};
+          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          std::wcerr << L"Exception raised during Mouse "
+                        L"OnRButtonUp. What happened:"
+                     << wide_what << "\n";
+        } catch (...) {
+          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+        }
+#endif  // LOG_WINDOW
+        OutputDebugStringW(L"Mouse OnRButtonUp raised exception\n");
+      }
+    } break;
+    case WM_MOUSEMOVE: {
+      auto const mse_cur_pos{MAKEPOINTS(lParam)};
+      try {
+        if (mse_cur_pos.x >= 0 && mse_cur_pos.x < width_ &&
+            mse_cur_pos.y >= 0 && mse_cur_pos.y < height_) {
+          mse_.OnMove(lParam);
+          if (Mouse::View const v{mse_}; !v.IsInWindow()) {
+            SetCapture(hwnd_);
+            mse_.OnHoverWindow(lParam);
+          }
+        } else {
+          if (Mouse::View const v{mse_};
+              v.IsLeftButtonPressed() || v.IsRightButtonPressed()) {
+            mse_.OnMove(lParam);
+          } else if (v.IsInWindow()) {
+            ReleaseCapture();
+            mse_.OnLeaveWindow(lParam);
+          }
+        }
+      } catch ([[maybe_unused]] std::exception const& e) {
+#ifdef LOG_WINDOW
+        try {
+          std::string const narrow_what{e.what()};
+          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          std::wcerr << L"Exception raised during mouse move handling. "
+                        L"What happened:"
+                     << wide_what << "\n";
+        } catch (...) {
+          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+        }
+#endif  // LOG_WINDOW
+        OutputDebugStringW(L"Handling mouse move raised exception\n");
+      }
+    } break;
+    case WM_MOUSEWHEEL: {
+      try {
+        mse_.OnWheel(lParam, wParam);
+      } catch ([[maybe_unused]] std::exception const& e) {
+#ifdef LOG_WINDOW
+        try {
+          std::string const narrow_what{e.what()};
+          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          std::wcerr << L"Exception raised during Mouse "
+                        L"OnWheel. What happened:"
+                     << wide_what << "\n";
+        } catch (...) {
+          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+        }
+#endif  // LOG_WINDOW
+        OutputDebugStringW(L"Mouse OnWheel raised exception\n");
       }
     } break;
     default:

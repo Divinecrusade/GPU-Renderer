@@ -10,6 +10,7 @@
     <ClCompile Include="..\Window.cpp" />
     <ClCompile Include="..\Keyboard.cpp" />
     <ClCompile Include="KeyboardTest.cpp" />
+    <ClCompile Include="..\Mouse.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
