@@ -42,8 +42,8 @@ class Mouse final {
 
     ~View() = default;
 
-    friend bool operator==(View const& lhs, View const& rhs);
-    friend bool operator==(View const& lhs, View const& rhs);
+    friend bool operator==(View const& lhs, View const& rhs) noexcept;
+    friend bool operator!=(View const& lhs, View const& rhs) noexcept;
 
     bool IsLeftButtonPressed() const noexcept;
     bool IsRightButtonPressed() const noexcept;

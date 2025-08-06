@@ -26,6 +26,16 @@ gpu_renderer::Mouse::View::GetOldestEvent() const {
   return key_event;
 }
 
+bool gpu_renderer::operator==(gpu_renderer::Mouse::View const& lhs, 
+                              gpu_renderer::Mouse::View const& rhs) noexcept {
+  return lhs.mse_ == rhs.mse_;
+}
+
+bool gpu_renderer::operator!=(gpu_renderer::Mouse::View const& lhs, 
+                              gpu_renderer::Mouse::View const& rhs) noexcept {
+  return !(lhs == rhs);
+}
+
 void gpu_renderer::Mouse::OnLButtonDown(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
