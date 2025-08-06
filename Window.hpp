@@ -64,9 +64,9 @@ class Window {
   int width_;
   int height_;
   
-  Keyboard kbd_{};
+  Keyboard kbd_{Keyboard::kDefaultEventsQueueSize, 
+                Keyboard::kDefaultCharsBufferSize};
   Mouse mse_{};
-
 
   static unsigned active_windows_count_;
 #ifdef _DEBUG

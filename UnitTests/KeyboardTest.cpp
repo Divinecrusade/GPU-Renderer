@@ -11,7 +11,8 @@ using gpu_renderer::WindowClass;
 class KeyboardTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    keyboard_ = std::make_unique<Keyboard>();
+    keyboard_ = std::make_unique<Keyboard>(Keyboard::kDefaultEventsQueueSize, 
+                                           Keyboard::kDefaultCharsBufferSize);
     view_ = std::make_unique<Keyboard::View>(*keyboard_);
   }
 
@@ -55,7 +56,8 @@ TEST_F(KeyboardTest, ViewMoveConstructorWorks) {
 }
 
 TEST_F(KeyboardTest, ViewAssignmentOperatorWorks) {
-  Keyboard second_keyboard{};
+  Keyboard second_keyboard{Keyboard::kDefaultEventsQueueSize, 
+                           Keyboard::kDefaultCharsBufferSize};
   Keyboard::View second_view{second_keyboard};
 
   second_view = *view_;
@@ -64,7 +66,8 @@ TEST_F(KeyboardTest, ViewAssignmentOperatorWorks) {
 
 TEST_F(KeyboardTest, ViewEqualityOperatorWorksCorrectly) {
   Keyboard::View same_view{*keyboard_};
-  Keyboard second_keyboard{};
+  Keyboard second_keyboard{Keyboard::kDefaultEventsQueueSize, 
+                           Keyboard::kDefaultCharsBufferSize};
   Keyboard::View different_view{second_keyboard};
 
   EXPECT_EQ(*view_, same_view);
@@ -364,7 +367,7 @@ TEST_F(KeyboardTest, KeyEventQueueHandlesOverflow) {
     ++event_count;
   }
 
-  EXPECT_LE(event_count, 256);
+  EXPECT_LE(event_count, Keyboard::kDefaultEventsQueueSize);
 }
 
 TEST_F(KeyboardTest, CharBufferHandlesOverflow) {
@@ -376,7 +379,7 @@ TEST_F(KeyboardTest, CharBufferHandlesOverflow) {
 
   std::wstring const chars{view_->GetChars()};
 
-  EXPECT_LE(chars.size(), 256);
+  EXPECT_LE(chars.size(), Keyboard::kDefaultCharsBufferSize);
 }
 
 }  // namespace input_handling

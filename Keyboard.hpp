@@ -53,7 +53,13 @@ class Keyboard final {
   };
 
  public:
-  Keyboard() = default;
+  static constexpr std::size_t kDefaultEventsQueueSize{128ull};
+  static constexpr std::size_t kDefaultCharsBufferSize{64ull};
+
+ public:
+  Keyboard() = delete;
+  Keyboard(std::size_t events_queue_size, 
+           std::size_t chars_buffer_size);
   Keyboard(Keyboard const&) = delete;
   Keyboard(Keyboard&&) = delete;
 
@@ -75,18 +81,14 @@ class Keyboard final {
   void ClearCharsBuffer() noexcept;
 
  private:
-  static constexpr std::size_t kEventsQueueSize{256ull};
-  static constexpr std::size_t kCharsBufferSize{256ull};
-
- private:
 #pragma warning(push)
 #pragma warning(disable : 4820)
   bool auto_repeating_{false};
 #pragma warning(pop)
   std::bitset<std::numeric_limits<KeyCode>::max() + 1> keys_state_{};
-  std::queue<Event, boost::circular_buffer<Event>> events_queue_{
-      boost::circular_buffer<Event>{kEventsQueueSize}};
-  boost::circular_buffer<wchar_t> chars_buffer_{kCharsBufferSize};
+
+  std::queue<Event, boost::circular_buffer<Event>> events_queue_;
+  boost::circular_buffer<wchar_t> chars_buffer_;
 };
 }  // namespace gpu_renderer
 

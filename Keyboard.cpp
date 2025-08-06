@@ -54,6 +54,12 @@ bool gpu_renderer::operator!=(Keyboard::View const& lhs,
   return !(lhs == rhs);
 }
 
+gpu_renderer::Keyboard::Keyboard(std::size_t events_queue_size,
+                                 std::size_t chars_buffer_size)
+    : events_queue_{boost::circular_buffer<Event>{events_queue_size}},
+      chars_buffer_{boost::circular_buffer<wchar_t>{chars_buffer_size}} 
+{}
+
 void gpu_renderer::Keyboard::EnableAutoRepeat() noexcept {
 #ifdef LOG_KEYBOARD
   if (auto_repeating_) {
@@ -127,7 +133,7 @@ void gpu_renderer::Keyboard::ClearKeysState() noexcept { keys_state_.reset(); }
 
 void gpu_renderer::Keyboard::ClearKeyEventsQueue() {
   std::queue<Event, boost::circular_buffer<Event>> empty_key_events_queue{
-      boost::circular_buffer<Event>{kEventsQueueSize}};
+      boost::circular_buffer<Event>{events_queue_._Get_container().capacity()}};
   events_queue_.swap(empty_key_events_queue);
 }
 
