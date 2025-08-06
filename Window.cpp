@@ -22,65 +22,10 @@ gpu_renderer::Window::Window(WindowClass const& window_class,
                              int y, int nWidth, int nHeight,
                              HINSTANCE hInstance, DWORD dwExStyle)
     : width_{nWidth}, height_{nHeight} {
-  assert(((void)"Window name cannot be nullptr", lpszWindowName != nullptr));
-  assert(((void)"Instance handle cannot be null", hInstance != NULL));
-  assert(((void)"Width must be positive", nWidth > 0));
-  assert(((void)"Height must be positive", nHeight > 0));
-  assert(((void)"Current implementation of window doesn't support child window "
-                "type",
-          ((dwStyle & WS_CHILD) != WS_CHILD)));
-
-  static constexpr auto WindowCreationFailed = [](HWND const& wnd) {
-    return wnd == NULL;
-  };
-
-  RECT window_pos{};
-  window_pos.left = x;
-  window_pos.right = window_pos.left + nWidth;
-  window_pos.top = y;
-  window_pos.bottom = window_pos.top + nHeight;
-  if (!AdjustWindowRectEx(&window_pos, dwStyle, FALSE, dwExStyle)) {
-#ifdef LOG_WINDOW
-    try {
-      std::wcerr << L"AdjustWindowRectEx failed during Window constructing,"
-                 << L"error code: " << GetLastError() << "\n";
-    } catch (...) {
-      OutputDebugStringW(L"Exception raised in log Window constructor\n");
-    }
-#endif  // LOG_WINDOW
-  }
-  hwnd_ = CreateWindowExW(
-      dwExStyle, window_class.GetLpClassName(), lpszWindowName, dwStyle,
-      window_pos.left, window_pos.top, window_pos.right - window_pos.left,
-      window_pos.bottom - window_pos.top, kNoParent, kNoMenu, hInstance, this);
-
-  if (WindowCreationFailed(hwnd_)) {
-#ifdef LOG_WINDOW
-    try {
-      std::wcerr << L"Window creation failed\n";
-      std::wcerr << L"Error code: " << GetLastError() << L"\n";
-    } catch (...) {
-      OutputDebugStringW(L"Exception raised in log Window constructor\n");
-    }
-#endif  // LOG_WINDOW
-#ifdef _DEBUG
-    throw exception::WinError{__FILEW__, __LINE__,
-                              "CreateWindowExW returned NULL hwnd",
-                              GetLastError()};
-#else
-    throw exception::WinError{"It was not able to create window",
-                              GetLastError()};
-#endif  // _DEBUG
-  }
-
-#ifdef LOG_WINDOW
-  try {
-    std::wclog << L"Window '" << lpszWindowName << L"' of class '"
-               << window_class.GetLpClassName() << L"' created successfully\n";
-  } catch (...) {
-    OutputDebugStringW(L"Exception raised in log Window constructor\n");
-  }
-#endif  // LOG_WINDOW
+  hwnd_ =
+      InitializeWindow(this, window_class.GetLpClassName(), lpszWindowName,
+                       dwStyle, x, y, width_, height_, hInstance, dwExStyle);
+  assert(((void)"Window handler cannot be NULL", hwnd_ != NULL));
 }
 
 gpu_renderer::Window::~Window() noexcept {
@@ -183,6 +128,75 @@ WNDPROC gpu_renderer::Window::GetlpfnWndProc() noexcept {
   return SetupWindowProcW;
 }
 
+HWND gpu_renderer::Window::InitializeWindow(Window* window_instance, 
+                                            LPCWSTR lpClassName,
+                                            LPCWSTR lpszWindowName,
+                                            DWORD dwStyle, int x, int y,
+                                            int nWidth, int nHeight,
+                                            HINSTANCE hInstance,
+                                            DWORD dwExStyle) {
+  assert(((void)"Window name cannot be nullptr", lpszWindowName != nullptr));
+  assert(((void)"Instance handle cannot be null", hInstance != NULL));
+  assert(((void)"Width must be positive", nWidth > 0));
+  assert(((void)"Height must be positive", nHeight > 0));
+  assert(((void)"Current implementation of window doesn't support child window "
+                "type",
+          ((dwStyle & WS_CHILD) != WS_CHILD)));
+
+  static constexpr auto WindowCreationFailed = [](HWND const& wnd) {
+    return wnd == NULL;
+  };
+
+  RECT window_pos{};
+  window_pos.left = x;
+  window_pos.right = window_pos.left + nWidth;
+  window_pos.top = y;
+  window_pos.bottom = window_pos.top + nHeight;
+  if (!AdjustWindowRectEx(&window_pos, dwStyle, FALSE, dwExStyle)) {
+#ifdef LOG_WINDOW
+    try {
+      std::wcerr << L"AdjustWindowRectEx failed during Window constructing,"
+                 << L"error code: " << GetLastError() << "\n";
+    } catch (...) {
+      OutputDebugStringW(L"Exception raised in log Window constructor\n");
+    }
+#endif  // LOG_WINDOW
+  }
+  HWND const hwnd{CreateWindowExW(
+      dwExStyle, lpClassName, lpszWindowName, dwStyle,
+      window_pos.left, window_pos.top, window_pos.right - window_pos.left,
+      window_pos.bottom - window_pos.top, kNoParent, kNoMenu, hInstance, window_instance)};
+
+  if (WindowCreationFailed(hwnd)) {
+#ifdef LOG_WINDOW
+    try {
+      std::wcerr << L"Window creation failed\n";
+      std::wcerr << L"Error code: " << GetLastError() << L"\n";
+    } catch (...) {
+      OutputDebugStringW(L"Exception raised in log Window constructor\n");
+    }
+#endif  // LOG_WINDOW
+#ifdef _DEBUG
+    throw exception::WinError{__FILEW__, __LINE__,
+                              "CreateWindowExW returned NULL hwnd",
+                              GetLastError()};
+#else
+    throw exception::WinError{"It was not able to create window",
+                              GetLastError()};
+#endif  // _DEBUG
+  }
+
+#ifdef LOG_WINDOW
+  try {
+    std::wclog << L"Window '" << lpszWindowName << L"' of class '"
+               << lpClassName << L"' created successfully\n";
+  } catch (...) {
+    OutputDebugStringW(L"Exception raised in log Window constructor\n");
+  }
+#endif  // LOG_WINDOW
+  return hwnd;
+}
+
 LRESULT WINAPI gpu_renderer::Window::SetupWindowProcW(
     _In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam,
     _In_ LPARAM lParam) noexcept {
@@ -251,6 +265,23 @@ LRESULT WINAPI gpu_renderer::Window::DisptachWindowProcW(
   }
 #endif  // LOG_WINDOW_MESSAGES
   return window_instance->HandleMessage(Msg, wParam, lParam);
+}
+
+gpu_renderer::Window::Window(std::size_t keyboard_events_queue_size,
+                             std::size_t keyboard_chars_buffer_size,
+                             std::size_t mouse_events_queue_size,
+                             WindowClass const& window_class,
+                             LPCWSTR lpszWindowName, DWORD dwStyle, int x,
+                             int y, int nWidth, int nHeight,
+                             HINSTANCE hInstance, DWORD dwExStyle)
+    : width_{nWidth},
+      height_{nHeight},
+      kbd_{keyboard_events_queue_size, keyboard_chars_buffer_size},
+      mse_{mouse_events_queue_size} {
+  hwnd_ =
+      InitializeWindow(this, window_class.GetLpClassName(), lpszWindowName,
+                       dwStyle, x, y, width_, height_, hInstance, dwExStyle);
+  assert(((void)"Window handler cannot be NULL", hwnd_ != NULL));
 }
 
 LRESULT gpu_renderer::Window::HandleMessage(UINT Msg, WPARAM wParam,

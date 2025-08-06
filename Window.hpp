@@ -43,15 +43,13 @@ class Window {
 
   static WNDPROC GetlpfnWndProc() noexcept;
 
- private:
-  static LRESULT WINAPI SetupWindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
-                                         _In_ WPARAM wParam,
-                                         _In_ LPARAM lParam) noexcept;
-  static LRESULT WINAPI DisptachWindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
-                                            _In_ WPARAM wParam,
-                                            _In_ LPARAM lParam) noexcept;
-
  protected:
+  Window(std::size_t keyboard_events_queue_size,
+         std::size_t keyboard_chars_buffer_size,
+         std::size_t mouse_events_queue_size, WindowClass const& window_class,
+         LPCWSTR lpszWindowName, DWORD dwStyle, int x, int y, int nWidth,
+         int nHeight, HINSTANCE hInstance, DWORD dwExStyle);
+
   virtual LRESULT HandleMessage(UINT Msg, WPARAM wParam,
                                 LPARAM lParam) noexcept;
 
@@ -60,13 +58,27 @@ class Window {
   static unsigned GetCountOfActiveWindows() noexcept;
 
  private:
-  HWND hwnd_;
+  static HWND InitializeWindow(Window* window_instance, LPCWSTR lpClassName,
+                               LPCWSTR lpszWindowName, DWORD dwStyle, int x,
+                               int y, int nWidth, int nHeight,
+                               HINSTANCE hInstance, DWORD dwExStyle);
+
+  static LRESULT WINAPI SetupWindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
+                                         _In_ WPARAM wParam,
+                                         _In_ LPARAM lParam) noexcept;
+  static LRESULT WINAPI DisptachWindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
+                                            _In_ WPARAM wParam,
+                                            _In_ LPARAM lParam) noexcept;
+
+ private:
   int width_;
   int height_;
-  
+
   Keyboard kbd_{Keyboard::kDefaultEventsQueueSize, 
                 Keyboard::kDefaultCharsBufferSize};
   Mouse mse_{Mouse::kDefaultEventsQueueSize};
+
+  HWND hwnd_{NULL};
 
   static unsigned active_windows_count_;
 #ifdef _DEBUG
