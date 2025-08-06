@@ -66,7 +66,7 @@ class Window {
   
   Keyboard kbd_{Keyboard::kDefaultEventsQueueSize, 
                 Keyboard::kDefaultCharsBufferSize};
-  Mouse mse_{};
+  Mouse mse_{Mouse::kDefaultEventsQueueSize};
 
   static unsigned active_windows_count_;
 #ifdef _DEBUG

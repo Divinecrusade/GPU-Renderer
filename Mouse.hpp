@@ -56,7 +56,11 @@ class Mouse final {
   };
 
  public:
-  Mouse() = default;
+  static constexpr std::size_t kDefaultEventsQueueSize{512ull};
+
+ public:
+  Mouse() = delete;
+  Mouse(std::size_t events_queue_size);
   Mouse(Mouse const&) = delete;
   Mouse(Mouse&&) = delete;
 
@@ -76,11 +80,7 @@ class Mouse final {
   void OnLeaveWindow(LPARAM lParam);
 
  private:
-  static constexpr std::size_t kEventsQueueSize{256ull};
-
- private:
-  std::queue<Event, boost::circular_buffer<Event>> events_queue_{
-      boost::circular_buffer<Event>{kEventsQueueSize}};
+  std::queue<Event, boost::circular_buffer<Event>> events_queue_;
   bool left_button_pressed_{false};
   bool right_button_pressed_{false};
 #pragma warning(push)

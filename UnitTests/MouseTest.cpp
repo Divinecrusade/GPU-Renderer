@@ -7,7 +7,7 @@ using gpu_renderer::Mouse;
 class MouseTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    mouse_ = std::make_unique<Mouse>();
+    mouse_ = std::make_unique<Mouse>(Mouse::kDefaultEventsQueueSize);
     view_ = std::make_unique<Mouse::View>(*mouse_);
   }
 
@@ -49,7 +49,7 @@ TEST_F(MouseTest, ViewMoveConstructorWorks) {
 }
 
 TEST_F(MouseTest, ViewAssignmentOperatorWorks) {
-  Mouse second_mouse{};
+  Mouse second_mouse{Mouse::kDefaultEventsQueueSize};
   Mouse::View second_view{second_mouse};
 
   second_view = *view_;
@@ -58,7 +58,7 @@ TEST_F(MouseTest, ViewAssignmentOperatorWorks) {
 
 TEST_F(MouseTest, ViewEqualityOperatorWorksCorrectly) {
   Mouse::View same_view{*mouse_};
-  Mouse second_mouse{};
+  Mouse second_mouse{Mouse::kDefaultEventsQueueSize};
   Mouse::View different_view{second_mouse};
 
   EXPECT_EQ(*view_, same_view);
@@ -244,7 +244,6 @@ TEST_F(MouseTest, OnWheelMultipleDeltasGenerateMultipleEvents) {
 
   mouse_->OnWheel(lParam, triple_delta);
 
-  // Should generate 3 wheel up events
   EXPECT_TRUE(view_->GetOldestEvent().has_value());
   EXPECT_TRUE(view_->GetOldestEvent().has_value());
   EXPECT_TRUE(view_->GetOldestEvent().has_value());
@@ -299,7 +298,8 @@ TEST_F(MouseTest, LargeCoordinatesAreHandledCorrectly) {
 }
 
 TEST_F(MouseTest, EventQueueHandlesOverflow) {
-  static constexpr std::size_t kOverflowCount{300};
+  static constexpr std::size_t kOverflowCount{
+      Mouse::kDefaultEventsQueueSize * 3 / 2};
   LPARAM const lParam{MAKELPARAM(kCenterPos.x, kCenterPos.y)};
 
   for (std::size_t i{0}; i < kOverflowCount; ++i) {
@@ -311,14 +311,14 @@ TEST_F(MouseTest, EventQueueHandlesOverflow) {
     ++event_count;
   }
 
-  EXPECT_LE(event_count, 256);
+  EXPECT_LE(event_count, Mouse::kDefaultEventsQueueSize);
 }
 
 TEST_F(MouseTest, ButtonStateIndependentOfEvents) {
   LPARAM const lParam{MAKELPARAM(kCenterPos.x, kCenterPos.y)};
 
   mouse_->OnLButtonDown(lParam);
-  view_->GetOldestEvent();  // Consume event
+  view_->GetOldestEvent(); 
 
   EXPECT_TRUE(view_->IsLeftButtonPressed());
   EXPECT_FALSE(view_->GetOldestEvent().has_value());
@@ -374,5 +374,6 @@ TEST_F(MouseTest, MixedWheelDirectionsHandledCorrectly) {
   mouse_->OnWheel(lParam, pos_delta);
   mouse_->OnWheel(lParam, pos_delta);
   EXPECT_TRUE(view_->GetOldestEvent().has_value());
+  EXPECT_FALSE(view_->GetOldestEvent().has_value());
 }
 }  // namespace input_handling

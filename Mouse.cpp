@@ -36,6 +36,9 @@ bool gpu_renderer::operator!=(gpu_renderer::Mouse::View const& lhs,
   return !(lhs == rhs);
 }
 
+gpu_renderer::Mouse::Mouse(std::size_t events_queue_size)
+    : events_queue_{boost::circular_buffer<Event>{events_queue_size}} {}
+
 void gpu_renderer::Mouse::OnLButtonDown(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
