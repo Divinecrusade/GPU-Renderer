@@ -200,3 +200,13 @@ void gpu_renderer::Mouse::OnLeaveWindow(LPARAM lParam) {
   in_window_ = false;
 }
 
+void gpu_renderer::Mouse::ClearEventsQueue() {
+  std::queue<Event, boost::circular_buffer<Event>> empty_events_queue{
+      boost::circular_buffer<Event>{events_queue_._Get_container().capacity()}};
+  events_queue_.swap(empty_events_queue);
+}
+
+void gpu_renderer::Mouse::ClearState() noexcept {
+  left_button_pressed_ = right_button_pressed_ = in_window_ = false;
+  accumulated_wheel_delta_ = 0;
+}

@@ -79,6 +79,9 @@ class Mouse final {
   void OnHoverWindow(LPARAM lParam);
   void OnLeaveWindow(LPARAM lParam);
 
+  void ClearEventsQueue();
+  void ClearState() noexcept;
+
  private:
   std::queue<Event, boost::circular_buffer<Event>> events_queue_;
   bool left_button_pressed_{false};
