@@ -198,7 +198,7 @@ TEST_F(KeyboardTest, ClearKeyEventsQueueRemovesAllEvents) {
   keyboard_->OnKeyDown(kTestKeyA);
   keyboard_->OnKeyDown(kTestKeyB);
 
-  keyboard_->ClearKeyEventsQueue();
+  keyboard_->ClearEventsQueue();
 
   EXPECT_FALSE(view_->IsKeyEventHappened());
   EXPECT_FALSE(view_->GetOldestEvent().has_value());
@@ -288,7 +288,7 @@ TEST_F(KeyboardTest, ClearOperationsAreIndependent) {
   EXPECT_TRUE(view_->IsKeyEventHappened());
   EXPECT_TRUE(view_->IsCharTyped());
 
-  keyboard_->ClearKeyEventsQueue();
+  keyboard_->ClearEventsQueue();
 
   EXPECT_FALSE(view_->IsKeyEventHappened());
   EXPECT_TRUE(view_->IsCharTyped());

@@ -330,20 +330,20 @@ LRESULT gpu_renderer::Window::HandleMessage(UINT Msg, WPARAM wParam,
     case WM_KILLFOCUS: {
       kbd_.ClearKeysState();
       try {
-        kbd_.ClearKeyEventsQueue();
+        kbd_.ClearEventsQueue();
       } catch ([[maybe_unused]] std::exception const& e) {
 #ifdef LOG_WINDOW
         try {
           std::string const narrow_what{e.what()};
           std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
           std::wcerr << L"Exception raised during Keyboard "
-                        L"ClearKeyEventsQueue. What happened:"
+                        L"ClearEventsQueue. What happened:"
                      << wide_what << "\n";
         } catch (...) {
           OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
         }
 #endif  // LOG_WINDOW
-        OutputDebugStringW(L"Keyboard ClearKeyEventsQueue raised exception\n");
+        OutputDebugStringW(L"Keyboard ClearEventsQueue raised exception\n");
       }
     } break;
     case WM_KEYDOWN:

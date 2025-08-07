@@ -131,10 +131,10 @@ void gpu_renderer::Keyboard::OnChar(wchar_t symbol) {
 
 void gpu_renderer::Keyboard::ClearKeysState() noexcept { keys_state_.reset(); }
 
-void gpu_renderer::Keyboard::ClearKeyEventsQueue() {
-  std::queue<Event, boost::circular_buffer<Event>> empty_key_events_queue{
+void gpu_renderer::Keyboard::ClearEventsQueue() {
+  std::queue<Event, boost::circular_buffer<Event>> empty_events_queue{
       boost::circular_buffer<Event>{events_queue_._Get_container().capacity()}};
-  events_queue_.swap(empty_key_events_queue);
+  events_queue_.swap(empty_events_queue);
 }
 
 void gpu_renderer::Keyboard::ClearCharsBuffer() noexcept {

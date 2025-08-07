@@ -77,7 +77,7 @@ class Keyboard final {
   void OnChar(wchar_t symbol);
 
   void ClearKeysState() noexcept;
-  void ClearKeyEventsQueue();
+  void ClearEventsQueue();
   void ClearCharsBuffer() noexcept;
 
  private:
