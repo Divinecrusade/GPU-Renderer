@@ -19,13 +19,13 @@ class WinError : public std::exception {
 #ifdef _DEBUG
   WinError(wchar_t const* file, int line, char const* message,
            DWORD error_code);
-  std::filesystem::path const& InWhatFileThrowed() const noexcept;
-  int InWhatLineOfCodeThrowed() const noexcept;
+  [[nodiscard]] std::filesystem::path const& InWhatFileThrowed() const noexcept;
+  [[nodiscard]] int InWhatLineOfCodeThrowed() const noexcept;
 #endif  // _DEBUG
   WinError(char const* message, DWORD error_code_) noexcept;
 
-  DWORD GetErrorCode() const noexcept;
-  std::wstring WhatHappened() const;
+  [[nodiscard]] DWORD GetErrorCode() const noexcept;
+  [[nodiscard]] std::wstring WhatHappened() const;
 
  private:
 #ifdef _DEBUG

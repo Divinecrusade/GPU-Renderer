@@ -45,9 +45,9 @@ class Mouse final {
     friend bool operator==(View const& lhs, View const& rhs) noexcept;
     friend bool operator!=(View const& lhs, View const& rhs) noexcept;
 
-    bool IsLeftButtonPressed() const noexcept;
-    bool IsRightButtonPressed() const noexcept;
-    bool IsInWindow() const noexcept;
+    [[nodiscard]] bool IsLeftButtonPressed() const noexcept;
+    [[nodiscard]] bool IsRightButtonPressed() const noexcept;
+    [[nodiscard]] bool IsInWindow() const noexcept;
 
     std::optional<Event> GetOldestEvent() const;
 

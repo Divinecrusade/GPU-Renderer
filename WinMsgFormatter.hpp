@@ -21,7 +21,7 @@ struct WinMsgFormatter {
       static_cast<std::streamsize>(sizeof(LPARAM)) * kHexDigitsInByte};
 
  public:
-  std::wstring operator()(UINT Msg, WPARAM wParam, LPARAM lParam) {
+  [[nodiscard]] std::wstring operator()(UINT Msg, WPARAM wParam, LPARAM lParam) {
     std::wostringstream wsout{};
     wsout << L"Msg: ";
     wsout << std::setw(kMessageNameWidth) << std::right;

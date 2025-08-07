@@ -36,13 +36,13 @@ class Window {
   void Enable() const noexcept;
   void Disable() const noexcept;
 
-  bool IsEnabled() const noexcept;
-  bool IsShown() const noexcept;
+  [[nodiscard]] bool IsEnabled() const noexcept;
+  [[nodiscard]] bool IsShown() const noexcept;
 
-  Keyboard::View GetKeyboard() noexcept;
-  Mouse::View GetMouse() noexcept;
+  [[nodiscard]] Keyboard::View GetKeyboard() noexcept;
+  [[nodiscard]] Mouse::View GetMouse() noexcept;
 
-  static WNDPROC GetlpfnWndProc() noexcept;
+  [[nodiscard]] static WNDPROC GetlpfnWndProc() noexcept;
 
  protected:
   Window(std::size_t keyboard_events_queue_size,
@@ -54,11 +54,11 @@ class Window {
   virtual LRESULT HandleMessage(UINT Msg, WPARAM wParam,
                                 LPARAM lParam) noexcept;
 
-  HWND GetHWND() const noexcept;
+  [[nodiscard]] HWND GetHWND() const noexcept;
 
   static void IncreaseCounterOfActiveWindows(unsigned delta = 1u) noexcept;
   static void DecreaseCounterOfActiveWindows(unsigned delta = 1u) noexcept;
-  static unsigned GetCountOfActiveWindows() noexcept;
+  [[nodiscard]] static unsigned GetCountOfActiveWindows() noexcept;
 
  private:
   static HWND InitializeWindow(Window* window_instance, LPCWSTR lpClassName,

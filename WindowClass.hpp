@@ -28,7 +28,7 @@ class WindowClass {
 
   virtual ~WindowClass() noexcept;
 
-  LPCWSTR GetLpClassName() const noexcept;
+  [[nodiscard]] LPCWSTR GetLpClassName() const noexcept;
 
  private:
   struct wstring_hash {

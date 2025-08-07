@@ -16,6 +16,8 @@ class CachedDC : public WindowClass {
 
   CachedDC& operator=(CachedDC const&) = delete;
   CachedDC& operator=(CachedDC&&) = delete;
+
+  ~CachedDC() = default;
 };
 }  // namespace gpu_renderer
 

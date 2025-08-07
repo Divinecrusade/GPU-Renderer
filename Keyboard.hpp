@@ -40,9 +40,9 @@ class Keyboard final {
     friend bool operator==(View const& lhs, View const& rhs) noexcept;
     friend bool operator!=(View const& lhs, View const& rhs) noexcept;
 
-    bool IsKeyPressed(KeyCode key) const noexcept;
-    bool IsKeyEventHappened() const noexcept;
-    bool IsCharTyped() const noexcept;
+    [[nodiscard]] bool IsKeyPressed(KeyCode key) const noexcept;
+    [[nodiscard]] bool IsKeyEventHappened() const noexcept;
+    [[nodiscard]] bool IsCharTyped() const noexcept;
 
     std::optional<Event> GetOldestEvent() const;
     std::optional<wchar_t> GetFirstChar() const;
