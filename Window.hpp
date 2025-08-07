@@ -40,6 +40,7 @@ class Window {
   bool IsShown() const noexcept;
 
   Keyboard::View GetKeyboard() noexcept;
+  Mouse::View GetMouse() noexcept;
 
   static WNDPROC GetlpfnWndProc() noexcept;
 

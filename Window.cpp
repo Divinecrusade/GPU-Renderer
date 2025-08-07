@@ -124,6 +124,10 @@ gpu_renderer::Keyboard::View gpu_renderer::Window::GetKeyboard() noexcept {
   return kbd_;
 }
 
+gpu_renderer::Mouse::View gpu_renderer::Window::GetMouse() noexcept { 
+  return mse_; 
+}
+
 WNDPROC gpu_renderer::Window::GetlpfnWndProc() noexcept {
   return SetupWindowProcW;
 }
