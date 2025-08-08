@@ -46,6 +46,8 @@ class Window {
 
   [[nodiscard]] static WNDPROC GetlpfnWndProc() noexcept;
 
+  static int LockInMessageQueue();
+
  protected:
   Window(std::size_t keyboard_events_queue_size,
          std::size_t keyboard_chars_buffer_size,

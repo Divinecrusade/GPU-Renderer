@@ -17,11 +17,11 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 #endif  // _DEBUG
 
-  MSG msg{};
   using gpu_renderer::window::CachedDC;
   using gpu_renderer::window::Canvas;
   using gpu_renderer::exception::WinError;
   using gpu_renderer::debug::Console;
+  int exit_code{};
   try {
 #ifdef _DEBUG
     Console::InitStdStreams(L"GPU-Renderer Debug Console");
@@ -40,27 +40,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                kWindowHeight,
                hInstance};
     wnd.Show(nCmdShow);
-
-    static constexpr HWND ALL_WINDOWS{NULL};
-    static constexpr UINT NO_MIN_RANGE_FILTER_MSG{NULL};
-    static constexpr UINT NO_MAX_RANGE_FILTER_MSG{NULL};
-    static constexpr auto ErrorHappened = [](BOOL result) {
-      return result == -1;
-    };
-    while (auto const operation_done{GetMessageW(
-        &msg, ALL_WINDOWS, NO_MIN_RANGE_FILTER_MSG, NO_MAX_RANGE_FILTER_MSG)}) {
-      if (ErrorHappened(operation_done)) {
-#ifdef _DEBUG
-        throw WinError{__FILEW__, __LINE__, "Handling message provokes error",
-                       GetLastError()};
-#else
-        throw WinError{"Event goes wrong", GetLastError()};
-#endif  // _DEBUG
-      } else {
-        (void)TranslateMessage(&msg);
-        (void)DispatchMessageW(&msg);
-      }
-    }
+    exit_code = wnd.LockInMessageQueue();
   } catch (WinError const& e) {
     MessageBoxW(NULL, e.WhatHappened().c_str(), e.kTypeOfException.data(),
                 MB_OK | MB_ICONERROR);
@@ -76,9 +56,5 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     return EXIT_FAILURE;
   }
 
-  if constexpr (sizeof(WPARAM) > sizeof(int)) {
-    return gsl::narrow<int>(msg.wParam);
-  } else {
-    return int(msg.wParam);
-  }
+  return exit_code;
 }

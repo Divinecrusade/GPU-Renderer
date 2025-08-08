@@ -131,7 +131,7 @@
       <SmallerTypeCheck>false</SmallerTypeCheck>
       <FloatingPointExceptions>true</FloatingPointExceptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <UndefinePreprocessorDefinitions>LOG_WINDOW_MESSAGES;LOG_MOUSE;%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>LOG_WINDOW_MESSAGES;LOG_MOUSE;LOG_KEYBOARD;%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <EnablePREfast>true</EnablePREfast>
     </ClCompile>
     <Link>

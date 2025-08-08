@@ -130,7 +130,34 @@ Mouse::View Window::GetMouse() noexcept {
 }
 
 WNDPROC Window::GetlpfnWndProc() noexcept {
-  return SetupWindowProcW;
+  return SetupWindowProcW; }
+
+int Window::LockInMessageQueue() { 
+  static constexpr HWND ALL_WINDOWS{NULL};
+  static constexpr UINT NO_MIN_RANGE_FILTER_MSG{NULL};
+  static constexpr UINT NO_MAX_RANGE_FILTER_MSG{NULL};
+  static constexpr auto ErrorHappened = [](BOOL result) {
+    return result == -1;
+  };
+  
+  MSG msg{};
+  while (auto const operation_done{GetMessageW(
+      &msg, ALL_WINDOWS, NO_MIN_RANGE_FILTER_MSG, NO_MAX_RANGE_FILTER_MSG)}) {
+    if (ErrorHappened(operation_done)) {
+#ifdef _DEBUG
+      throw exception::WinError{__FILEW__, __LINE__, 
+                                "Handling message provokes error",
+                                GetLastError()};
+#else
+      throw exception::WinError{"Event goes wrong", GetLastError()};
+#endif  // _DEBUG
+    } else {
+      std::ignore = TranslateMessage(&msg); // TODO: check its return
+      std::ignore = DispatchMessageW(&msg); // TODO: check its return
+    }
+  }
+
+  return gsl::narrow<int>(msg.wParam);
 }
 
 HWND Window::InitializeWindow(Window* window_instance, 
@@ -209,7 +236,7 @@ LRESULT WINAPI Window::SetupWindowProcW(
 #ifdef LOG_WINDOW_MESSAGES
     try {
       std::wclog << L"Installing wndproc for new instance of Window...\n";
-      std::wclog << WinMsgFormatter{}(Msg, wParam, lParam) << "\n";
+      std::wclog << debug::WinMsgFormatter{}(Msg, wParam, lParam) << "\n";
     } catch (...) {
       OutputDebugStringW(L"Exception raised in log Window SetupWindowProcW\n");
     }
