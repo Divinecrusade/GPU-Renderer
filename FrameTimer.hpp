@@ -5,11 +5,11 @@
 
 namespace gpu_renderer {
 class FrameTimer {
- private:
-  using Clock = std::chrono::high_resolution_clock;
-
  public:
   using DeltaTime = float;
+
+ private:
+  using Clock = std::chrono::high_resolution_clock;
 
  public:
   DeltaTime Mark() noexcept {
@@ -23,4 +23,4 @@ class FrameTimer {
 };
 }
 
-#endif  // !DELTA_TIMER_HPP
+#endif  // !FRAME_TIMER_HPP
