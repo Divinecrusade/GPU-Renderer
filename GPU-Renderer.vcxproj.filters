@@ -78,6 +78,9 @@
     <ClCompile Include="Keyboard.cpp">
       <Filter>Исходные файлы\input</Filter>
     </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
@@ -119,6 +122,9 @@
     </ClInclude>
     <ClInclude Include="Console.hpp">
       <Filter>Файлы заголовков\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.hpp">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
