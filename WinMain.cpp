@@ -18,12 +18,13 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 #endif  // _DEBUG
 
   MSG msg{};
-  using gpu_renderer::CachedDC;
-  using gpu_renderer::Canvas;
+  using gpu_renderer::window::CachedDC;
+  using gpu_renderer::window::Canvas;
   using gpu_renderer::exception::WinError;
+  using gpu_renderer::debug::Console;
   try {
 #ifdef _DEBUG
-    gpu_renderer::Console::InitStdStreams(L"GPU-Renderer Debug Console");
+    Console::InitStdStreams(L"GPU-Renderer Debug Console");
 #endif  // _DEBUG
 
     CachedDC wc{hInstance, Canvas::GetlpfnWndProc()};

@@ -4,9 +4,9 @@
 #include "WindowClass.hpp"
 
 namespace input_handling {
-using gpu_renderer::Keyboard;
-using gpu_renderer::Window;
-using gpu_renderer::WindowClass;
+using gpu_renderer::input::Keyboard;
+using gpu_renderer::window::Window;
+using gpu_renderer::window::WindowClass;
 
 class KeyboardTest : public ::testing::Test {
  protected:

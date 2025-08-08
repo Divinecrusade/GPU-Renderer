@@ -3,7 +3,7 @@
 
 #include <string_view>
 
-namespace gpu_renderer {
+namespace gpu_renderer::debug {
 class Console {
  public:
   static void InitStdStreams(std::wstring_view console_window_title);
@@ -19,6 +19,6 @@ class Console {
 
   ~Console() noexcept;
 };
-}  // namespace gpu_renderer
+}  // namespace gpu_renderer::debug
 
 #endif  // !CONSOLE_HPP

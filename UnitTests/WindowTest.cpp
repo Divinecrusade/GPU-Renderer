@@ -3,9 +3,9 @@
 #include "Window.hpp"
 #include "WinError.hpp"
 
-namespace winapi_wrapper {
-using gpu_renderer::Window;
-using gpu_renderer::WindowClass;
+namespace window_manipulating {
+using gpu_renderer::window::Window;
+using gpu_renderer::window::WindowClass;
 using gpu_renderer::exception::WinError;
 
 class WindowTest : public ::testing::Test {

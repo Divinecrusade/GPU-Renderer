@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "WindowClass.hpp"
 
-namespace winapi_wrapper {
-using gpu_renderer::WindowClass;
+namespace window_manipulating {
+using gpu_renderer::window::WindowClass;
 
 class WindowClassTest : public ::testing::Test {
  protected:

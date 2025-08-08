@@ -2,7 +2,7 @@
 #include "Mouse.hpp"
 
 namespace input_handling {
-using gpu_renderer::Mouse;
+using gpu_renderer::input::Mouse;
 
 class MouseTest : public ::testing::Test {
  protected:

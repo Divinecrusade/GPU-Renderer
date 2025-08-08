@@ -12,7 +12,7 @@
 #include "OptimisedBoostHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 
-namespace gpu_renderer {
+namespace gpu_renderer::input {
 class Keyboard final {
  public:
   class View;
@@ -90,6 +90,6 @@ class Keyboard final {
   std::queue<Event, boost::circular_buffer<Event>> events_queue_;
   boost::circular_buffer<wchar_t> chars_buffer_;
 };
-}  // namespace gpu_renderer
+}  // namespace gpu_renderer::input
 
 #endif  // !KEYBOARD_HPP

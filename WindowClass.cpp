@@ -1,22 +1,22 @@
 ﻿#include "WindowClass.hpp"
 
-#include "WinError.hpp"
-
 #include <cassert>
+
+#include "WinError.hpp"
 #ifdef LOG_WINDOW_CLASS
 #include <iostream>
 #endif  // LOG_WINDOW_CLASS
 
-std::unordered_map<std::wstring, std::size_t,
-                   gpu_renderer::WindowClass::wstring_hash, std::equal_to<>>
-    gpu_renderer::WindowClass::class_ref_counts_{};
+namespace gpu_renderer::window {
+std::unordered_map<std::wstring, std::size_t, WindowClass::wstring_hash,
+                   std::equal_to<>>
+    WindowClass::class_ref_counts_{};
 
-gpu_renderer::WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc,
-                                       int cbClsExtra, int cbWndExtra,
-                                       HINSTANCE hInstance, HICON hIcon,
-                                       HCURSOR hCursor, HBRUSH hbrBackground,
-                                       LPCWSTR lpszMenuName,
-                                       LPCWSTR lpszClassName, HICON hIconSm)
+WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
+                         int cbWndExtra, HINSTANCE hInstance, HICON hIcon,
+                         HCURSOR hCursor, HBRUSH hbrBackground,
+                         LPCWSTR lpszMenuName, LPCWSTR lpszClassName,
+                         HICON hIconSm)
     : hInstance_{hInstance} {
   assert(((void)"Class name cannot be nullptr", lpszClassName != nullptr));
   assert(((void)"Class name should not be empty",
@@ -82,7 +82,7 @@ gpu_renderer::WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc,
 #endif  // LOG_WINDOW_CLASS
 }
 
-gpu_renderer::WindowClass::~WindowClass() noexcept {
+WindowClass::~WindowClass() noexcept {
   assert(
       ((void)"Class name must be valid in destructor", !class_name_.empty()));
 
@@ -138,6 +138,7 @@ gpu_renderer::WindowClass::~WindowClass() noexcept {
   }
 }
 
-LPCWSTR gpu_renderer::WindowClass::GetLpClassName() const noexcept {
+LPCWSTR WindowClass::GetLpClassName() const noexcept {
   return class_name_.data();
 }
+}  // namespace gpu_renderer::window

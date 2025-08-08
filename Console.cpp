@@ -12,8 +12,8 @@
 #include "OptimisedWindowsHeader.hpp"
 #include "WinError.hpp"
 
-void gpu_renderer::Console::InitStdStreams(
-    std::wstring_view console_window_title) {
+namespace gpu_renderer::debug {
+void Console::InitStdStreams(std::wstring_view console_window_title) {
   static Console instance{console_window_title};
 #ifdef _DEBUG
   static bool std_streams_initialized{false};
@@ -25,7 +25,7 @@ void gpu_renderer::Console::InitStdStreams(
 #endif  // _DEBUG
 }
 
-gpu_renderer::Console::Console(std::wstring_view console_window_title) {
+Console::Console(std::wstring_view console_window_title) {
   if (!AllocConsole()) {
 #ifdef _DEBUG
     throw exception::WinError{__FILEW__, __LINE__, "Console wasn't allocated",
@@ -89,8 +89,9 @@ gpu_renderer::Console::Console(std::wstring_view console_window_title) {
   }
 }
 
-gpu_renderer::Console::~Console() noexcept {
+Console::~Console() noexcept {
   if (!FreeConsole()) {
     OutputDebugStringW(L"Console wasn't freed because of error\n");
   }
 }
+}  // namespace gpu_renderer::debug

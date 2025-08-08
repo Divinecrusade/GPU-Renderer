@@ -13,34 +13,70 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Исходные файлы\debug">
+      <UniqueIdentifier>{e448d5f0-be6f-4854-a4b9-dd833bfa0879}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\exception">
+      <UniqueIdentifier>{6110764f-44f1-4068-95f4-8069e7de67b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\window">
+      <UniqueIdentifier>{45eb12b7-0e94-45a6-8795-901190ee8e7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\input">
+      <UniqueIdentifier>{c1f05fc8-32fe-41c2-bc61-794174bbc64b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\debug">
+      <UniqueIdentifier>{8701a874-62ab-4a79-8162-5f12545239b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\exception">
+      <UniqueIdentifier>{812524fc-6c03-4515-8810-07dbe6875225}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\input">
+      <UniqueIdentifier>{3c18b508-bc1d-46b0-bbe6-32db21a72c8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\window">
+      <UniqueIdentifier>{249c4e5e-e2c9-4d65-9edb-f3cb3485b09c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\window\class">
+      <UniqueIdentifier>{336835ff-167e-418c-8b73-63757bfd2c2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\window\class">
+      <UniqueIdentifier>{9b5bb8d3-060a-41a9-aee1-f2f551c1ac77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\window\entity">
+      <UniqueIdentifier>{508a3317-dc8a-49f1-ad02-6091e8c7c5b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\window\entity">
+      <UniqueIdentifier>{b86155ca-cfae-4ff8-8a7f-6eb4003e3b86}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="WinError.cpp">
+      <Filter>Исходные файлы\exception</Filter>
+    </ClCompile>
     <ClCompile Include="WindowClass.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\window\class</Filter>
     </ClCompile>
     <ClCompile Include="CachedDC.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\window\class</Filter>
     </ClCompile>
     <ClCompile Include="Window.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\window\entity</Filter>
     </ClCompile>
     <ClCompile Include="Canvas.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\window\entity</Filter>
     </ClCompile>
     <ClCompile Include="Console.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="WinError.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="Keyboard.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\debug</Filter>
     </ClCompile>
     <ClCompile Include="Mouse.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\input</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>Исходные файлы\input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -48,41 +84,41 @@
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WinMsgFormatter.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="OptimisedWindowsHeader.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowClass.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="CachedDC.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Window.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Canvas.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Console.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="WinError.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Keyboard.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="OptimisedBoostHeader.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="WinError.hpp">
+      <Filter>Файлы заголовков\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="WinMsgFormatter.hpp">
+      <Filter>Файлы заголовков\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyboard.hpp">
+      <Filter>Файлы заголовков\input</Filter>
+    </ClInclude>
     <ClInclude Include="Mouse.hpp">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>Файлы заголовков\input</Filter>
+    </ClInclude>
+    <ClInclude Include="CachedDC.hpp">
+      <Filter>Файлы заголовков\window\class</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowClass.hpp">
+      <Filter>Файлы заголовков\window\class</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.hpp">
+      <Filter>Файлы заголовков\window\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Canvas.hpp">
+      <Filter>Файлы заголовков\window\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Console.hpp">
+      <Filter>Файлы заголовков\debug</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

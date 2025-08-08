@@ -8,7 +8,7 @@
 #include "OptimisedBoostHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 
-namespace gpu_renderer {
+namespace gpu_renderer::input {
 class Mouse final {
  public:
   class View;
@@ -92,6 +92,6 @@ class Mouse final {
 #pragma warning(pop)
   int accumulated_wheel_delta_{0};
 };
-} // namespace gpu_renderer
+} // namespace gpu_renderer::input
 
 #endif  // !MOUSE_HPP

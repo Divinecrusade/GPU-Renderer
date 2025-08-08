@@ -6,7 +6,7 @@
 
 #include "OptimisedWindowsHeader.hpp"
 
-namespace gpu_renderer {
+namespace gpu_renderer::window {
 class WindowClass {
  public:
   static constexpr HICON kDefaultIcon{NULL};
@@ -54,6 +54,6 @@ class WindowClass {
                             wstring_hash,
                             std::equal_to<>> class_ref_counts_;
 };
-}  // namespace gpu_renderer
+}  // namespace gpu_renderer::window
 
 #endif  // !WINDOW_CLASS_HPP

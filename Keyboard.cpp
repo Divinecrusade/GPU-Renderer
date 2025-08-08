@@ -4,22 +4,22 @@
 #include <gsl/gsl>
 #include <iostream>
 
-gpu_renderer::Keyboard::View::View(Keyboard& kbd) noexcept : kbd_{&kbd} {}
+namespace gpu_renderer::input {
+Keyboard::View::View(Keyboard& kbd) noexcept : kbd_{&kbd} {}
 
-bool gpu_renderer::Keyboard::View::IsKeyPressed(KeyCode key) const noexcept {
+bool Keyboard::View::IsKeyPressed(KeyCode key) const noexcept {
   return gsl::at(kbd_->keys_state_, key);
 }
 
-bool gpu_renderer::Keyboard::View::IsKeyEventHappened() const noexcept {
+bool Keyboard::View::IsKeyEventHappened() const noexcept {
   return !kbd_->events_queue_.empty();
 }
 
-bool gpu_renderer::Keyboard::View::IsCharTyped() const noexcept {
+bool Keyboard::View::IsCharTyped() const noexcept {
   return !kbd_->chars_buffer_.empty();
 }
 
-std::optional<gpu_renderer::Keyboard::Event>
-gpu_renderer::Keyboard::View::GetOldestEvent() const {
+std::optional<Keyboard::Event> Keyboard::View::GetOldestEvent() const {
   if (kbd_->events_queue_.empty()) return std::nullopt;
 
   Event const key_event{std::move(kbd_->events_queue_.front())};
@@ -27,7 +27,7 @@ gpu_renderer::Keyboard::View::GetOldestEvent() const {
   return key_event;
 }
 
-std::optional<wchar_t> gpu_renderer::Keyboard::View::GetFirstChar() const {
+std::optional<wchar_t> Keyboard::View::GetFirstChar() const {
   if (kbd_->chars_buffer_.empty()) return std::nullopt;
 
   auto const symbol{std::move(kbd_->chars_buffer_.front())};
@@ -35,7 +35,7 @@ std::optional<wchar_t> gpu_renderer::Keyboard::View::GetFirstChar() const {
   return symbol;
 }
 
-std::wstring gpu_renderer::Keyboard::View::GetChars() const {
+std::wstring Keyboard::View::GetChars() const {
   if (kbd_->chars_buffer_.empty()) return L"";
 
   std::wstring buffer_content{kbd_->chars_buffer_.begin(),
@@ -44,23 +44,19 @@ std::wstring gpu_renderer::Keyboard::View::GetChars() const {
   return buffer_content;
 }
 
-bool gpu_renderer::operator==(Keyboard::View const& lhs,
-                              Keyboard::View const& rhs) noexcept {
+bool operator==(Keyboard::View const& lhs, Keyboard::View const& rhs) noexcept {
   return lhs.kbd_ == rhs.kbd_;
 }
 
-bool gpu_renderer::operator!=(Keyboard::View const& lhs,
-                              Keyboard::View const& rhs) noexcept {
+bool operator!=(Keyboard::View const& lhs, Keyboard::View const& rhs) noexcept {
   return !(lhs == rhs);
 }
 
-gpu_renderer::Keyboard::Keyboard(std::size_t events_queue_size,
-                                 std::size_t chars_buffer_size)
+Keyboard::Keyboard(std::size_t events_queue_size, std::size_t chars_buffer_size)
     : events_queue_{boost::circular_buffer<Event>{events_queue_size}},
-      chars_buffer_{boost::circular_buffer<wchar_t>{chars_buffer_size}} 
-{}
+      chars_buffer_{boost::circular_buffer<wchar_t>{chars_buffer_size}} {}
 
-void gpu_renderer::Keyboard::EnableAutoRepeat() noexcept {
+void Keyboard::EnableAutoRepeat() noexcept {
 #ifdef LOG_KEYBOARD
   if (auto_repeating_) {
     try {
@@ -75,7 +71,7 @@ void gpu_renderer::Keyboard::EnableAutoRepeat() noexcept {
   auto_repeating_ = true;
 }
 
-void gpu_renderer::Keyboard::DisableAutoRepeat() noexcept {
+void Keyboard::DisableAutoRepeat() noexcept {
 #ifdef LOG_KEYBOARD
   if (auto_repeating_) {
     try {
@@ -90,11 +86,9 @@ void gpu_renderer::Keyboard::DisableAutoRepeat() noexcept {
   auto_repeating_ = false;
 }
 
-bool gpu_renderer::Keyboard::IsAutoRepeating() const noexcept {
-  return auto_repeating_;
-}
+bool Keyboard::IsAutoRepeating() const noexcept { return auto_repeating_; }
 
-void gpu_renderer::Keyboard::OnKeyDown(KeyCode key) {
+void Keyboard::OnKeyDown(KeyCode key) {
 #ifdef LOG_KEYBOARD
   try {
     std::wclog << L"Key 0x" << std::hex << key << L" pressed\n";
@@ -106,7 +100,7 @@ void gpu_renderer::Keyboard::OnKeyDown(KeyCode key) {
   events_queue_.push(std::make_pair(key, EventType::kPressed));
 }
 
-void gpu_renderer::Keyboard::OnKeyUp(KeyCode key) {
+void Keyboard::OnKeyUp(KeyCode key) {
 #ifdef LOG_KEYBOARD
   try {
     std::wclog << L"Key 0x" << std::hex << key << L" released\n";
@@ -118,7 +112,7 @@ void gpu_renderer::Keyboard::OnKeyUp(KeyCode key) {
   events_queue_.push(std::make_pair(key, EventType::kReleased));
 }
 
-void gpu_renderer::Keyboard::OnChar(wchar_t symbol) {
+void Keyboard::OnChar(wchar_t symbol) {
 #ifdef LOG_KEYBOARD
   try {
     std::wclog << L"Char '" << symbol << L"' typed\n";
@@ -129,14 +123,13 @@ void gpu_renderer::Keyboard::OnChar(wchar_t symbol) {
   chars_buffer_.push_back(symbol);
 }
 
-void gpu_renderer::Keyboard::ClearKeysState() noexcept { keys_state_.reset(); }
+void Keyboard::ClearKeysState() noexcept { keys_state_.reset(); }
 
-void gpu_renderer::Keyboard::ClearEventsQueue() {
+void Keyboard::ClearEventsQueue() {
   std::queue<Event, boost::circular_buffer<Event>> empty_events_queue{
       boost::circular_buffer<Event>{events_queue_._Get_container().capacity()}};
   events_queue_.swap(empty_events_queue);
 }
 
-void gpu_renderer::Keyboard::ClearCharsBuffer() noexcept {
-  chars_buffer_.clear();
-}
+void Keyboard::ClearCharsBuffer() noexcept { chars_buffer_.clear(); }
+}  // namespace gpu_renderer::input

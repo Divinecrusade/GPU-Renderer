@@ -1,6 +1,7 @@
 ﻿#include "Canvas.hpp"
 
-gpu_renderer::Canvas::Canvas(CachedDC& window_class, LPCWSTR lpszWindowName,
+namespace gpu_renderer::window {
+Canvas::Canvas(CachedDC& window_class, LPCWSTR lpszWindowName,
                              int left_top_pos_x, int left_top_pos_y, 
                              int width, int height,
                              HINSTANCE hInstance)
@@ -18,7 +19,7 @@ gpu_renderer::Canvas::Canvas(CachedDC& window_class, LPCWSTR lpszWindowName,
              Window::kNoExtraStyle} 
 {}
 
-LRESULT gpu_renderer::Canvas::HandleMessage(UINT Msg, WPARAM wParam,
+LRESULT Canvas::HandleMessage(UINT Msg, WPARAM wParam,
                                             LPARAM lParam) noexcept {
   if (Msg == WM_CHAR) {
     return DefWindowProcW(GetHWND(), Msg, wParam, lParam);
@@ -26,3 +27,4 @@ LRESULT gpu_renderer::Canvas::HandleMessage(UINT Msg, WPARAM wParam,
     return Window::HandleMessage(Msg, wParam, lParam);
   }
 }
+}  // namespace gpu_renderer::window

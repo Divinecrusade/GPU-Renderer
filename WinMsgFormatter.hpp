@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-namespace gpu_renderer {
+namespace gpu_renderer::debug {
 struct WinMsgFormatter {
  private:
   static constexpr std::wstring_view kUnknownMessageName{L"UNKNOWN"};

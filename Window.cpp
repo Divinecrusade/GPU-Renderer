@@ -12,12 +12,13 @@
 #include "WinMsgFormatter.hpp"
 #endif  // LOG_WINDOW_MESSAGES
 
-unsigned gpu_renderer::Window::active_windows_count_{0u};
+namespace gpu_renderer::window {
+unsigned Window::active_windows_count_{0u};
 #ifdef _DEBUG
-bool gpu_renderer::Window::first_show_done_{false};
+bool Window::first_show_done_{false};
 #endif  // _DEBUG
 
-gpu_renderer::Window::Window(WindowClass const& window_class,
+Window::Window(WindowClass const& window_class,
                              LPCWSTR lpszWindowName, DWORD dwStyle, int x,
                              int y, int nWidth, int nHeight,
                              HINSTANCE hInstance, DWORD dwExStyle)
@@ -28,7 +29,7 @@ gpu_renderer::Window::Window(WindowClass const& window_class,
   assert(((void)"Window handler cannot be NULL", hwnd_ != NULL));
 }
 
-gpu_renderer::Window::~Window() noexcept {
+Window::~Window() noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
   if (DestroyWindow(hwnd_)) {
 #ifdef LOG_WINDOW
@@ -51,14 +52,14 @@ gpu_renderer::Window::~Window() noexcept {
 #endif  // LOG_WINDOW
 }
 
-void gpu_renderer::Window::Show() const noexcept {
+void Window::Show() const noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
   assert(((void)"Window must be showed first with wWinaMain nCmdShow param",
           first_show_done_));
   std::ignore = ShowWindow(hwnd_, SW_SHOW);
 }
 
-void gpu_renderer::Window::Show(int nCmdShow) const noexcept {
+void Window::Show(int nCmdShow) const noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
 #ifdef _DEBUG
   if (first_show_done_) {
@@ -79,14 +80,14 @@ void gpu_renderer::Window::Show(int nCmdShow) const noexcept {
 #endif  // _DEBUG
 }
 
-void gpu_renderer::Window::Hide() const noexcept {
+void Window::Hide() const noexcept {
   assert(((void)"Window must be showed first with wWinaMain nCmdShow param",
           first_show_done_));
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
   std::ignore = ShowWindow(hwnd_, SW_HIDE);
 }
 
-void gpu_renderer::Window::Enable() const noexcept {
+void Window::Enable() const noexcept {
   if (BOOL const was_disabled{EnableWindow(hwnd_, TRUE)}; !was_disabled) {
 #ifdef LOG_WINDOW
     try {
@@ -99,7 +100,7 @@ void gpu_renderer::Window::Enable() const noexcept {
   }
 }
 
-void gpu_renderer::Window::Disable() const noexcept {
+void Window::Disable() const noexcept {
   if (BOOL const was_disabled{EnableWindow(hwnd_, FALSE)}; was_disabled) {
 #ifdef LOG_WINDOW
     try {
@@ -112,27 +113,27 @@ void gpu_renderer::Window::Disable() const noexcept {
   }
 }
 
-bool gpu_renderer::Window::IsEnabled() const noexcept {
+bool Window::IsEnabled() const noexcept {
   return IsWindowEnabled(hwnd_);
 }
 
-bool gpu_renderer::Window::IsShown() const noexcept {
+bool Window::IsShown() const noexcept {
   return IsWindowVisible(hwnd_);
 }
 
-gpu_renderer::Keyboard::View gpu_renderer::Window::GetKeyboard() noexcept {
+Keyboard::View Window::GetKeyboard() noexcept {
   return kbd_;
 }
 
-gpu_renderer::Mouse::View gpu_renderer::Window::GetMouse() noexcept { 
+Mouse::View Window::GetMouse() noexcept { 
   return mse_; 
 }
 
-WNDPROC gpu_renderer::Window::GetlpfnWndProc() noexcept {
+WNDPROC Window::GetlpfnWndProc() noexcept {
   return SetupWindowProcW;
 }
 
-HWND gpu_renderer::Window::InitializeWindow(Window* window_instance, 
+HWND Window::InitializeWindow(Window* window_instance, 
                                             LPCWSTR lpClassName,
                                             LPCWSTR lpszWindowName,
                                             DWORD dwStyle, int x, int y,
@@ -201,7 +202,7 @@ HWND gpu_renderer::Window::InitializeWindow(Window* window_instance,
   return hwnd;
 }
 
-LRESULT WINAPI gpu_renderer::Window::SetupWindowProcW(
+LRESULT WINAPI Window::SetupWindowProcW(
     _In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam,
     _In_ LPARAM lParam) noexcept {
   if (Msg == WM_CREATE) {
@@ -243,13 +244,13 @@ LRESULT WINAPI gpu_renderer::Window::SetupWindowProcW(
   return DefWindowProcW(hWnd, Msg, wParam, lParam);
 }
 
-LRESULT WINAPI gpu_renderer::Window::DisptachWindowProcW(
+LRESULT WINAPI Window::DisptachWindowProcW(
     _In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam,
     _In_ LPARAM lParam) noexcept {
 #ifdef LOG_WINDOW_MESSAGES
   try {
     std::wclog << L"Dispatcher get windows message...\n";
-    std::wclog << WinMsgFormatter{}(Msg, wParam, lParam) << "\n";
+    std::wclog << debug::WinMsgFormatter{}(Msg, wParam, lParam) << "\n";
   } catch (...) {
     OutputDebugStringW(L"Exception raised in log Window DisptachWindowProcW\n");
   }
@@ -271,7 +272,7 @@ LRESULT WINAPI gpu_renderer::Window::DisptachWindowProcW(
   return window_instance->HandleMessage(Msg, wParam, lParam);
 }
 
-gpu_renderer::Window::Window(std::size_t keyboard_events_queue_size,
+Window::Window(std::size_t keyboard_events_queue_size,
                              std::size_t keyboard_chars_buffer_size,
                              std::size_t mouse_events_queue_size,
                              WindowClass const& window_class,
@@ -288,7 +289,7 @@ gpu_renderer::Window::Window(std::size_t keyboard_events_queue_size,
   assert(((void)"Window handler cannot be NULL", hwnd_ != NULL));
 }
 
-LRESULT gpu_renderer::Window::HandleMessage(UINT Msg, WPARAM wParam,
+LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam,
                                             LPARAM lParam) noexcept {
   static constexpr auto kPreviousKeyStateMask{
       0b1000000000000000000000000000000};
@@ -535,20 +536,21 @@ LRESULT gpu_renderer::Window::HandleMessage(UINT Msg, WPARAM wParam,
   return DefWindowProcW(hwnd_, Msg, wParam, lParam);
 }
 
-HWND gpu_renderer::Window::GetHWND() const noexcept { 
+HWND Window::GetHWND() const noexcept { 
   return hwnd_; 
 }
 
-void gpu_renderer::Window::IncreaseCounterOfActiveWindows(
+void Window::IncreaseCounterOfActiveWindows(
     unsigned delta) noexcept {
   active_windows_count_ += delta;
 }
 
-void gpu_renderer::Window::DecreaseCounterOfActiveWindows(
+void Window::DecreaseCounterOfActiveWindows(
     unsigned delta) noexcept {
   active_windows_count_ -= delta;
 }
 
-unsigned gpu_renderer::Window::GetCountOfActiveWindows() noexcept {
+unsigned Window::GetCountOfActiveWindows() noexcept {
   return active_windows_count_;
 }
+}  // namespace gpu_renderer::window

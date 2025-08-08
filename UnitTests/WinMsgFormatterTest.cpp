@@ -2,8 +2,8 @@
 
 #include "WinMsgFormatter.hpp"
 
-namespace debug_loggin {
-using gpu_renderer::WinMsgFormatter;
+namespace debug_logging {
+using gpu_renderer::debug::WinMsgFormatter;
 
 class WinMsgFormatterTest : public ::testing::Test {
  protected:

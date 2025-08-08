@@ -1,22 +1,56 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="WinMsgFormatterTest.cpp" />
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="..\WindowClass.cpp" />
-    <ClCompile Include="WindowClassTest.cpp" />
-    <ClCompile Include="..\WinError.cpp" />
-    <ClCompile Include="WindowTest.cpp" />
-    <ClCompile Include="..\Window.cpp" />
-    <ClCompile Include="..\Keyboard.cpp" />
-    <ClCompile Include="KeyboardTest.cpp" />
-    <ClCompile Include="..\Mouse.cpp" />
-    <ClCompile Include="MouseTest.cpp" />
+    <ClCompile Include="KeyboardTest.cpp">
+      <Filter>input_handling</Filter>
+    </ClCompile>
+    <ClCompile Include="MouseTest.cpp">
+      <Filter>input_handling</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowClassTest.cpp">
+      <Filter>window_manipulating</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowTest.cpp">
+      <Filter>window_manipulating</Filter>
+    </ClCompile>
+    <ClCompile Include="WinMsgFormatterTest.cpp">
+      <Filter>debug_logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Mouse.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Keyboard.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Window.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\WindowClass.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\WinError.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="debug_logging">
+      <UniqueIdentifier>{1ca7e3d7-e869-4dcb-9688-13361c35d781}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="input_handling">
+      <UniqueIdentifier>{593394dc-1415-4f79-a8b3-f043ac86d0d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="window_manipulating">
+      <UniqueIdentifier>{ea428487-76a1-4121-8a5f-c104b998775e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы">
+      <UniqueIdentifier>{54bc212b-9176-4c29-b4c3-26f9d120e36d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

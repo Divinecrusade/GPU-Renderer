@@ -5,7 +5,7 @@
 #include "OptimisedWindowsHeader.hpp"
 #include "Window.hpp"
 
-namespace gpu_renderer {
+namespace gpu_renderer::window {
 class Canvas : public Window {
  private:
   static constexpr DWORD kFrameWithMinimize{WS_MINIMIZEBOX | WS_CAPTION |

@@ -3,7 +3,7 @@
 
 #include "WindowClass.hpp"
 
-namespace gpu_renderer {
+namespace gpu_renderer::window {
 class CachedDC : public WindowClass {
  private:
   static constexpr LPCWSTR kClassName{L"Cached DC"};

@@ -3,22 +3,23 @@
 #include <algorithm>
 #include <iostream>
 
-gpu_renderer::Mouse::View::View(Mouse& mse) noexcept : mse_{&mse} {}
+namespace gpu_renderer::input {
+Mouse::View::View(Mouse& mse) noexcept : mse_{&mse} {}
 
-bool gpu_renderer::Mouse::View::IsLeftButtonPressed() const noexcept {
+bool Mouse::View::IsLeftButtonPressed() const noexcept {
   return mse_->left_button_pressed_;
 }
 
-bool gpu_renderer::Mouse::View::IsRightButtonPressed() const noexcept {
+bool Mouse::View::IsRightButtonPressed() const noexcept {
   return mse_->right_button_pressed_;
 }
 
-bool gpu_renderer::Mouse::View::IsInWindow() const noexcept { 
+bool Mouse::View::IsInWindow() const noexcept { 
   return mse_->in_window_; 
 }
 
-std::optional<gpu_renderer::Mouse::Event>
-gpu_renderer::Mouse::View::GetOldestEvent() const {
+std::optional<Mouse::Event>
+Mouse::View::GetOldestEvent() const {
   if (mse_->events_queue_.empty()) return std::nullopt;
 
   Event const key_event{std::move(mse_->events_queue_.front())};
@@ -26,20 +27,20 @@ gpu_renderer::Mouse::View::GetOldestEvent() const {
   return key_event;
 }
 
-bool gpu_renderer::operator==(gpu_renderer::Mouse::View const& lhs, 
-                              gpu_renderer::Mouse::View const& rhs) noexcept {
+bool operator==(Mouse::View const& lhs, 
+                              Mouse::View const& rhs) noexcept {
   return lhs.mse_ == rhs.mse_;
 }
 
-bool gpu_renderer::operator!=(gpu_renderer::Mouse::View const& lhs, 
-                              gpu_renderer::Mouse::View const& rhs) noexcept {
+bool operator!=(Mouse::View const& lhs, 
+                              Mouse::View const& rhs) noexcept {
   return !(lhs == rhs);
 }
 
-gpu_renderer::Mouse::Mouse(std::size_t events_queue_size)
+Mouse::Mouse(std::size_t events_queue_size)
     : events_queue_{boost::circular_buffer<Event>{events_queue_size}} {}
 
-void gpu_renderer::Mouse::OnLButtonDown(LPARAM lParam) {
+void Mouse::OnLButtonDown(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
@@ -54,7 +55,7 @@ void gpu_renderer::Mouse::OnLButtonDown(LPARAM lParam) {
   left_button_pressed_ = true;
 }
 
-void gpu_renderer::Mouse::OnLButtonUp(LPARAM lParam) {
+void Mouse::OnLButtonUp(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
@@ -70,7 +71,7 @@ void gpu_renderer::Mouse::OnLButtonUp(LPARAM lParam) {
   left_button_pressed_ = false;
 }
 
-void gpu_renderer::Mouse::OnRButtonDown(LPARAM lParam) {
+void Mouse::OnRButtonDown(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
@@ -86,7 +87,7 @@ void gpu_renderer::Mouse::OnRButtonDown(LPARAM lParam) {
   right_button_pressed_ = true;
 }
 
-void gpu_renderer::Mouse::OnRButtonUp(LPARAM lParam) {
+void Mouse::OnRButtonUp(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
@@ -102,7 +103,7 @@ void gpu_renderer::Mouse::OnRButtonUp(LPARAM lParam) {
   right_button_pressed_ = false;
 }
 
-void gpu_renderer::Mouse::OnMove(LPARAM lParam) {
+void Mouse::OnMove(LPARAM lParam) {
 #ifdef LOG_MOUSE
   auto const pos{MAKEPOINTS(lParam)};
   try {
@@ -116,7 +117,7 @@ void gpu_renderer::Mouse::OnMove(LPARAM lParam) {
   events_queue_.push(std::make_pair(MAKEPOINTS(lParam), EventType::kMove));
 }
 
-void gpu_renderer::Mouse::OnWheel(LPARAM lParam, WPARAM wParam) {
+void Mouse::OnWheel(LPARAM lParam, WPARAM wParam) {
   auto const pos{MAKEPOINTS(lParam)};
   accumulated_wheel_delta_ += GET_WHEEL_DELTA_WPARAM(wParam);
 #ifdef LOG_MOUSE
@@ -170,7 +171,7 @@ void gpu_renderer::Mouse::OnWheel(LPARAM lParam, WPARAM wParam) {
 #endif  // LOG_MOUSE
 }
 
-void gpu_renderer::Mouse::OnHoverWindow(LPARAM lParam) {
+void Mouse::OnHoverWindow(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
@@ -185,7 +186,7 @@ void gpu_renderer::Mouse::OnHoverWindow(LPARAM lParam) {
   in_window_ = true;
 }
 
-void gpu_renderer::Mouse::OnLeaveWindow(LPARAM lParam) {
+void Mouse::OnLeaveWindow(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
@@ -200,13 +201,14 @@ void gpu_renderer::Mouse::OnLeaveWindow(LPARAM lParam) {
   in_window_ = false;
 }
 
-void gpu_renderer::Mouse::ClearEventsQueue() {
+void Mouse::ClearEventsQueue() {
   std::queue<Event, boost::circular_buffer<Event>> empty_events_queue{
       boost::circular_buffer<Event>{events_queue_._Get_container().capacity()}};
   events_queue_.swap(empty_events_queue);
 }
 
-void gpu_renderer::Mouse::ClearState() noexcept {
+void Mouse::ClearState() noexcept {
   left_button_pressed_ = right_button_pressed_ = in_window_ = false;
   accumulated_wheel_delta_ = 0;
 }
+}  // namespace gpu_renderer::input

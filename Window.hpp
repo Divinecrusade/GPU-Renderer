@@ -6,7 +6,9 @@
 #include "OptimisedWindowsHeader.hpp"
 #include "WindowClass.hpp"
 
-namespace gpu_renderer {
+namespace gpu_renderer::window {
+using namespace input;
+
 class Window {
  public:
   static constexpr DWORD kNoExtraStyle{NULL};
@@ -88,6 +90,6 @@ class Window {
   static bool first_show_done_;
 #endif  // _DEBUG
 };
-}  // namespace gpu_renderer
+}  // namespace gpu_renderer::window
 
 #endif  // !WINDOW_HPP
