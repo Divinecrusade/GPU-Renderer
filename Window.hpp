@@ -8,6 +8,7 @@
 
 namespace gpu_renderer::window {
 using namespace input;
+using ExitCode = int;
 
 class Window {
  public:
@@ -16,6 +17,13 @@ class Window {
  private:
   static constexpr HWND kNoParent{NULL};
   static constexpr HMENU kNoMenu{NULL};
+
+  static constexpr HWND kAllWindows{NULL};
+  static constexpr UINT kNoMinRangeFilterMsg{NULL};
+  static constexpr UINT kNoMaxRangeFilterMsg{NULL};
+  static constexpr auto ErrorHappened = [](BOOL result) {
+    return result == -1;
+  };
 
  public:
   Window() = delete;
@@ -46,7 +54,8 @@ class Window {
 
   [[nodiscard]] static WNDPROC GetlpfnWndProc() noexcept;
 
-  static int LockInMessageQueue();
+  static ExitCode LockInMessageQueue();
+  static std::optional<ExitCode> ProcessMessagesFromQueue();
 
  protected:
   Window(std::size_t keyboard_events_queue_size,

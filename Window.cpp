@@ -130,19 +130,14 @@ Mouse::View Window::GetMouse() noexcept {
 }
 
 WNDPROC Window::GetlpfnWndProc() noexcept {
-  return SetupWindowProcW; }
+  return SetupWindowProcW; 
+}
 
-int Window::LockInMessageQueue() { 
-  static constexpr HWND ALL_WINDOWS{NULL};
-  static constexpr UINT NO_MIN_RANGE_FILTER_MSG{NULL};
-  static constexpr UINT NO_MAX_RANGE_FILTER_MSG{NULL};
-  static constexpr auto ErrorHappened = [](BOOL result) {
-    return result == -1;
-  };
-  
+
+int Window::LockInMessageQueue() {  
   MSG msg{};
   while (auto const operation_done{GetMessageW(
-      &msg, ALL_WINDOWS, NO_MIN_RANGE_FILTER_MSG, NO_MAX_RANGE_FILTER_MSG)}) {
+      &msg, kAllWindows, kNoMinRangeFilterMsg, kNoMaxRangeFilterMsg)}) {
     if (ErrorHappened(operation_done)) {
 #ifdef _DEBUG
       throw exception::WinError{__FILEW__, __LINE__, 
@@ -157,7 +152,20 @@ int Window::LockInMessageQueue() {
     }
   }
 
-  return gsl::narrow<int>(msg.wParam);
+  return gsl::narrow<ExitCode>(msg.wParam);
+}
+
+std::optional<ExitCode> Window::ProcessMessagesFromQueue() {
+  static MSG msg{};
+
+  while (PeekMessageW(&msg, kAllWindows, kNoMinRangeFilterMsg,
+                      kNoMaxRangeFilterMsg, PM_REMOVE)) {
+    if (msg.message == WM_QUIT) {
+      return gsl::narrow<ExitCode>(msg.wParam);
+    }
+    std::ignore = DispatchMessageW(&msg); // TODO: check its return
+  }
+  return std::nullopt;
 }
 
 HWND Window::InitializeWindow(Window* window_instance, 

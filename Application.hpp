@@ -5,11 +5,6 @@
 
 namespace gpu_renderer {
 class Application final {
- public:
-  Application(HINSTANCE hInstance, int nCmdShow);
-
-  int Run() const;
-
  private:
   static constexpr int kWidth{640};
   static constexpr int kHeight{480};
@@ -17,9 +12,21 @@ class Application final {
   static constexpr int kLeftTopCornerPosY{30};
   static constexpr LPCWSTR kName{L"GPU-Renderer"};
 
+ public:
+  Application(HINSTANCE hInstance, int nCmdShow);
+
+  int Run();
+ 
+ private:
+  void Process();
+  void Update();
+  void Render();
+
  private:
   window::CachedDC window_class_;
   window::Canvas window_;
+
+  std::optional<window::ExitCode> exit_code_{};
 };
 }  // namespace gpu_renderer
 
