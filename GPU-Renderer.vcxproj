@@ -184,6 +184,7 @@
     <ClInclude Include="CachedDC.hpp" />
     <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="Console.hpp" />
+    <ClInclude Include="FrameTimer.hpp" />
     <ClInclude Include="Keyboard.hpp" />
     <ClInclude Include="Mouse.hpp" />
     <ClInclude Include="OptimisedBoostHeader.hpp" />

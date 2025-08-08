@@ -1,4 +1,5 @@
 #include "Application.hpp"
+#include "FrameTimer.hpp"
 
 namespace gpu_renderer {
 Application::Application(HINSTANCE hInstance, int nCmdShow)
@@ -6,17 +7,17 @@ Application::Application(HINSTANCE hInstance, int nCmdShow)
       window_{window_class_, kName,   kLeftTopCornerPosX, kLeftTopCornerPosY,
               kWidth,        kHeight, hInstance} {
   window_.Show(nCmdShow);
+  Process();
 }
 
 int Application::Run() {
-  while (!exit_code_) {
-    Process();
-    Update();
+  for (FrameTimer ft{}; !exit_code_; Process()) {
+    Update(ft.Mark());
     Render();
   }
   return *exit_code_;
 }
 void Application::Process() { exit_code_ = window_.ProcessMessagesFromQueue(); }
-void Application::Update() {}
+void Application::Update(FrameTimer::DeltaTime dt) {}
 void Application::Render() {}
 }  // namespace gpu_renderer

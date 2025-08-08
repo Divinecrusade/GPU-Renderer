@@ -2,6 +2,7 @@
 #define APPLICATION_HPP
 
 #include "Canvas.hpp"
+#include "FrameTimer.hpp"
 
 namespace gpu_renderer {
 class Application final {
@@ -13,13 +14,21 @@ class Application final {
   static constexpr LPCWSTR kName{L"GPU-Renderer"};
 
  public:
+  Application() = delete;
   Application(HINSTANCE hInstance, int nCmdShow);
+  Application(Application const&) = delete;
+  Application(Application&&) = delete;
+
+  Application& operator=(Application const&) = delete;
+  Application& operator=(Application&&) = delete;
+
+  ~Application() = default;
 
   int Run();
  
  private:
   void Process();
-  void Update();
+  void Update(FrameTimer::DeltaTime dt);
   void Render();
 
  private:
