@@ -166,6 +166,9 @@
     <ClCompile Include="CachedDC.cpp" />
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Console.cpp" />
+    <ClCompile Include="CrtError.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -184,6 +187,7 @@
     <ClInclude Include="CachedDC.hpp" />
     <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="Console.hpp" />
+    <ClInclude Include="CrtError.hpp" />
     <ClInclude Include="FrameTimer.hpp" />
     <ClInclude Include="Keyboard.hpp" />
     <ClInclude Include="Mouse.hpp" />

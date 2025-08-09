@@ -11,6 +11,7 @@
 
 #include "OptimisedWindowsHeader.hpp"
 #include "WinError.hpp"
+#include "CrtError.hpp"
 
 namespace gpu_renderer::debug {
 void Console::InitStdStreams(std::wstring_view console_window_title) {
@@ -67,14 +68,23 @@ Console::Console(std::wstring_view console_window_title) {
     return op_status < 0;
   };
   if (SetModeFailed(_setmode(_fileno(stdout), _O_U8TEXT))) {
-    assert(((void)"Console out/log setmode failed",
-            true));  // TODO: replace with corresponding exception
-                     //       for errno
+#ifdef _DEBUG
+    throw exception::CrtError{__FILEW__, __LINE__, "stdout setmode failed",
+                              errno};
+#else
+    throw exception::CrtError{"Console (out and log streams) code page is not set correctly", 
+                              errno};
+#endif  // _DEBUG
   }
   if (SetModeFailed(_setmode(_fileno(stderr), _O_U8TEXT))) {
-    assert(((void)"Console err setmode failed",
-            true));  // TODO: replace with corresponding exception
-                     //       for errno
+#ifdef _DEBUG
+    throw exception::CrtError{__FILEW__, __LINE__,
+                              "stderr setmode failed", 
+                              errno};
+#else
+    throw exception::CrtError{"Console (err stream) code page is not set correctly",
+                              errno};
+#endif  // _DEBUG
   }
 
   std::ignore = std::ios::sync_with_stdio(true);

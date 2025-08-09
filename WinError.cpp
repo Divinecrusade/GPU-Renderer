@@ -40,7 +40,7 @@ std::wstring WinError::WhatHappened() const {
 #pragma warning(push)
 #pragma warning(disable : 26490)
   DWORD const format_result{FormatMessageW(
-      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+          FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
           FORMAT_MESSAGE_IGNORE_INSERTS,
       nullptr, error_code_, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
       reinterpret_cast<LPWSTR>(&lpMsgBuf), 0, nullptr)};

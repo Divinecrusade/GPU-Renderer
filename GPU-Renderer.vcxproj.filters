@@ -69,6 +69,9 @@
     <ClCompile Include="CachedDC.cpp">
       <Filter>Исходные файлы\window</Filter>
     </ClCompile>
+    <ClCompile Include="CrtError.cpp">
+      <Filter>Исходные файлы\exception</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
@@ -116,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="WindowClass.hpp">
       <Filter>Файлы заголовков\window</Filter>
+    </ClInclude>
+    <ClInclude Include="CrtError.hpp">
+      <Filter>Файлы заголовков\exception</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 ﻿#include "Application.hpp"
 #ifdef _DEBUG
 #include "Console.hpp"
+#include "CrtError.hpp"
 #endif  // DCSONSOLE
 #include "OptimisedWindowsHeader.hpp"
 #include "WinError.hpp"
@@ -15,15 +16,36 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                  _CRTDBG_CHECK_ALWAYS_DF);
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 #endif  // _DEBUG
-
   using gpu_renderer::exception::WinError;
-  using gpu_renderer::Application;
+#ifdef _DEBUG
+  using gpu_renderer::exception::CrtError;
   using gpu_renderer::debug::Console;
+
+  try {
+    Console::InitStdStreams(L"GPU-Renderer Debug Console");
+  } catch (WinError const& e) {
+    MessageBoxW(NULL, e.WhatHappened().c_str(), e.kTypeOfException.data(),
+                MB_OK | MB_ICONERROR);
+    return static_cast<int>(e.GetErrorCode());
+  } catch (CrtError const& e) {
+    MessageBoxW(NULL, e.WhatHappened().c_str(), e.kTypeOfException.data(),
+                MB_OK | MB_ICONERROR);
+    return static_cast<int>(e.GetErrorCode());
+  } catch (std::exception const& e) {
+    std::string const narrow{e.what()};
+    MessageBoxW(NULL, std::wstring{narrow.begin(), narrow.end()}.c_str(),
+                L"C++ standard exception", MB_OK | MB_ICONERROR);
+    return EXIT_FAILURE;
+  } catch (...) {
+    MessageBoxW(NULL, L"Something unexpected happened", L"Unknown error",
+                MB_OK | MB_ICONERROR);
+    return EXIT_FAILURE;
+  }
+#endif  // _DEBUG
+
+  using gpu_renderer::Application;
   int exit_code{};
   try {
-#ifdef _DEBUG
-    Console::InitStdStreams(L"GPU-Renderer Debug Console");
-#endif  // _DEBUG
     Application app{hInstance, nCmdShow};
     exit_code = app.Run();
   } catch (WinError const& e) {
