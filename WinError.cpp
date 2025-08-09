@@ -4,10 +4,10 @@
 #include <format>
 #include <iostream>
 
+namespace gpu_renderer::exception {
 #ifdef _DEBUG
-gpu_renderer::exception::WinError::WinError(wchar_t const* file, int line,
-                                            char const* message,
-                                            DWORD error_code)
+WinError::WinError(wchar_t const* file, int line, char const* message,
+                   DWORD error_code)
     : std::exception{message},
       file_{file},
       line_{line},
@@ -20,28 +20,21 @@ gpu_renderer::exception::WinError::WinError(wchar_t const* file, int line,
   assert(((void)"WinAPI error code cannot be 0", error_code_ != 0));
 }
 
-std::filesystem::path const&
-gpu_renderer::exception::WinError::InWhatFileThrowed() const noexcept {
+std::filesystem::path const& WinError::InWhatFileThrowed() const noexcept {
   return file_;
 }
 
-int gpu_renderer::exception::WinError::InWhatLineOfCodeThrowed()
-    const noexcept {
-  return line_;
-}
+int WinError::InWhatLineOfCodeThrowed() const noexcept { return line_; }
 #endif  // _DEBUG
 
-gpu_renderer::exception::WinError::WinError(char const* message,
-                                            DWORD error_code_) noexcept
+WinError::WinError(char const* message, DWORD error_code_) noexcept
     : exception{message}, error_code_{error_code_} {
   assert(((void)"WinAPI error code cannot be 0", error_code_ != NULL));
 }
 
-DWORD gpu_renderer::exception::WinError::GetErrorCode() const noexcept {
-  return error_code_;
-}
+DWORD WinError::GetErrorCode() const noexcept { return error_code_; }
 
-std::wstring gpu_renderer::exception::WinError::WhatHappened() const {
+std::wstring WinError::WhatHappened() const {
   LPWSTR lpMsgBuf{nullptr};
 
 #pragma warning(push)
@@ -86,3 +79,4 @@ std::wstring gpu_renderer::exception::WinError::WhatHappened() const {
                      static_cast<unsigned int>(error_code_), error_description);
 #endif  // _DEBUG
 }
+}  // namespace gpu_renderer::exception
