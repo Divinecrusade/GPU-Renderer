@@ -1,38 +1,30 @@
 ﻿#include "WinError.hpp"
 
 #include <cassert>
-#include <format>
 #include <iostream>
 
 namespace gpu_renderer::exception {
 #ifdef _DEBUG
 WinError::WinError(wchar_t const* file, int line, char const* message,
                    DWORD error_code)
-    : std::exception{message},
-      file_{file},
-      line_{line},
+    : SystemError{file, line, message},
       error_code_{error_code} {
-  assert(((void)"URL of file with code where exception throwed cannot be empty",
-          file != nullptr));
-  assert(((void)"Line of code where exception throwed cannot be equal of less "
-                "than zero",
-          line > 0));
   assert(((void)"WinAPI error code cannot be 0", error_code_ != 0));
 }
-
-std::filesystem::path const& WinError::InWhatFileThrowed() const noexcept {
-  return file_;
-}
-
-int WinError::InWhatLineOfCodeThrowed() const noexcept { return line_; }
 #endif  // _DEBUG
 
 WinError::WinError(char const* message, DWORD error_code_) noexcept
-    : exception{message}, error_code_{error_code_} {
-  assert(((void)"WinAPI error code cannot be 0", error_code_ != NULL));
+    : SystemError{message}, error_code_{error_code_} {
+  assert(((void)"WinAPI error code cannot be 0", error_code_ != 0));
 }
 
-DWORD WinError::GetErrorCode() const noexcept { return error_code_; }
+int WinError::GetErrorCode() const noexcept {
+  return error_code_;
+}
+
+std::wstring_view WinError::GetTypeOfException() const noexcept {
+  return kTypeOfException;
+}
 
 std::wstring WinError::WhatHappened() const {
   LPWSTR lpMsgBuf{nullptr};
@@ -66,17 +58,6 @@ std::wstring WinError::WhatHappened() const {
     error_description = L"Unknown error";
   }
 
-  std::string const narrow_what{what()};
-  std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
-
-#ifdef _DEBUG
-  return std::format(
-      L"[What] {}\n[Code] 0x{:08X}\n[Description] {}\n[File] {}\n[Line] {}",
-      wide_what, static_cast<unsigned int>(error_code_), error_description,
-      file_.wstring(), line_);
-#else
-  return std::format(L"[What] {}\n[Code] 0x{:08X}\n[Description] {}", wide_what,
-                     static_cast<unsigned int>(error_code_), error_description);
-#endif  // _DEBUG
+  return FormatErrorMessage(error_description);
 }
 }  // namespace gpu_renderer::exception

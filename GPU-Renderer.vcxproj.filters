@@ -72,6 +72,9 @@
     <ClCompile Include="CrtError.cpp">
       <Filter>Исходные файлы\exception</Filter>
     </ClCompile>
+    <ClCompile Include="SystemError.cpp">
+      <Filter>Исходные файлы\exception</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
@@ -121,6 +124,9 @@
       <Filter>Файлы заголовков\window</Filter>
     </ClInclude>
     <ClInclude Include="CrtError.hpp">
+      <Filter>Файлы заголовков\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemError.hpp">
       <Filter>Файлы заголовков\exception</Filter>
     </ClInclude>
   </ItemGroup>

@@ -171,6 +171,7 @@
     </ClCompile>
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Mouse.cpp" />
+    <ClCompile Include="SystemError.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowClass.cpp" />
     <ClCompile Include="WinError.cpp">
@@ -194,6 +195,7 @@
     <ClInclude Include="OptimisedBoostHeader.hpp" />
     <ClInclude Include="OptimisedWindowsHeader.hpp" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SystemError.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="WindowClass.hpp" />
     <ClInclude Include="WinError.hpp" />

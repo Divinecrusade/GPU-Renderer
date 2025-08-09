@@ -1,16 +1,12 @@
-﻿#ifndef CRT_ERROR
-#define CRT_ERROR
+﻿#ifndef CRT_ERROR_HPP
+#define CRT_ERROR_HPP
 
-#include <exception>
-#ifdef _DEBUG
-#include <filesystem>
-#endif  // _DEBUG
-#include <string>
-#include <string_view>
 #include <corecrt.h>
 
+#include "SystemError.hpp"
+
 namespace gpu_renderer::exception {
-class CrtError : public std::exception {
+class CrtError : public SystemError {
  public:
   static constexpr std::wstring_view kTypeOfException{L"C runtime library (CRT) error"};
 
@@ -18,22 +14,16 @@ class CrtError : public std::exception {
 #ifdef _DEBUG
   CrtError(wchar_t const* file, int line, char const* message,
            int error_code);
-  [[nodiscard]] std::filesystem::path const& InWhatFileThrowed() const noexcept;
-  [[nodiscard]] int InWhatLineOfCodeThrowed() const noexcept;
 #endif  // _DEBUG
   CrtError(char const* message, int error_code_) noexcept;
 
-  [[nodiscard]] int GetErrorCode() const noexcept;
-  [[nodiscard]] std::wstring WhatHappened() const;
+  [[nodiscard]] int GetErrorCode() const noexcept override;
+  [[nodiscard]] std::wstring_view GetTypeOfException() const noexcept override;
+  [[nodiscard]] std::wstring WhatHappened() const override;
 
  private:
-#ifdef _DEBUG
-  std::filesystem::path file_{};
-  int line_{};
-#endif  // _DEBUG
-
   int error_code_{};
 };
 }  // namespace gpu_renderer::exception
 
-#endif  // !CRT_ERROR
+#endif  // !CRT_ERROR_HPP
