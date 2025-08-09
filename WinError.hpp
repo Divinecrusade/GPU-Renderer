@@ -21,7 +21,10 @@ class WinError : public SystemError {
   [[nodiscard]] std::wstring WhatHappened() const override;
 
  private:
+#pragma warning(push)
+#pragma warning(disable : 4820)
   DWORD error_code_{};
+#pragma warning(pop)
 };
 }  // namespace gpu_renderer::exception
 

@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <gsl/gsl>
 
 namespace gpu_renderer::exception {
 #ifdef _DEBUG
@@ -19,7 +20,7 @@ WinError::WinError(char const* message, DWORD error_code_) noexcept
 }
 
 int WinError::GetErrorCode() const noexcept {
-  return error_code_;
+  return gsl::narrow_cast<int>(error_code_);
 }
 
 std::wstring_view WinError::GetTypeOfException() const noexcept {

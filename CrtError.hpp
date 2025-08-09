@@ -22,7 +22,10 @@ class CrtError : public SystemError {
   [[nodiscard]] std::wstring WhatHappened() const override;
 
  private:
+#pragma warning(push)
+#pragma warning(disable : 4820)
   int error_code_{};
+#pragma warning(pop)
 };
 }  // namespace gpu_renderer::exception
 
