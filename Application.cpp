@@ -1,4 +1,4 @@
-#include "Application.hpp"
+﻿#include "Application.hpp"
 #include "FrameTimer.hpp"
 
 namespace gpu_renderer {
@@ -17,7 +17,7 @@ int Application::Run() {
   }
   return *exit_code_;
 }
-void Application::Process() { exit_code_ = window_.ProcessMessagesFromQueue(); }
+void Application::Process() { exit_code_ = window_.ProcessMessagesFromQueue<false>(); }
 void Application::Update(FrameTimer::DeltaTime dt) {}
 void Application::Render() {}
 }  // namespace gpu_renderer

@@ -2,12 +2,10 @@
 
 #include <cassert>
 
-#include "WinError.hpp"
 #if defined(LOG_WINDOW_MESSAGES) || defined(LOG_WINDOW)
 #include <iostream>
 #endif  // LOG_WINDOW_MESSAGES || LOG_WINDOW
 
-#include <gsl/gsl>
 #ifdef LOG_WINDOW_MESSAGES
 #include "WinMsgFormatter.hpp"
 #endif  // LOG_WINDOW_MESSAGES
@@ -131,41 +129,6 @@ Mouse::View Window::GetMouse() noexcept {
 
 WNDPROC Window::GetlpfnWndProc() noexcept {
   return SetupWindowProcW; 
-}
-
-
-int Window::LockInMessageQueue() {  
-  MSG msg{};
-  while (auto const operation_done{GetMessageW(
-      &msg, kAllWindows, kNoMinRangeFilterMsg, kNoMaxRangeFilterMsg)}) {
-    if (ErrorHappened(operation_done)) {
-#ifdef _DEBUG
-      throw exception::WinError{__FILEW__, __LINE__, 
-                                "Handling message provokes error",
-                                GetLastError()};
-#else
-      throw exception::WinError{"Event goes wrong", GetLastError()};
-#endif  // _DEBUG
-    } else {
-      std::ignore = TranslateMessage(&msg); // TODO: check its return
-      std::ignore = DispatchMessageW(&msg); // TODO: check its return
-    }
-  }
-
-  return gsl::narrow<ExitCode>(msg.wParam);
-}
-
-std::optional<ExitCode> Window::ProcessMessagesFromQueue() {
-  static MSG msg{};
-
-  while (PeekMessageW(&msg, kAllWindows, kNoMinRangeFilterMsg,
-                      kNoMaxRangeFilterMsg, PM_REMOVE)) {
-    if (msg.message == WM_QUIT) {
-      return gsl::narrow<ExitCode>(msg.wParam);
-    }
-    std::ignore = DispatchMessageW(&msg); // TODO: check its return
-  }
-  return std::nullopt;
 }
 
 HWND Window::InitializeWindow(Window* window_instance, 

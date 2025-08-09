@@ -1,10 +1,13 @@
 ﻿#ifndef WINDOW_HPP
 #define WINDOW_HPP
 
+#include <gsl/gsl>
+
 #include "Keyboard.hpp"
 #include "Mouse.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "WindowClass.hpp"
+#include "WinError.hpp"
 
 namespace gpu_renderer::window {
 using namespace input;
@@ -54,8 +57,47 @@ class Window {
 
   [[nodiscard]] static WNDPROC GetlpfnWndProc() noexcept;
 
-  static ExitCode LockInMessageQueue();
-  static std::optional<ExitCode> ProcessMessagesFromQueue();
+  template<bool kTranslateMessages = true>
+  static int LockInMessageQueue() {
+    MSG msg{};
+    while (auto const operation_done{GetMessageW(
+        &msg, kAllWindows, kNoMinRangeFilterMsg, kNoMaxRangeFilterMsg)}) {
+      if (ErrorHappened(operation_done)) {
+#ifdef _DEBUG
+        throw exception::WinError{__FILEW__, __LINE__,
+                                  "Handling message provokes error",
+                                  GetLastError()};
+#else
+        throw exception::WinError{"Event goes wrong", GetLastError()};
+#endif  // _DEBUG
+      } else {
+        if constexpr (kTranslateMessages) {
+          std::ignore = TranslateMessage(&msg);
+        }
+        std::ignore = DispatchMessageW(&msg);
+      }
+    }
+
+    return gsl::narrow<ExitCode>(msg.wParam);
+  }
+
+  template <bool kTranslateMessages = true>
+  static std::optional<ExitCode> ProcessMessagesFromQueue() {
+    static MSG msg{};
+
+    while (PeekMessageW(&msg, kAllWindows, kNoMinRangeFilterMsg,
+                        kNoMaxRangeFilterMsg, PM_REMOVE)) {
+      if (msg.message == WM_QUIT) {
+        return gsl::narrow<ExitCode>(msg.wParam);
+      }
+
+      if constexpr (kTranslateMessages) {
+        std::ignore = TranslateMessage(&msg);
+      }
+      std::ignore = DispatchMessageW(&msg);
+    }
+    return std::nullopt;
+  }
 
  protected:
   Window(std::size_t keyboard_events_queue_size,
