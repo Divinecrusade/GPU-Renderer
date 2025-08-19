@@ -2,9 +2,7 @@
 #define WIN_MSG_FORMATTER_HPP
 #include <WinUser.h>
 
-#include <iomanip>
-#include <sstream>
-#include <string>
+#include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::debug {
 struct WinMsgFormatter {

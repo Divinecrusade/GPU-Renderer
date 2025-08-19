@@ -3,10 +3,9 @@
 #include "Console.hpp"
 #include "CrtError.hpp"
 #endif  // DCSONSOLE
+#include "OptimisedGslHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "WinError.hpp"
-
-#include <gsl/gsl>
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                     [[maybe_unused]] _In_opt_ HINSTANCE,

@@ -3,12 +3,7 @@
 #include <fcntl.h>
 #include <io.h>
 
-#include <cassert>
-#include <cstdio>
-#include <iostream>
-#include <optional>
-#include <string>
-
+#include "OptimisedStlHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "WinError.hpp"
 #include "CrtError.hpp"

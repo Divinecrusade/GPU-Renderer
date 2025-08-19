@@ -129,6 +129,12 @@
     <ClInclude Include="SystemError.hpp">
       <Filter>Файлы заголовков\exception</Filter>
     </ClInclude>
+    <ClInclude Include="OptimisedStlHeader.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="OptimisedGslheader.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GPU-Renderer.rc">

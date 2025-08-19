@@ -1,15 +1,8 @@
 ﻿#ifndef KEYBOARD_HPP
 #define KEYBOARD_HPP
 
-#include <bitset>
-#include <limits>
-#include <numeric>
-#include <optional>
-#include <queue>
-#include <string>
-#include <utility>
-
 #include "OptimisedBoostHeader.hpp"
+#include "OptimisedStlHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 
 namespace gpu_renderer::input {

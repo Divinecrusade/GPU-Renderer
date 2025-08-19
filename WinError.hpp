@@ -1,6 +1,7 @@
 ﻿#ifndef WIN_ERROR_HPP
 #define WIN_ERROR_HPP
 
+#include "OptimisedStlHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "SystemError.hpp"
 

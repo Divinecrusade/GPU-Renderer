@@ -1,8 +1,5 @@
 ﻿#include "SystemError.hpp"
 
-#include <cassert>
-#include <format>
-
 #include "OptimisedWindowsHeader.hpp"
 
 namespace gpu_renderer::exception {

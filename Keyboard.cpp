@@ -1,8 +1,7 @@
 ﻿#include "Keyboard.hpp"
 
-#include <cassert>
-#include <gsl/gsl>
-#include <iostream>
+#include "OptimisedGslHeader.hpp"
+#include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::input {
 Keyboard::View::View(Keyboard& kbd) noexcept : kbd_{&kbd} {}

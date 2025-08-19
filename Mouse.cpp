@@ -1,7 +1,6 @@
 ﻿#include "Mouse.hpp"
 
-#include <algorithm>
-#include <iostream>
+#include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::input {
 Mouse::View::View(Mouse& mse) noexcept : mse_{&mse} {}

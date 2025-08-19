@@ -1,9 +1,7 @@
 ﻿#ifndef WINDOW_CLASS_HPP
 #define WINDOW_CLASS_HPP
 
-#include <string>
-#include <unordered_map>
-
+#include "OptimisedStlHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 
 namespace gpu_renderer::window {

@@ -1,8 +1,7 @@
 ﻿#include "WinError.hpp"
 
-#include <cassert>
-#include <iostream>
-#include <gsl/gsl>
+#include "OptimisedGslheader.hpp"
+#include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::exception {
 #ifdef _DEBUG

@@ -1,7 +1,7 @@
 ﻿#ifndef CONSOLE_HPP
 #define CONSOLE_HPP
 
-#include <string_view>
+#include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::debug {
 class Console {

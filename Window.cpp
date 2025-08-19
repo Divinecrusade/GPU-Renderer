@@ -1,11 +1,8 @@
 ﻿#include "Window.hpp"
 
-#include <cassert>
-
-#if defined(LOG_WINDOW_MESSAGES) || defined(LOG_WINDOW)
-#include <iostream>
-#endif  // LOG_WINDOW_MESSAGES || LOG_WINDOW
-
+#include "OptimisedGslHeader.hpp"
+#include "OptimisedStlHeader.hpp"
+#include "WinError.hpp"
 #ifdef LOG_WINDOW_MESSAGES
 #include "WinMsgFormatter.hpp"
 #endif  // LOG_WINDOW_MESSAGES

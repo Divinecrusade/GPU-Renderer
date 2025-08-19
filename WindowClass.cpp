@@ -1,11 +1,7 @@
 ﻿#include "WindowClass.hpp"
 
-#include <cassert>
-
+#include "OptimisedStlHeader.hpp"
 #include "WinError.hpp"
-#ifdef LOG_WINDOW_CLASS
-#include <iostream>
-#endif  // LOG_WINDOW_CLASS
 
 namespace gpu_renderer::window {
 std::unordered_map<std::wstring, std::size_t, WindowClass::wstring_hash,

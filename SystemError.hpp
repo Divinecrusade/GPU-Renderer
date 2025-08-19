@@ -1,12 +1,7 @@
 ﻿#ifndef SYSTEM_ERROR_HPP
 #define SYSTEM_ERROR_HPP
 
-#include <exception>
-#ifdef _DEBUG
-#include <filesystem>
-#endif  // _DEBUG
-#include <string>
-#include <string_view>
+#include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::exception {
 class SystemError : public std::exception {

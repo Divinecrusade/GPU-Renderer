@@ -1,11 +1,8 @@
 ﻿#ifndef MOUSE_HPP
 #define MOUSE_HPP
 
-#include <utility>
-#include <optional>
-#include <queue>
-
 #include "OptimisedBoostHeader.hpp"
+#include "OptimisedStlHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 
 namespace gpu_renderer::input {
