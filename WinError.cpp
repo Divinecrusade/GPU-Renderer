@@ -52,7 +52,7 @@ std::wstring WinError::WhatHappened() const {
       }
     }
 #else
-    (void)LocalFree(lpMsgBuf);
+    std::ignore = LocalFree(lpMsgBuf);
 #endif  // _DEBUG
   } else {
     error_description = L"Unknown error";
