@@ -4,7 +4,6 @@
 #include "Keyboard.hpp"
 #include "Mouse.hpp"
 #include "OptimisedGslheader.hpp"
-#include "OptimisedWindowsHeader.hpp"
 #include "WindowClass.hpp"
 #include "WinError.hpp"
 

@@ -1,9 +1,10 @@
-#ifndef OPTIMISED_STL_HEADER_HPP
+﻿#ifndef OPTIMISED_STL_HEADER_HPP
 #define OPTIMISED_STL_HEADER_HPP
 
 #pragma warning(push)
 #pragma warning(disable : 4365 400)
 #include <atomic>
+#include <array>
 #include <bitset>
 #include <cassert>
 #include <chrono>

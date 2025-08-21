@@ -2,7 +2,7 @@
 #define CANVAS_HPP
 
 #include "CachedDC.hpp"
-#include "OptimisedWindowsHeader.hpp"
+#include "Graphics.hpp"
 #include "Window.hpp"
 
 namespace gpu_renderer::window {
@@ -25,6 +25,9 @@ class Canvas : public Window {
 
  protected:
   LRESULT HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept override;
+
+ public:
+  Graphics gfx;
 };
 }  // namespace gpu_renderer
 

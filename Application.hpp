@@ -1,4 +1,4 @@
-#ifndef APPLICATION_HPP
+﻿#ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
 #include "Canvas.hpp"
@@ -36,6 +36,8 @@ class Application final {
   window::Canvas window_;
 
   std::optional<window::ExitCode> exit_code_{};
+
+  float theta = 0.f;
 };
 }  // namespace gpu_renderer
 
