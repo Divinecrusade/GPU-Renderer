@@ -7,18 +7,23 @@ Application::Application(HINSTANCE hInstance, int nCmdShow)
       window_{window_class_, kName,   kLeftTopCornerPosX, kLeftTopCornerPosY,
               kWidth,        kHeight, hInstance} {
   window_.Show(nCmdShow);
-  Process();
 }
 
 int Application::Run() {
-  for (FrameTimer ft{}; !exit_code_; Process()) {
+  std::optional<window::ExitCode> exit_code{Process()};
+
+  for (FrameTimer ft{}; !exit_code; exit_code = Process()) {
     Update(ft.Mark());
     Render();
   }
-  return *exit_code_;
+
+  return *exit_code;
 }
 
-void Application::Process() { exit_code_ = window_.ProcessMessagesFromQueue<false>(); }
+std::optional<window::ExitCode> Application::Process() {
+  static constexpr bool kLockInQueue{false};
+  return window_.ProcessMessagesFromQueue<kLockInQueue>();
+}
 
 void Application::Update(FrameTimer::DeltaTime dt) {
   constexpr float kDeltaTheta{3.14f / 4.f};

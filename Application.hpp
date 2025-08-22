@@ -27,15 +27,13 @@ class Application final {
   int Run();
  
  private:
-  void Process();
+  [[nodiscard]] std::optional<window::ExitCode> Process();
   void Update(FrameTimer::DeltaTime dt);
   void Render();
 
  private:
   window::CachedDC window_class_;
   window::Canvas window_;
-
-  std::optional<window::ExitCode> exit_code_{};
 
   float theta = 0.f;
 };
