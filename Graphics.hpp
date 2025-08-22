@@ -8,7 +8,7 @@ namespace gpu_renderer {
 class Graphics final {
  public:
   Graphics() = delete;
-  Graphics(HWND hwnd) noexcept;
+  Graphics(HWND hwnd);
   Graphics(Graphics const&) = delete;
   Graphics(Graphics&&) = delete;
 

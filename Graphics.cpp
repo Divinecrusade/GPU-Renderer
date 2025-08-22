@@ -5,24 +5,17 @@
 #include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer {
-Graphics::Graphics(HWND hwnd) noexcept {
-  static constexpr IDXGIAdapter* kDefaultAdapter{nullptr};
-  static constexpr HMODULE kNoSoftwareRasterizer{NULL};
-  static constexpr UINT kNoRuntimeLayers{0u};
-  static constexpr D3D_FEATURE_LEVEL* kDefaultFeatureLevel{nullptr};
-  static constexpr UINT kUseDefaultNumberOfFeatures{0u};
+Graphics::Graphics(HWND hwnd) {
   static constexpr UINT kUseWindowDimension{0u};
   static constexpr UINT kUseDoubleBuffer{1u};
-  static constexpr D3D_FEATURE_LEVEL* kIgnoreFeatureLevelReturn{nullptr};
   static constexpr UINT kUseDeafultSwapChainBehaviorOptions{0u};
-
   DXGI_SWAP_CHAIN_DESC const swap_chain_conf{
       .BufferDesc = {.Width = kUseWindowDimension,
                      .Height = kUseWindowDimension,
-                     .RefreshRate = DXGI_RATIONAL{.Numerator = 0u, .Denominator = 0u},
+                     .RefreshRate =
+                         DXGI_RATIONAL{.Numerator = 0u, .Denominator = 0u},
                      .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
-                     .ScanlineOrdering =
-                         DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,
+                     .ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,
                      .Scaling = DXGI_MODE_SCALING_UNSPECIFIED},
       .SampleDesc = {.Count = 1, .Quality = 0},
       .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
@@ -32,6 +25,12 @@ Graphics::Graphics(HWND hwnd) noexcept {
       .SwapEffect = DXGI_SWAP_EFFECT_DISCARD,
       .Flags = kUseDeafultSwapChainBehaviorOptions};
 
+  static constexpr IDXGIAdapter* kDefaultAdapter{nullptr};
+  static constexpr HMODULE kNoSoftwareRasterizer{NULL};
+  static constexpr UINT kNoRuntimeLayers{0u};
+  static constexpr D3D_FEATURE_LEVEL* kDefaultFeatureLevel{nullptr};
+  static constexpr UINT kUseDefaultNumberOfFeatures{0u};
+  static constexpr D3D_FEATURE_LEVEL* kIgnoreFeatureLevelReturn{nullptr};
   std::ignore = D3D11CreateDeviceAndSwapChain(
       kDefaultAdapter, D3D_DRIVER_TYPE_HARDWARE, kNoSoftwareRasterizer,
       kNoRuntimeLayers, kDefaultFeatureLevel, kUseDefaultNumberOfFeatures,
@@ -43,13 +42,14 @@ Graphics::Graphics(HWND hwnd) noexcept {
 
   ID3D11Resource* back_buffer{nullptr};
   static constexpr UINT kBackBufferId{0u};
-  std::ignore =
-      swap_chain_->GetBuffer(kBackBufferId, __uuidof(ID3D11Resource),
-                             reinterpret_cast<void**>(&back_buffer));
+#pragma warning(push)
+#pragma warning(disable : 26490)
+  std::ignore = swap_chain_->GetBuffer(kBackBufferId, __uuidof(ID3D11Resource),
+                                       reinterpret_cast<void**>(&back_buffer));
+#pragma warning(pop)
   assert(back_buffer);
 
-  constexpr D3D11_RENDER_TARGET_VIEW_DESC const* kGiveAccessToAllMipmapLevels{
-      nullptr};
+  constexpr D3D11_RENDER_TARGET_VIEW_DESC const* kGiveAccessToAllMipmapLevels{nullptr};
   std::ignore = device_->CreateRenderTargetView(
       back_buffer, kGiveAccessToAllMipmapLevels, &target_);
   assert(target_);
@@ -61,10 +61,21 @@ Graphics::~Graphics() noexcept {
   assert(swap_chain_);
   assert(device_context_);
   assert(device_);
-  std::ignore = target_->Release();
-  std::ignore = swap_chain_->Release();
-  std::ignore = device_context_->Release();
-  std::ignore = device_->Release();
+  try {
+    std::ignore = target_->Release();
+    std::ignore = swap_chain_->Release();
+    std::ignore = device_context_->Release();
+    std::ignore = device_->Release();
+  } catch (...) {
+#ifdef LOG_GRAPHICS
+    try {
+      std::wcerr << L"Unknown exception happened in Graphics destructor\n";
+    } catch (...) {
+      OutputDebugStringW(
+          L"Unknown exception happened in Graphics destructor logging\n");
+    }
+#endif  // LOG_GRAPHICS
+  }
 }
 
 void Graphics::EndFrame() {
