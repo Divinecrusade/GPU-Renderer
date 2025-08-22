@@ -27,7 +27,7 @@ class Application final {
   int Run();
  
  private:
-  [[nodiscard]] std::optional<window::ExitCode> Process();
+  std::optional<window::ExitCode> Process();
   void Update(FrameTimer::DeltaTime dt);
   void Render();
 
