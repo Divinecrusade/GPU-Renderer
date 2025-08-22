@@ -2,10 +2,11 @@
 
 #pragma comment(lib, "d3d11")
 
-#include "OptimisedStlHeader.hpp"
-
 namespace gpu_renderer {
 Graphics::Graphics(HWND hwnd) {
+  assert(((void)"HWND cannot be null", hwnd != NULL));
+  [[assume(hwnd != NULL)]];
+
   static constexpr UINT kUseWindowDimension{0u};
   static constexpr UINT kUseDoubleBuffer{1u};
   static constexpr UINT kUseDeafultSwapChainBehaviorOptions{0u};
@@ -49,10 +50,12 @@ Graphics::Graphics(HWND hwnd) {
 #pragma warning(pop)
   assert(back_buffer);
 
-  constexpr D3D11_RENDER_TARGET_VIEW_DESC const* kGiveAccessToAllMipmapLevels{nullptr};
+  static constexpr D3D11_RENDER_TARGET_VIEW_DESC const*
+      kGiveAccessToAllMipmapLevels{nullptr};
   std::ignore = device_->CreateRenderTargetView(
       back_buffer, kGiveAccessToAllMipmapLevels, &target_);
   assert(target_);
+
   std::ignore = back_buffer->Release();
 }
 
@@ -84,8 +87,61 @@ void Graphics::EndFrame() {
   std::ignore =
       swap_chain_->Present(kNoSwapChainSync, kDefaultSwapChainPresention);
 }
-void Graphics::ClearBuffer(float r, float g, float b) {
-  std::array<float, 4u> c{r, g, b, 1.f};
-  device_context_->ClearRenderTargetView(target_, c.data());
+
+void Graphics::ClearBuffer(Color const& c) {
+  device_context_->ClearRenderTargetView(target_, &c);
 }
+
+Graphics::Color::Color(float r, float g, float b) noexcept
+    : encoded_{r, g, b, 1.f} {
+  assert(((void)"Color component must be normalised (0..1)",
+          (0.f <= r && r <= 1.f)));
+  [[assume((0.f <= r && r <= 1.f))]];
+  assert(((void)"Color component must be normalised (0..1)",
+          (0.f <= g && g <= 1.f)));
+  [[assume((0.f <= g && g <= 1.f))]];
+  assert(((void)"Color component must be normalised (0..1)",
+          (0.f <= b && b <= 1.f)));
+  [[assume((0.f <= b && b <= 1.f))]];
+}
+
+FLOAT const* Graphics::Color::operator&() const noexcept {
+  return encoded_.data();
+}
+
+#pragma warning(push)
+#pragma warning(disable : 26446)
+float Graphics::Color::GetR() const noexcept {
+  return encoded_[kIndexComponentR];
+}
+
+float Graphics::Color::GetG() const noexcept {
+  return encoded_[kIndexComponentG];
+}
+
+float Graphics::Color::GetB() const noexcept {
+  return encoded_[kIndexComponentB];
+}
+
+void Graphics::Color::SetR(float r) noexcept {
+  assert(((void)"Color component must be normalised (0..1)",
+          (0.f <= r && r <= 1.f)));
+  [[assume((0.f <= r && r <= 1.f))]];
+  encoded_[kIndexComponentR] = r;
+}
+
+void Graphics::Color::SetG(float g) noexcept {
+  assert(((void)"Color component must be normalised (0..1)",
+          (0.f <= g && g <= 1.f)));
+  [[assume((0.f <= g && g <= 1.f))]];
+  encoded_[kIndexComponentR] = g;
+}
+
+void Graphics::Color::SetB(float b) noexcept {
+  assert(((void)"Color component must be normalised (0..1)",
+          (0.f <= b && b <= 1.f)));
+  [[assume((0.f <= b && b <= 1.f))]];
+  encoded_[kIndexComponentR] = b;
+}
+#pragma warning(pop)
 }  // namespace gpu_renderer

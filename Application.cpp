@@ -17,13 +17,16 @@ int Application::Run() {
   }
   return *exit_code_;
 }
+
 void Application::Process() { exit_code_ = window_.ProcessMessagesFromQueue<false>(); }
+
 void Application::Update(FrameTimer::DeltaTime dt) {
   constexpr float kDeltaTheta{3.14f / 4.f};
   theta = std::fmodf(theta + kDeltaTheta * dt, 3.14f);
 }
+
 void Application::Render() { 
-  window_.gfx.ClearBuffer(std::sinf(theta), 1.f, 1.f);
+  window_.gfx.ClearBuffer({std::sinf(theta), 1.f, 1.f});
   window_.gfx.EndFrame(); 
 }
 }  // namespace gpu_renderer

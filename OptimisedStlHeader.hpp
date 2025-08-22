@@ -3,7 +3,6 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4365 400)
-#include <atomic>
 #include <array>
 #include <bitset>
 #include <cassert>

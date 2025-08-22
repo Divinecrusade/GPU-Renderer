@@ -1,4 +1,4 @@
-#ifndef OPTIMISED_GSL_HEADER
+﻿#ifndef OPTIMISED_GSL_HEADER
 #define OPTIMISED_GSL_HEADER
 
 #pragma warning(push)
