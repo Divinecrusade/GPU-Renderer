@@ -5,7 +5,7 @@
 namespace gpu_renderer {
 Graphics::Graphics(HWND hwnd) {
   assert(((void)"HWND cannot be null", hwnd != NULL));
-  [[assume(hwnd != NULL)]];
+  __assume(hwnd != NULL);
 
   static constexpr UINT kUseWindowDimension{0u};
   static constexpr UINT kUseDoubleBuffer{1u};
@@ -96,13 +96,13 @@ Graphics::Color::Color(float r, float g, float b) noexcept
     : encoded_{r, g, b, 1.f} {
   assert(((void)"Color component must be normalised (0..1)",
           (0.f <= r && r <= 1.f)));
-  [[assume((0.f <= r && r <= 1.f))]];
+  __assume((0.f <= r && r <= 1.f));
   assert(((void)"Color component must be normalised (0..1)",
           (0.f <= g && g <= 1.f)));
-  [[assume((0.f <= g && g <= 1.f))]];
+  __assume((0.f <= g && g <= 1.f));
   assert(((void)"Color component must be normalised (0..1)",
           (0.f <= b && b <= 1.f)));
-  [[assume((0.f <= b && b <= 1.f))]];
+  __assume((0.f <= b && b <= 1.f));
 }
 
 FLOAT const* Graphics::Color::operator&() const noexcept {
@@ -126,21 +126,21 @@ float Graphics::Color::GetB() const noexcept {
 void Graphics::Color::SetR(float r) noexcept {
   assert(((void)"Color component must be normalised (0..1)",
           (0.f <= r && r <= 1.f)));
-  [[assume((0.f <= r && r <= 1.f))]];
+  __assume((0.f <= r && r <= 1.f));
   encoded_[kIndexComponentR] = r;
 }
 
 void Graphics::Color::SetG(float g) noexcept {
   assert(((void)"Color component must be normalised (0..1)",
           (0.f <= g && g <= 1.f)));
-  [[assume((0.f <= g && g <= 1.f))]];
+  __assume((0.f <= g && g <= 1.f));
   encoded_[kIndexComponentR] = g;
 }
 
 void Graphics::Color::SetB(float b) noexcept {
   assert(((void)"Color component must be normalised (0..1)",
           (0.f <= b && b <= 1.f)));
-  [[assume((0.f <= b && b <= 1.f))]];
+  __assume((0.f <= b && b <= 1.f));
   encoded_[kIndexComponentR] = b;
 }
 #pragma warning(pop)
