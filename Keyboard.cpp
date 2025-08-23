@@ -7,7 +7,10 @@ namespace gpu_renderer::input {
 Keyboard::View::View(Keyboard& kbd) noexcept : kbd_{&kbd} {}
 
 bool Keyboard::View::IsKeyPressed(KeyCode key) const noexcept {
-  return gsl::at(kbd_->keys_state_, key);
+#pragma warning(push)
+#pragma warning(disable : 26446)
+  return kbd_->keys_state_[key];
+#pragma warning(pop)
 }
 
 bool Keyboard::View::IsKeyEventHappened() const noexcept {
@@ -59,11 +62,11 @@ void Keyboard::EnableAutoRepeat() noexcept {
 #ifdef LOG_KEYBOARD
   if (auto_repeating_) {
     try {
-      std::wclog << L"EnableAutoRepeat method called, but auto repeating is "
+      std::wcerr << L"EnableAutoRepeat method called, but auto repeating is "
                     L"already enabled\n";
-    } catch (...) {
-      OutputDebugStringW(
-          L"Exception raised in log Keyboard EnableAutoRepeat\n");
+    } 
+    catch (...) {
+      OutputDebugStringW(L"Exception raised in log Keyboard EnableAutoRepeat\n");
     }
   }
 #endif  // LOG_KEYBOARD
@@ -74,11 +77,11 @@ void Keyboard::DisableAutoRepeat() noexcept {
 #ifdef LOG_KEYBOARD
   if (auto_repeating_) {
     try {
-      std::wclog << L"DisableAutoRepeat method called, but auto repeating is "
+      std::wcerr << L"DisableAutoRepeat method called, but auto repeating is "
                     L"already disabled\n";
-    } catch (...) {
-      OutputDebugStringW(
-          L"Exception raised in log Keyboard DisableAutoRepeat\n");
+    } 
+    catch (...) {
+      OutputDebugStringW(L"Exception raised in log Keyboard DisableAutoRepeat\n");
     }
   }
 #endif  // LOG_KEYBOARD
@@ -91,7 +94,8 @@ void Keyboard::OnKeyDown(KeyCode key) {
 #ifdef LOG_KEYBOARD
   try {
     std::wclog << L"Key 0x" << std::hex << key << L" pressed\n";
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Keyboard OnKeyDown\n");
   }
 #endif  // LOG_KEYBOARD
@@ -103,7 +107,8 @@ void Keyboard::OnKeyUp(KeyCode key) {
 #ifdef LOG_KEYBOARD
   try {
     std::wclog << L"Key 0x" << std::hex << key << L" released\n";
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Keyboard OnKeyUp\n");
   }
 #endif  // LOG_KEYBOARD
@@ -115,7 +120,8 @@ void Keyboard::OnChar(wchar_t symbol) {
 #ifdef LOG_KEYBOARD
   try {
     std::wclog << L"Char '" << symbol << L"' typed\n";
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Keyboard OnChar\n");
   }
 #endif  // LOG_KEYBOARD
