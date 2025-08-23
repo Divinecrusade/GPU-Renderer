@@ -51,8 +51,8 @@ class Keyboard final {
 
  public:
   Keyboard() = delete;
-  Keyboard(std::size_t events_queue_size = kDefaultEventsQueueSize, 
-           std::size_t chars_buffer_size = kDefaultCharsBufferSize);
+  Keyboard(std::size_t events_queue_size, 
+           std::size_t chars_buffer_size);
   Keyboard(Keyboard const&) = delete;
   Keyboard(Keyboard&&) = delete;
 

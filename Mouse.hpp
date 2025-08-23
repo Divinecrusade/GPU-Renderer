@@ -57,7 +57,7 @@ class Mouse final {
 
  public:
   Mouse() = delete;
-  Mouse(std::size_t events_queue_size = kDefaultEventsQueueSize);
+  Mouse(std::size_t events_queue_size);
   Mouse(Mouse const&) = delete;
   Mouse(Mouse&&) = delete;
 
