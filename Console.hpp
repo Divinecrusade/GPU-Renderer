@@ -4,7 +4,7 @@
 #include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::debug {
-class Console {
+class Console final {
  public:
   static void InitStdStreams(std::wstring_view console_window_title);
 
