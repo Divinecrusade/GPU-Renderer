@@ -37,6 +37,9 @@
     <Filter Include="Файлы заголовков\window">
       <UniqueIdentifier>{249c4e5e-e2c9-4d65-9edb-f3cb3485b09c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы заголовков\lib">
+      <UniqueIdentifier>{f7062b9c-55a9-488f-96fd-7dad95cd05e7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -84,13 +87,7 @@
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="OptimisedWindowsHeader.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="OptimisedBoostHeader.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="WinError.hpp">
@@ -132,17 +129,23 @@
     <ClInclude Include="SystemError.hpp">
       <Filter>Файлы заголовков\exception</Filter>
     </ClInclude>
-    <ClInclude Include="OptimisedStlHeader.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="OptimisedGslheader.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="OptimisedBoostHeader.hpp">
+      <Filter>Файлы заголовков\lib</Filter>
+    </ClInclude>
     <ClInclude Include="OptimisedDirect3dHeader.hpp">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>Файлы заголовков\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="OptimisedGslheader.hpp">
+      <Filter>Файлы заголовков\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="OptimisedStlHeader.hpp">
+      <Filter>Файлы заголовков\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="OptimisedWindowsHeader.hpp">
+      <Filter>Файлы заголовков\lib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
