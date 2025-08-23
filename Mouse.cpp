@@ -26,18 +26,17 @@ Mouse::View::GetOldestEvent() const {
   return key_event;
 }
 
-bool operator==(Mouse::View const& lhs, 
-                              Mouse::View const& rhs) noexcept {
+bool operator==(Mouse::View const& lhs, Mouse::View const& rhs) noexcept {
   return lhs.mse_ == rhs.mse_;
 }
 
-bool operator!=(Mouse::View const& lhs, 
-                              Mouse::View const& rhs) noexcept {
+bool operator!=(Mouse::View const& lhs, Mouse::View const& rhs) noexcept {
   return !(lhs == rhs);
 }
 
 Mouse::Mouse(std::size_t events_queue_size)
-    : events_queue_{boost::circular_buffer<Event>{events_queue_size}} {}
+    : events_queue_{boost::circular_buffer<Event>{events_queue_size}} 
+{}
 
 void Mouse::OnLButtonDown(LPARAM lParam) {
 #ifdef LOG_MOUSE
@@ -45,12 +44,13 @@ void Mouse::OnLButtonDown(LPARAM lParam) {
     auto const pos{MAKEPOINTS(lParam)};
     std::wclog << L"Mouse left button pressed. Current position: (" 
                << pos.x << L", " << pos.y << L")\n";
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Mouse OnLButtonDown\n");
   }
 #endif  // LOG_MOUSE
-  events_queue_.push(
-      std::make_pair(MAKEPOINTS(lParam), EventType::kLeftButtonPressed));
+  events_queue_.push(std::make_pair(MAKEPOINTS(lParam), 
+                                    EventType::kLeftButtonPressed));
   left_button_pressed_ = true;
 }
 
@@ -59,14 +59,14 @@ void Mouse::OnLButtonUp(LPARAM lParam) {
   try {
     auto const pos{MAKEPOINTS(lParam)};
     std::wclog << L"Mouse left button released. Current position: (" 
-               << pos.x
-               << L", " << pos.y << L")\n";
-  } catch (...) {
+               << pos.x << L", " << pos.y << L")\n";
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Mouse OnLButtonUp\n");
   }
 #endif  // LOG_MOUSE
-  events_queue_.push(
-      std::make_pair(MAKEPOINTS(lParam), EventType::kLeftButtonReleased));
+  events_queue_.push(std::make_pair(MAKEPOINTS(lParam), 
+                                    EventType::kLeftButtonReleased));
   left_button_pressed_ = false;
 }
 
@@ -75,14 +75,14 @@ void Mouse::OnRButtonDown(LPARAM lParam) {
   try {
     auto const pos{MAKEPOINTS(lParam)};
     std::wclog << L"Mouse right button pressed. Current position: (" 
-               << pos.x
-               << L", " << pos.y << L")\n";
-  } catch (...) {
+               << pos.x << L", " << pos.y << L")\n";
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Mouse OnRButtonDown\n");
   }
 #endif  // LOG_MOUSE
-  events_queue_.push(
-      std::make_pair(MAKEPOINTS(lParam), EventType::kRightButtonPressed));
+  events_queue_.push(std::make_pair(MAKEPOINTS(lParam), 
+                                    EventType::kRightButtonPressed));
   right_button_pressed_ = true;
 }
 
@@ -91,14 +91,14 @@ void Mouse::OnRButtonUp(LPARAM lParam) {
   try {
     auto const pos{MAKEPOINTS(lParam)};
     std::wclog << L"Mouse right button released. Current position: (" 
-               << pos.x
-               << L", " << pos.y << L")\n";
-  } catch (...) {
+               << pos.x << L", " << pos.y << L")\n";
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Mouse OnRButtonUp\n");
   }
 #endif  // LOG_MOUSE
-  events_queue_.push(
-      std::make_pair(MAKEPOINTS(lParam), EventType::kRightButtonReleased));
+  events_queue_.push(std::make_pair(MAKEPOINTS(lParam), 
+                                    EventType::kRightButtonReleased));
   right_button_pressed_ = false;
 }
 
@@ -107,13 +107,14 @@ void Mouse::OnMove(LPARAM lParam) {
   auto const pos{MAKEPOINTS(lParam)};
   try {
     std::wclog << L"Mouse moved. Current position: (" 
-               << pos.x << L", " << pos.y
-               << L")\n";
-  } catch (...) {
+               << pos.x << L", " << pos.y << L")\n";
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Mouse OnMove\n");
   }
 #endif  // LOG_MOUSE
-  events_queue_.push(std::make_pair(MAKEPOINTS(lParam), EventType::kMove));
+  events_queue_.push(std::make_pair(MAKEPOINTS(lParam), 
+                                    EventType::kMove));
 }
 
 void Mouse::OnWheel(LPARAM lParam, WPARAM wParam) {
@@ -123,7 +124,8 @@ void Mouse::OnWheel(LPARAM lParam, WPARAM wParam) {
   try {
     std::wclog << L"Mouse wheeled. Accumulated delta: " << accumulated_wheel_delta_ 
                <<L"\nCurrent position: (" << pos.x << L", " << pos.y << L")\n";
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Mouse OnWheel\n");
   }
 #endif  // LOG_MOUSE
@@ -134,27 +136,30 @@ void Mouse::OnWheel(LPARAM lParam, WPARAM wParam) {
 #ifdef LOG_MOUSE
       try {
         std::wclog << L"Mouse wheel rolled down\n";
-      } catch (...) {
+      } 
+      catch (...) {
         OutputDebugStringW(L"Exception raised in log Mouse OnWheel\n");
       }
 #endif  // LOG_MOUSE
     while (accumulated_wheel_delta_ <= -WHEEL_DELTA) {
-      events_queue_.push(std::make_pair(pos, EventType::kWheelDown));
+           events_queue_.push(std::make_pair(pos, EventType::kWheelDown));
       accumulated_wheel_delta_ += WHEEL_DELTA;
 #ifdef LOG_MOUSE
       ++i;
 #endif  // LOG_MOUSE
     }
-  } else if (accumulated_wheel_delta_ > 0) {
+  } 
+  else if (accumulated_wheel_delta_ > 0) {
 #ifdef LOG_MOUSE
     try {
       std::wclog << L"Mouse wheel rolled up\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log Mouse OnWheel\n");
     }
 #endif  // LOG_MOUSE
     while (accumulated_wheel_delta_ >= WHEEL_DELTA) {
-      events_queue_.push(std::make_pair(pos, EventType::kWheelUp));
+           events_queue_.push(std::make_pair(pos, EventType::kWheelUp));
       accumulated_wheel_delta_ -= WHEEL_DELTA;
 #ifdef LOG_MOUSE
       ++i;
@@ -164,7 +169,8 @@ void Mouse::OnWheel(LPARAM lParam, WPARAM wParam) {
 #ifdef LOG_MOUSE
   try {
     std::wclog << L"Generated: " << i << L" events\n";
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Mouse OnWheel\n");
   }
 #endif  // LOG_MOUSE
@@ -174,14 +180,15 @@ void Mouse::OnHoverWindow(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
-    std::wclog << L"Mouse entered window. Current position: (" << pos.x << L", "
-               << pos.y << L")\n";
-  } catch (...) {
+    std::wclog << L"Mouse entered window. Current position: (" 
+               << pos.x << L", " << pos.y << L")\n";
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Mouse OnHoverWindow\n");
   }
 #endif  // LOG_MOUSE
-  events_queue_.push(
-      std::make_pair(MAKEPOINTS(lParam), EventType::kHoverWindow));
+  events_queue_.push(std::make_pair(MAKEPOINTS(lParam), 
+                                    EventType::kHoverWindow));
   in_window_ = true;
 }
 
@@ -191,12 +198,13 @@ void Mouse::OnLeaveWindow(LPARAM lParam) {
     auto const pos{MAKEPOINTS(lParam)};
     std::wclog << L"Mouse left window. Current position: (" 
                << pos.x << L", " << pos.y << L")\n";
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Mouse OnLeaveWindow\n");
   }
 #endif  // LOG_MOUSE
-  events_queue_.push(
-      std::make_pair(MAKEPOINTS(lParam), EventType::kLeaveWindow));
+  events_queue_.push(std::make_pair(MAKEPOINTS(lParam), 
+                                    EventType::kLeaveWindow));
   in_window_ = false;
 }
 

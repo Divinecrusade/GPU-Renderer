@@ -27,7 +27,7 @@ class Mouse final {
   };
   using Event = std::pair<POINTS, EventType>;
 
-  class View {
+  class View final {
    public:
     View() = delete;
     View(Mouse& mse) noexcept;
