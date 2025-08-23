@@ -5,7 +5,7 @@
 #include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::debug {
-struct WinMsgFormatter {
+struct WinMsgFormatter final {
  private:
   static constexpr std::wstring_view kUnknownMessageName{L"UNKNOWN"};
   static constexpr std::wstring_view kHexLiteral{L"0x"};
