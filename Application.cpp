@@ -9,7 +9,7 @@ Application::Application(HINSTANCE hInstance, int nCmdShow)
   window_.Show(nCmdShow);
 }
 
-int Application::Run() {
+window::ExitCode Application::Run() {
   std::optional<window::ExitCode> exit_code{Process()};
 
   for (FrameTimer ft{}; !exit_code; exit_code = Process()) {

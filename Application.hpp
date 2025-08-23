@@ -24,7 +24,7 @@ class Application final {
 
   ~Application() = default;
 
-  int Run();
+  window::ExitCode Run();
  
  private:
   std::optional<window::ExitCode> Process();
