@@ -15,12 +15,13 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
                          HICON hIconSm)
     : hInstance_{hInstance} {
   assert(((void)"Class name cannot be nullptr", lpszClassName != nullptr));
-  assert(((void)"Class name should not be empty",
-          std::wcslen(lpszClassName) > 0ull));
+  __assume(lpszClassName != nullptr);
   assert(((void)"Window procedure cannot be null", lpfnWndProc != nullptr));
+  __assume(lpfnWndProc != nullptr);
   assert(((void)"Instance handle cannot be null", hInstance != NULL));
+  __assume(hInstance != NULL);
 
-  auto const [it, _] = class_ref_counts_.try_emplace(lpszClassName, 0ull);
+  auto const [it, _]{class_ref_counts_.try_emplace(lpszClassName, 0ull)};
   class_name_ = it->first;
 
   assert(((void)"string_view must reference map key",
@@ -63,11 +64,12 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
       throw exception::WinError{"Class for window was not registered",
                                 GetLastError()};
 #endif  // _DEBUG
-    } else {
+    } 
 #ifdef LOG_WINDOW_CLASS
+    else {
       std::wclog << L"Class '" << class_name_ << L"' registered successfully\n";
-#endif  // LOG_WINDOW_CLASS
     }
+#endif  // LOG_WINDOW_CLASS
   }
 
   ++it->second;
@@ -79,24 +81,27 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
 }
 
 WindowClass::~WindowClass() noexcept {
-  assert(
-      ((void)"Class name must be valid in destructor", !class_name_.empty()));
+  assert(((void)"Class name must be valid in destructor", 
+         !class_name_.empty()));
+  __assume(!class_name_.empty());
 
   try {
-    if (auto const it = class_ref_counts_.find(class_name_);
-        it != class_ref_counts_.end()) {
+    if (auto const it{class_ref_counts_.find(class_name_)};
+        it != class_ref_counts_.end()) [[likely]] {
       assert(((void)"string_view must still reference map key",
               class_name_.data() == it->first.data()));
+      __assume(class_name_.data() == it->first.data());
       assert(((void)"Reference count must be positive before decrement",
               it->second > 0ull));
+      __assume(it->second > 0ull);
       --it->second;
 #ifdef LOG_WINDOW_CLASS
       std::wclog << L"Class '" << class_name_ << L"' ref count: " << it->second
                  << L"\n";
 #endif  // LOG_WINDOW_CLASS
 
-      if (it->second == 0) {
-        if (!UnregisterClassW(class_name_.data(), hInstance_)) {
+      if (it->second == 0ull) [[likely]] {
+        if (!UnregisterClassW(class_name_.data(), hInstance_)) [[unlikely]] {
 #ifdef LOG_WINDOW_CLASS
           std::wcerr << L"Class with name '" << class_name_
                      << L"' was not unregistered\n";
@@ -104,21 +109,24 @@ WindowClass::~WindowClass() noexcept {
 #endif  // LOG_WINDOW_CLASS
         }
 #ifdef LOG_WINDOW_CLASS
-        else {
+        else [[likely]] {
           std::wclog << L"Class '" << class_name_
                      << L"' unregistered successfully\n";
         }
 #endif  // LOG_WINDOW_CLASS
         assert(((void)"Reference count must be zero before map erase",
                 it->second == 0ull));
+        __assume(it->second == 0ull);
         class_ref_counts_.erase(it);
       }
-    } else {
+    } 
+    else [[unlikely]] {
       assert(((void)"Class name not found in reference count map during "
                     "destruction",
               false));
     }
-  } catch ([[maybe_unused]] std::exception const& e) {
+  } 
+  catch ([[maybe_unused]] std::exception const& e) {
 #ifdef LOG_WINDOW_CLASS
     try {
       std::string const narrow_what{e.what()};
@@ -126,7 +134,8 @@ WindowClass::~WindowClass() noexcept {
       std::wcerr << L"Exception raised during WindowClass "
                     L"destructor. What happened:"
                  << wide_what << "\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log WindowClass destructor\n");
     }
 #endif  // LOG_WINDOW_CLASS

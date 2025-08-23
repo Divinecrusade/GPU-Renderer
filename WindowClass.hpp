@@ -19,7 +19,7 @@ class WindowClass {
               HBRUSH hbrBackground, LPCWSTR lpszMenuName, LPCWSTR lpszClassName,
               HICON hIconSm);
   WindowClass(WindowClass&) = delete;
-  WindowClass(WindowClass&&) noexcept = delete;
+  WindowClass(WindowClass&&) = delete;
 
   WindowClass& operator=(WindowClass const&) = delete;
   WindowClass& operator=(WindowClass&&) = delete;
@@ -34,10 +34,15 @@ class WindowClass {
 
 #pragma warning(push)
 #pragma warning(disable : 4514)
-    [[nodiscard]] size_t operator()(std::wstring_view txt) const noexcept {
+    [[nodiscard]] std::size_t operator()(std::wstring_view txt) const noexcept {
       return std::hash<std::wstring_view>{}(txt);
     }
-    [[nodiscard]] size_t operator()(const std::wstring& txt) const noexcept {
+
+    [[nodiscard]] std::size_t operator()(wchar_t const* txt) const noexcept {
+      return this->operator()(std::wstring_view{txt});
+    }
+
+    [[nodiscard]] std::size_t operator()(const std::wstring& txt) const noexcept {
       return std::hash<std::wstring>{}(txt);
     }
 #pragma warning(pop)
