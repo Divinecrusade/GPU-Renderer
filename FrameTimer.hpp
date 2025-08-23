@@ -1,10 +1,10 @@
-#ifndef FRAME_TIMER_HPP
+﻿#ifndef FRAME_TIMER_HPP
 #define FRAME_TIMER_HPP
 
 #include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer {
-class FrameTimer {
+class FrameTimer final {
  public:
   using DeltaTime = float;
 
