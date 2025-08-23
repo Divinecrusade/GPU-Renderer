@@ -21,6 +21,10 @@ class CrtError : public SystemError {
   [[nodiscard]] std::wstring_view GetTypeOfException() const noexcept override;
   [[nodiscard]] std::wstring WhatHappened() const override;
 
+  constexpr static [[nodiscard]] bool OperationFailed(errno_t operation_result) noexcept {
+    return operation_result != 0;
+  }
+
  private:
 #pragma warning(push)
 #pragma warning(disable : 4820)

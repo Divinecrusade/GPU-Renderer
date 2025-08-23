@@ -321,7 +321,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam,
 #endif  // LOG_WINDOW
         PostQuitMessage(EXIT_SUCCESS);
       }
-      return 0;
+      return EXIT_SUCCESS;
     }
     case WM_KILLFOCUS: {
       kbd_.ClearKeysState();
@@ -342,7 +342,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam,
         OutputDebugStringW(L"Keyboard ClearEventsQueue raised exception\n");
       }
     } break;
-    case WM_KEYDOWN:
+    case WM_KEYDOWN: [[fallthrough]];
     case WM_SYSKEYDOWN: {
       if (!(lParam & kPreviousKeyStateMask) || kbd_.IsAutoRepeating()) {
         try {

@@ -18,11 +18,12 @@ void Console::InitStdStreams(std::wstring_view console_window_title) {
         << L"Called InitStdStreans but "
         << L"Std streams (wclog, wcout, wcerr, wcin) are already initialized";
   }
+  std_streams_initialized = true;
 #endif  // _DEBUG
 }
 
 Console::Console(std::wstring_view console_window_title) {
-  if (!AllocConsole()) {
+  if (!AllocConsole()) [[unlikely]] {
 #ifdef _DEBUG
     throw exception::WinError{__FILEW__, __LINE__, "Console wasn't allocated",
                               GetLastError()};
@@ -30,15 +31,54 @@ Console::Console(std::wstring_view console_window_title) {
     throw exception::WinError{"Console wasn't allocated", GetLastError()};
 #endif  // _DEBUG
   }
+
   FILE* cout_stream{nullptr};
-  std::ignore = freopen_s(&cout_stream, "CONOUT$", "w", stdout);
+  if (errno_t const operation_code_result{freopen_s(&cout_stream, "CONOUT$", "w", stdout)};
+      exception::CrtError::OperationFailed(operation_code_result))
+      [[unlikely]] {
+#ifdef _DEBUG
+    throw exception::CrtError{__FILEW__, __LINE__, "Cout stream wasn't reopened",
+                              operation_code_result};
+#else
+    throw exception::CrtError{"Console wasn't opened",
+                              operation_code_result};
+#endif  // _DEBUG
+  }
+  assert(((void)"Cout stream must be initialised", cout_stream != nullptr));
+  __assume(cout_stream != nullptr);
+
   FILE* cerr_stream{nullptr};
-  std::ignore = freopen_s(&cerr_stream, "CONOUT$", "w", stderr);
+  if (errno_t const operation_code_result{freopen_s(&cerr_stream, "CONOUT$", "w", stderr)};
+      exception::CrtError::OperationFailed(operation_code_result))
+      [[unlikely]] {
+#ifdef _DEBUG
+    throw exception::CrtError{__FILEW__, __LINE__,
+                              "Cerr stream wasn't reopened",
+                              operation_code_result};
+#else
+    throw exception::CrtError{"Console wasn't opened", operation_code_result};
+#endif  // _DEBUG
+  }
+  assert(((void)"Cout stream must be initialised", cerr_stream != nullptr));
+  __assume(cerr_stream != nullptr);
+
   FILE* cin_stream{nullptr};
-  std::ignore = freopen_s(&cin_stream, "CONIN$", "r", stdin);
+  if (errno_t const operation_code_result{freopen_s(&cin_stream, "CONIN$", "r", stdin)};
+      exception::CrtError::OperationFailed(operation_code_result))
+      [[unlikely]] {
+#ifdef _DEBUG
+    throw exception::CrtError{__FILEW__, __LINE__,
+                              "Cin stream wasn't reopened",
+                              operation_code_result};
+#else
+    throw exception::CrtError{"Console wasn't opened", operation_code_result};
+#endif  // _DEBUG
+  }
+  assert(((void)"Cin stream must be initialised", cin_stream != nullptr));
+  __assume(cin_stream != nullptr);
 
   static constexpr UINT kCpUnicode{65001u};
-  if (!SetConsoleOutputCP(kCpUnicode)) {
+  if (!SetConsoleOutputCP(kCpUnicode)) [[unlikely]] {
 #ifdef _DEBUG
     throw exception::WinError{__FILEW__, __LINE__,
                               "Console output code page was not set to Unicode",
@@ -48,7 +88,7 @@ Console::Console(std::wstring_view console_window_title) {
                               GetLastError()};
 #endif  // _DEBUG
   }
-  if (!SetConsoleCP(kCpUnicode)) {
+  if (!SetConsoleCP(kCpUnicode)) [[unlikely]] {
 #ifdef _DEBUG
     throw exception::WinError{__FILEW__, __LINE__,
                               "Console input code page was not set to Unicode",
@@ -62,7 +102,7 @@ Console::Console(std::wstring_view console_window_title) {
   static constexpr auto SetModeFailed = [](auto op_status) {
     return op_status < 0;
   };
-  if (SetModeFailed(_setmode(_fileno(stdout), _O_U8TEXT))) {
+  if (SetModeFailed(_setmode(_fileno(stdout), _O_U8TEXT))) [[unlikely]] {
 #ifdef _DEBUG
     throw exception::CrtError{__FILEW__, __LINE__, "stdout setmode failed",
                               errno};
@@ -71,7 +111,7 @@ Console::Console(std::wstring_view console_window_title) {
                               errno};
 #endif  // _DEBUG
   }
-  if (SetModeFailed(_setmode(_fileno(stderr), _O_U8TEXT))) {
+  if (SetModeFailed(_setmode(_fileno(stderr), _O_U8TEXT))) [[unlikely]] {
 #ifdef _DEBUG
     throw exception::CrtError{__FILEW__, __LINE__,
                               "stderr setmode failed", 
@@ -88,14 +128,14 @@ Console::Console(std::wstring_view console_window_title) {
   std::wcerr.clear();
   std::wclog.clear();
 
-  if (!SetConsoleTitleW(console_window_title.data())) {
+  if (!SetConsoleTitleW(console_window_title.data())) [[unlikely]] {
     std::wcerr << L"Console title was not set, error code: " << GetLastError()
                << "\n";
   }
 }
 
 Console::~Console() noexcept {
-  if (!FreeConsole()) {
+  if (!FreeConsole()) [[unlikely]] {
     OutputDebugStringW(L"Console wasn't freed because of error\n");
   }
 }
