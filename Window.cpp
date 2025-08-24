@@ -1,7 +1,5 @@
 ﻿#include "Window.hpp"
 
-#include "OptimisedGslHeader.hpp"
-#include "OptimisedStlHeader.hpp"
 #include "WinError.hpp"
 #ifdef LOG_WINDOW_MESSAGES
 #include "WinMsgFormatter.hpp"
@@ -18,19 +16,20 @@ Window::Window(WindowClass const& window_class,
                              int y, int nWidth, int nHeight,
                              HINSTANCE hInstance, DWORD dwExStyle)
     : width_{nWidth}, height_{nHeight} {
-  hwnd_ =
-      InitializeWindow(this, window_class.GetLpClassName(), lpszWindowName,
-                       dwStyle, x, y, width_, height_, hInstance, dwExStyle);
+  hwnd_ = InitializeWindow(this, window_class.GetLpClassName(), lpszWindowName,
+                           dwStyle, x, y, width_, height_, hInstance, dwExStyle);
   assert(((void)"Window handler cannot be NULL", hwnd_ != NULL));
 }
 
 Window::~Window() noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
+  __assume(hwnd_ != NULL);
   if (DestroyWindow(hwnd_)) {
 #ifdef LOG_WINDOW
     try {
       std::wclog << L"Window destroyed successfully\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log Window destructor\n");
     }
 #endif  // LOG_WINDOW
@@ -40,7 +39,8 @@ Window::~Window() noexcept {
     try {
       std::wcerr << L"Window destruction failed. " << L"Error code: "
                  << GetLastError() << L"\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log Window destructor\n");
     }
   }
@@ -49,6 +49,7 @@ Window::~Window() noexcept {
 
 void Window::Show() const noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
+  __assume(hwnd_ != NULL);
   assert(((void)"Window must be showed first with wWinaMain nCmdShow param",
           first_show_done_));
   std::ignore = ShowWindow(hwnd_, SW_SHOW);
@@ -56,13 +57,15 @@ void Window::Show() const noexcept {
 
 void Window::Show(int nCmdShow) const noexcept {
   assert(((void)"HWND cannot be null", hwnd_ != NULL));
+  __assume(hwnd_ != NULL);
 #ifdef _DEBUG
   if (first_show_done_) {
 #ifdef LOG_WINDOW
     try {
       std::wcerr << L"Warning: This overloaded option of Show called but "
                     L"application first show already occurred\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log Window Show\n");
     }
 #endif  // LOG_WINDOW
@@ -76,9 +79,10 @@ void Window::Show(int nCmdShow) const noexcept {
 }
 
 void Window::Hide() const noexcept {
+  assert(((void)"HWND cannot be null", hwnd_ != NULL));
+  __assume(hwnd_ != NULL);
   assert(((void)"Window must be showed first with wWinaMain nCmdShow param",
           first_show_done_));
-  assert(((void)"HWND cannot be null", hwnd_ != NULL));
   std::ignore = ShowWindow(hwnd_, SW_HIDE);
 }
 
@@ -88,7 +92,8 @@ void Window::Enable() const noexcept {
     try {
       std::wcerr
           << L"Enable method called, but window has been enabled already\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log Window Enable\n");
     }
 #endif  // LOG_WINDOW
@@ -99,9 +104,9 @@ void Window::Disable() const noexcept {
   if (BOOL const was_disabled{EnableWindow(hwnd_, FALSE)}; was_disabled) {
 #ifdef LOG_WINDOW
     try {
-      std::wcerr
-          << L"Disable method called, but window has been disabled already\n";
-    } catch (...) {
+      std::wcerr << L"Disable method called, but window has been disabled already\n";
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log Window Disable\n");
     }
 #endif  // LOG_WINDOW
@@ -129,25 +134,25 @@ WNDPROC Window::GetlpfnWndProc() noexcept {
 }
 
 HWND Window::InitializeWindow(Window* window_instance, 
-                                            LPCWSTR lpClassName,
-                                            LPCWSTR lpszWindowName,
-                                            DWORD dwStyle, int x, int y,
-                                            int nWidth, int nHeight,
-                                            HINSTANCE hInstance,
-                                            DWORD dwExStyle) {
+                              LPCWSTR lpClassName,
+                              LPCWSTR lpszWindowName,
+                              DWORD dwStyle, int x, int y,
+                              int nWidth, int nHeight,
+                              HINSTANCE hInstance,
+                              DWORD dwExStyle) {
   assert(((void)"Window name cannot be nullptr", lpszWindowName != nullptr));
+  __assume(lpszWindowName != nullptr);
   assert(((void)"Instance handle cannot be null", hInstance != NULL));
+  __assume(hInstance != NULL);
   assert(((void)"Width must be positive", nWidth > 0));
+  __assume(nWidth > 0);
   assert(((void)"Height must be positive", nHeight > 0));
+  __assume(nHeight > 0);
   assert(((void)"Current implementation of window doesn't support child window "
                 "type",
           ((dwStyle & WS_CHILD) != WS_CHILD)));
 
-  static constexpr auto WindowCreationFailed = [](HWND const& wnd) {
-    return wnd == NULL;
-  };
-
-  RECT window_pos{};
+  RECT window_pos{}; // TODO: Declaration = initialization
   window_pos.left = x;
   window_pos.right = window_pos.left + nWidth;
   window_pos.top = y;
@@ -157,22 +162,29 @@ HWND Window::InitializeWindow(Window* window_instance,
     try {
       std::wcerr << L"AdjustWindowRectEx failed during Window constructing,"
                  << L"error code: " << GetLastError() << "\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log Window constructor\n");
     }
 #endif  // LOG_WINDOW
   }
-  HWND const hwnd{CreateWindowExW(
-      dwExStyle, lpClassName, lpszWindowName, dwStyle,
-      window_pos.left, window_pos.top, window_pos.right - window_pos.left,
-      window_pos.bottom - window_pos.top, kNoParent, kNoMenu, hInstance, window_instance)};
-
-  if (WindowCreationFailed(hwnd)) {
+  HWND const hwnd{CreateWindowExW(dwExStyle, lpClassName, 
+                                  lpszWindowName, dwStyle,
+                                  window_pos.left, window_pos.top, 
+                                  window_pos.right - window_pos.left,
+                                  window_pos.bottom - window_pos.top, 
+                                  kNoParent, kNoMenu, hInstance, 
+                                  window_instance)};
+  static constexpr auto WindowCreationFailed = [](HWND const& wnd) {
+    return wnd == NULL;
+  };
+  if (WindowCreationFailed(hwnd)) /* TODO: Mb lambda make local if variable? */ {
 #ifdef LOG_WINDOW
     try {
       std::wcerr << L"Window creation failed\n";
       std::wcerr << L"Error code: " << GetLastError() << L"\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log Window constructor\n");
     }
 #endif  // LOG_WINDOW
@@ -190,48 +202,52 @@ HWND Window::InitializeWindow(Window* window_instance,
   try {
     std::wclog << L"Window '" << lpszWindowName << L"' of class '"
                << lpClassName << L"' created successfully\n";
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Window constructor\n");
   }
 #endif  // LOG_WINDOW
   return hwnd;
 }
 
-LRESULT WINAPI Window::SetupWindowProcW(
-    _In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam,
-    _In_ LPARAM lParam) noexcept {
+LRESULT WINAPI Window::SetupWindowProcW(_In_ HWND hWnd, _In_ UINT Msg, 
+                                        _In_ WPARAM wParam, _In_ LPARAM lParam) noexcept {
   if (Msg == WM_CREATE) {
 #ifdef LOG_WINDOW_MESSAGES
     try {
       std::wclog << L"Installing wndproc for new instance of Window...\n";
       std::wclog << debug::WinMsgFormatter{}(Msg, wParam, lParam) << "\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log Window SetupWindowProcW\n");
     }
 #endif  // LOG_WINDOW_MESSAGES
 #pragma warning(push)
 #pragma warning(disable : 26490)
-    CREATESTRUCTW const* const creation_params{
-        reinterpret_cast<CREATESTRUCTW const*>(lParam)};
+    CREATESTRUCTW const* const creation_params{reinterpret_cast<CREATESTRUCTW const*>(lParam)};
     assert(((void)"lParam must be a pointer to window creation struct",
             creation_params != nullptr));
-    Window* const window_instance{
-        static_cast<Window*>(creation_params->lpCreateParams)};
+    __assume(creation_params != nullptr);
+    // TODO: replace static_cast with reinterpret
+    Window* const window_instance{static_cast<Window*>(creation_params->lpCreateParams)};
     assert(((void)"Window creation struct must have the pointer to Window "
                   "class object",
             window_instance != nullptr));
-    std::ignore = SetWindowLongPtrW(
-        hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window_instance));
-    std::ignore = SetWindowLongPtrW(
-        hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(DisptachWindowProcW));
+    __assume(window_instance != nullptr);
+
+    std::ignore = SetWindowLongPtrW(hWnd, GWLP_USERDATA, 
+                                    reinterpret_cast<LONG_PTR>(window_instance));
+    std::ignore = SetWindowLongPtrW(hWnd, GWLP_WNDPROC, 
+                                    reinterpret_cast<LONG_PTR>(DisptachWindowProcW));
 #pragma warning(pop)
     ++active_windows_count_;
 #ifdef LOG_WINDOW
     try {
       std::wclog << L"Done installing wndproc for new instance of Window\n";
-      std::wclog << L"There're " << active_windows_count_
+      std::wclog << L"There're " << active_windows_count_ 
                  << L" active windows right now\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log Window SetupWindowProcW\n");
     }
 #endif  // LOG_WINDOW
@@ -239,28 +255,30 @@ LRESULT WINAPI Window::SetupWindowProcW(
   return DefWindowProcW(hWnd, Msg, wParam, lParam);
 }
 
-LRESULT WINAPI Window::DisptachWindowProcW(
-    _In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam,
-    _In_ LPARAM lParam) noexcept {
+LRESULT WINAPI Window::DisptachWindowProcW(_In_ HWND hWnd, _In_ UINT Msg, 
+                                           _In_ WPARAM wParam, _In_ LPARAM lParam) noexcept {
 #ifdef LOG_WINDOW_MESSAGES
   try {
     std::wclog << L"Dispatcher get windows message...\n";
     std::wclog << debug::WinMsgFormatter{}(Msg, wParam, lParam) << "\n";
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Window DisptachWindowProcW\n");
   }
 #endif  // LOG_WINDOW_MESSAGES
 #pragma warning(push)
 #pragma warning(disable : 26490)
-  Window* const window_instance{
-      reinterpret_cast<Window*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA))};
+  Window* const window_instance{reinterpret_cast<Window*>(GetWindowLongPtrW(hWnd, 
+                                                                            GWLP_USERDATA))};
 #pragma warning(pop)
   assert(((void)"Window data must have the pointer to Window class object",
           window_instance != nullptr));
+  __assume(window_instance != nullptr);
 #ifdef LOG_WINDOW_MESSAGES
   try {
     std::wclog << L"...forward this message to Window object\n";
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Window DisptachWindowProcW\n");
   }
 #endif  // LOG_WINDOW_MESSAGES
@@ -268,265 +286,214 @@ LRESULT WINAPI Window::DisptachWindowProcW(
 }
 
 Window::Window(std::size_t keyboard_events_queue_size,
-                             std::size_t keyboard_chars_buffer_size,
-                             std::size_t mouse_events_queue_size,
-                             WindowClass const& window_class,
-                             LPCWSTR lpszWindowName, DWORD dwStyle, int x,
-                             int y, int nWidth, int nHeight,
-                             HINSTANCE hInstance, DWORD dwExStyle)
+               std::size_t keyboard_chars_buffer_size,
+               std::size_t mouse_events_queue_size,
+               WindowClass const& window_class,
+               LPCWSTR lpszWindowName, DWORD dwStyle, 
+               int x, int y, int nWidth, int nHeight,
+               HINSTANCE hInstance, DWORD dwExStyle)
     : width_{nWidth},
       height_{nHeight},
       kbd_{keyboard_events_queue_size, keyboard_chars_buffer_size},
       mse_{mouse_events_queue_size} {
-  hwnd_ =
-      InitializeWindow(this, window_class.GetLpClassName(), lpszWindowName,
-                       dwStyle, x, y, width_, height_, hInstance, dwExStyle);
+  hwnd_ = InitializeWindow(this, window_class.GetLpClassName(), 
+                           lpszWindowName, dwStyle, 
+                           x, y, width_, height_, 
+                           hInstance, dwExStyle);
   assert(((void)"Window handler cannot be NULL", hwnd_ != NULL));
 }
 
-LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam,
-                                            LPARAM lParam) noexcept {
-  static constexpr auto kPreviousKeyStateMask{
-      0b1000000000000000000000000000000};
+LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
+  static constexpr auto kPreviousKeyStateMask{0b1000000000000000000000000000000};
 #ifdef LOG_WINDOW_MESSAGES
   try {
     std::wclog << L"Message catched in Window object\n";
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
   }
 #endif  // LOG_WINDOW_MESSAGES
-  switch (Msg) {
-    case WM_CLOSE: {
-      assert(((void)"Counter of windows cannot be equal to zero "
-                    "during closing of window",
-              active_windows_count_ != 0u));
-      --active_windows_count_;
-      Disable();
-      Hide();
+  try {
+    switch (Msg) {
+      case WM_CLOSE: {
+        assert(((void)"Counter of windows cannot be equal to zero "
+                      "during closing of window",
+                active_windows_count_ != 0u));
+        __assume(active_windows_count_ != 0u);
+        --active_windows_count_;
+        Disable();
+        Hide();
 #ifdef LOG_WINDOW
-      try {
         std::wclog << L"Window disabled and hidden (inactive). There're "
                    << active_windows_count_ << L" active windows right now\n";
-      } catch (...) {
-        OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
-      }
 #endif  // LOG_WINDOW
-      if (active_windows_count_ == 0u) {
+        if (active_windows_count_ == 0u) {
 #ifdef LOG_WINDOW
-        try {
           std::wclog << L"No active windows, posting quit message queue...\n";
-        } catch (...) {
-          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
-        }
 #endif  // LOG_WINDOW
-        PostQuitMessage(EXIT_SUCCESS);
+          PostQuitMessage(EXIT_SUCCESS);
+        }
+        return EXIT_SUCCESS;
       }
-      return EXIT_SUCCESS;
-    }
-    case WM_KILLFOCUS: {
-      kbd_.ClearKeysState();
-      try {
-        kbd_.ClearEventsQueue();
-      } catch ([[maybe_unused]] std::exception const& e) {
-#ifdef LOG_WINDOW
+      case WM_KILLFOCUS: {
+        kbd_.ClearKeysState();
         try {
-          std::string const narrow_what{e.what()};
-          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          kbd_.ClearEventsQueue();
+        } 
+        catch (std::exception const& e) {
+#ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Keyboard "
-                        L"ClearEventsQueue. What happened:"
-                     << wide_what << "\n";
-        } catch (...) {
-          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+                        L"ClearEventsQueue. What happened:\n";
+  #endif  // LOG_WINDOW
+          throw e;
         }
-#endif  // LOG_WINDOW
-        OutputDebugStringW(L"Keyboard ClearEventsQueue raised exception\n");
-      }
-    } break;
-    case WM_KEYDOWN: [[fallthrough]];
-    case WM_SYSKEYDOWN: {
-      if (!(lParam & kPreviousKeyStateMask) || kbd_.IsAutoRepeating()) {
-        try {
-          kbd_.OnKeyDown(gsl::narrow_cast<unsigned char>(wParam));
-        } catch ([[maybe_unused]] std::exception const& e) {
-#ifdef LOG_WINDOW
+      } break;
+      case WM_KEYDOWN: [[fallthrough]];
+      case WM_SYSKEYDOWN: {
+        if (!(lParam & kPreviousKeyStateMask) || kbd_.IsAutoRepeating()) {
           try {
-            std::string const narrow_what{e.what()};
-            std::wstring const wide_what{narrow_what.begin(),
-                                         narrow_what.end()};
-            std::wcerr << L"Exception raised during Keyboard "
-                          L"OnKeyDown. What happened:"
-                       << wide_what << "\n";
-          } catch (...) {
-            OutputDebugStringW(
-                L"Exception raised in log Window HandleMessage\n");
+            kbd_.OnKeyDown(gsl::narrow_cast<unsigned char>(wParam));
+          } 
+          catch (std::exception const& e) {
+  #ifdef LOG_WINDOW
+            std::wcerr << L"Exception raised during Keyboard OnKeyDown. "
+                          L"What happened:\n";
+  #endif  // LOG_WINDOW
+            throw e;
           }
-#endif  // LOG_WINDOW
-          OutputDebugStringW(L"Keyboard OnKeyDown raised exception\n");
         }
-      }
-    } break;
-    case WM_KEYUP: {
-      try {
-        kbd_.OnKeyUp(gsl::narrow_cast<unsigned char>(wParam));
-      } catch ([[maybe_unused]] std::exception const& e) {
-#ifdef LOG_WINDOW
+      } break;
+      case WM_KEYUP: {
         try {
-          std::string const narrow_what{e.what()};
-          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          kbd_.OnKeyUp(gsl::narrow_cast<unsigned char>(wParam));
+        } 
+        catch (std::exception const& e) {
+  #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Keyboard "
-                        L"OnKeyUp. What happened:"
-                     << wide_what << "\n";
-        } catch (...) {
-          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+                        L"OnKeyUp. What happened:\n";
+  #endif  // LOG_WINDOW
+          throw e;
         }
-#endif  // LOG_WINDOW
-        OutputDebugStringW(L"Keyboard OnKeyUp raised exception\n");
-      }
-    } break;
-    case WM_CHAR: {
-      try {
-        kbd_.OnChar(gsl::narrow_cast<wchar_t>(wParam));
-      } catch ([[maybe_unused]] std::exception const& e) {
-#ifdef LOG_WINDOW
+      } break;
+      case WM_CHAR: {
         try {
-          std::string const narrow_what{e.what()};
-          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          kbd_.OnChar(gsl::narrow_cast<wchar_t>(wParam));
+        } 
+        catch (std::exception const& e) {
+  #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Keyboard "
-                        L"OnChar. What happened:"
-                     << wide_what << "\n";
-        } catch (...) {
-          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+                        L"OnChar. What happened:\n";
+  #endif  // LOG_WINDOW
+          throw e;
         }
-#endif  // LOG_WINDOW
-        OutputDebugStringW(L"Keyboard OnChar raised exception\n");
-      }
-    } break;
-    case WM_LBUTTONDOWN: {
-      try {
-        mse_.OnLButtonDown(lParam);
-      } catch ([[maybe_unused]] std::exception const& e) {
-#ifdef LOG_WINDOW
+      } break;
+      case WM_LBUTTONDOWN: {
         try {
-          std::string const narrow_what{e.what()};
-          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          mse_.OnLButtonDown(lParam);
+        } 
+        catch (std::exception const& e) {
+  #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Mouse "
-                        L"OnLButtonDown. What happened:"
-                     << wide_what << "\n";
-        } catch (...) {
-          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+                        L"OnLButtonDown. What happened:\n";
+  #endif  // LOG_WINDOW
+          throw e;
         }
-#endif  // LOG_WINDOW
-        OutputDebugStringW(L"Mouse OnLButtonDown raised exception\n");
-      }
-    } break;
-    case WM_LBUTTONUP: {
-      try {
-        mse_.OnLButtonUp(lParam);
-      } catch ([[maybe_unused]] std::exception const& e) {
-#ifdef LOG_WINDOW
+      } break;
+      case WM_LBUTTONUP: {
         try {
-          std::string const narrow_what{e.what()};
-          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          mse_.OnLButtonUp(lParam);
+        } 
+        catch (std::exception const& e) {
+  #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Mouse "
-                        L"OnLButtonUp. What happened:"
-                     << wide_what << "\n";
-        } catch (...) {
-          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+                        L"OnLButtonUp. What happened:\n";
+  #endif  // LOG_WINDOW
+          throw e;
         }
-#endif  // LOG_WINDOW
-        OutputDebugStringW(L"Mouse OnLButtonUp raised exception\n");
-      }
-    } break;
-    case WM_RBUTTONDOWN: {
-      try {
-        mse_.OnRButtonDown(lParam);
-      } catch ([[maybe_unused]] std::exception const& e) {
-#ifdef LOG_WINDOW
+      } break;
+      case WM_RBUTTONDOWN: {
         try {
-          std::string const narrow_what{e.what()};
-          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          mse_.OnRButtonDown(lParam);
+        } 
+        catch (std::exception const& e) {
+  #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Mouse "
-                        L"OnRButtonDown. What happened:"
-                     << wide_what << "\n";
-        } catch (...) {
-          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+                        L"OnRButtonDown. What happened:\n";
+  #endif  // LOG_WINDOW
+          throw e;
         }
-#endif  // LOG_WINDOW
-        OutputDebugStringW(L"Mouse OnRButtonDown raised exception\n");
-      }
-    } break;
-    case WM_RBUTTONUP: {
-      try {
-        mse_.OnRButtonUp(lParam);
-      } catch ([[maybe_unused]] std::exception const& e) {
-#ifdef LOG_WINDOW
+      } break;
+      case WM_RBUTTONUP: {
         try {
-          std::string const narrow_what{e.what()};
-          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          mse_.OnRButtonUp(lParam);
+        } 
+        catch (std::exception const& e) {
+  #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Mouse "
-                        L"OnRButtonUp. What happened:"
-                     << wide_what << "\n";
-        } catch (...) {
-          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+                        L"OnRButtonUp. What happened:\n";
+  #endif  // LOG_WINDOW
+          throw e;
         }
-#endif  // LOG_WINDOW
-        OutputDebugStringW(L"Mouse OnRButtonUp raised exception\n");
-      }
-    } break;
-    case WM_MOUSEMOVE: {
-      auto const mse_cur_pos{MAKEPOINTS(lParam)};
-      try {
-        if (mse_cur_pos.x >= 0 && mse_cur_pos.x < width_ &&
-            mse_cur_pos.y >= 0 && mse_cur_pos.y < height_) {
-          mse_.OnMove(lParam);
-          if (Mouse::View const v{mse_}; !v.IsInWindow()) {
-            SetCapture(hwnd_);
-            mse_.OnHoverWindow(lParam);
-          }
-        } else {
-          if (Mouse::View const v{mse_};
-              v.IsLeftButtonPressed() || v.IsRightButtonPressed()) {
+      } break;
+      case WM_MOUSEMOVE: {
+        auto const mse_cur_pos{MAKEPOINTS(lParam)};
+        try {
+          if (mse_cur_pos.x >= 0 && mse_cur_pos.x < width_ &&
+              mse_cur_pos.y >= 0 && mse_cur_pos.y < height_) {
             mse_.OnMove(lParam);
-          } else if (v.IsInWindow()) {
-            ReleaseCapture();
-            mse_.OnLeaveWindow(lParam);
+            if (Mouse::View const v{mse_}; !v.IsInWindow()) {
+              SetCapture(hwnd_);
+              mse_.OnHoverWindow(lParam);
+            }
+          } 
+          else {
+            if (Mouse::View const v{mse_};
+                v.IsLeftButtonPressed() || v.IsRightButtonPressed()) {
+              mse_.OnMove(lParam);
+            } 
+            else if (v.IsInWindow()) {
+              ReleaseCapture();
+              mse_.OnLeaveWindow(lParam);
+            }
           }
-        }
-      } catch ([[maybe_unused]] std::exception const& e) {
-#ifdef LOG_WINDOW
-        try {
-          std::string const narrow_what{e.what()};
-          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+        } 
+        catch (std::exception const& e) {
+  #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during mouse move handling. "
-                        L"What happened:"
-                     << wide_what << "\n";
-        } catch (...) {
-          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+                        L"What happened:\n";
+  #endif  // LOG_WINDOW
+          throw e;
         }
-#endif  // LOG_WINDOW
-        OutputDebugStringW(L"Handling mouse move raised exception\n");
-      }
-    } break;
-    case WM_MOUSEWHEEL: {
-      try {
-        mse_.OnWheel(lParam, wParam);
-      } catch ([[maybe_unused]] std::exception const& e) {
-#ifdef LOG_WINDOW
+      } break;
+      case WM_MOUSEWHEEL: {
         try {
-          std::string const narrow_what{e.what()};
-          std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+          mse_.OnWheel(lParam, wParam);
+        } 
+        catch (std::exception const& e) {
+  #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Mouse "
-                        L"OnWheel. What happened:"
-                     << wide_what << "\n";
-        } catch (...) {
-          OutputDebugStringW(L"Exception raised in log Window HandleMessage\n");
+                        L"OnWheel. What happened:\n";
+  #endif  // LOG_WINDOW
+          throw e;
         }
+      } break;
+      default: return DefWindowProcW(hwnd_, Msg, wParam, lParam);
+    }
+  }
+#ifdef LOG_WINDOW
+  catch (std::exception const& e) {
+    try {
+      std::string const narrow_what{e.what()};
+      std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
+      std::wcerr << wide_what << "\n";
+    }
+    catch (...) {
+      OutputDebugStringW(L"Exception happened during exception formating attempt");
+    }
+  }
 #endif  // LOG_WINDOW
-        OutputDebugStringW(L"Mouse OnWheel raised exception\n");
-      }
-    } break;
-    default:
-      return DefWindowProcW(hwnd_, Msg, wParam, lParam);
+  catch (...) {
+    OutputDebugStringW(L"Unknown exception happened in HandleMessage\n");
   }
   return DefWindowProcW(hwnd_, Msg, wParam, lParam);
 }
@@ -535,13 +502,11 @@ HWND Window::GetHWND() const noexcept {
   return hwnd_; 
 }
 
-void Window::IncreaseCounterOfActiveWindows(
-    unsigned delta) noexcept {
+void Window::IncreaseCounterOfActiveWindows(unsigned delta) noexcept {
   active_windows_count_ += delta;
 }
 
-void Window::DecreaseCounterOfActiveWindows(
-    unsigned delta) noexcept {
+void Window::DecreaseCounterOfActiveWindows(unsigned delta) noexcept {
   active_windows_count_ -= delta;
 }
 

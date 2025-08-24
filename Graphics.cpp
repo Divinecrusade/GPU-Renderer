@@ -93,7 +93,7 @@ void Graphics::ClearBuffer(Color const& c) {
 }
 
 Graphics::Color::Color(float r, float g, float b) noexcept
-    : encoded_{r, g, b, 1.f} {
+    : encoded_{{r, g, b, 1.f}} {
   assert(((void)"Color component must be normalised (0..1)",
           (0.f <= r && r <= 1.f)));
   __assume((0.f <= r && r <= 1.f));

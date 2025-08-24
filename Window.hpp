@@ -22,9 +22,6 @@ class Window {
   static constexpr HWND kAllWindows{NULL};
   static constexpr UINT kNoMinRangeFilterMsg{NULL};
   static constexpr UINT kNoMaxRangeFilterMsg{NULL};
-  static constexpr auto ErrorHappened = [](BOOL result) {
-    return result == -1;
-  };
 
  public:
   Window() = delete;
@@ -58,9 +55,10 @@ class Window {
   template<bool kTranslateMessages = true>
   static int LockInMessageQueue() {
     MSG msg{};
-    while (auto const operation_done{GetMessageW(
-        &msg, kAllWindows, kNoMinRangeFilterMsg, kNoMaxRangeFilterMsg)}) {
-      if (ErrorHappened(operation_done)) {
+    while (auto const operation_done{GetMessageW(&msg, kAllWindows, 
+                                                 kNoMinRangeFilterMsg, 
+                                                 kNoMaxRangeFilterMsg)}) {
+      if (exception::WinError::OperationFailed(operation_done)) {
 #ifdef _DEBUG
         throw exception::WinError{__FILEW__, __LINE__,
                                   "Handling message provokes error",
@@ -68,7 +66,8 @@ class Window {
 #else
         throw exception::WinError{"Event goes wrong", GetLastError()};
 #endif  // _DEBUG
-      } else {
+      } 
+      else {
         if constexpr (kTranslateMessages) {
           std::ignore = TranslateMessage(&msg);
         }
