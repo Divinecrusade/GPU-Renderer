@@ -152,11 +152,12 @@ HWND Window::InitializeWindow(Window* window_instance,
                 "type",
           ((dwStyle & WS_CHILD) != WS_CHILD)));
 
-  RECT window_pos{}; // TODO: Declaration = initialization
-  window_pos.left = x;
-  window_pos.right = window_pos.left + nWidth;
-  window_pos.top = y;
-  window_pos.bottom = window_pos.top + nHeight;
+  RECT window_pos{
+    .left = x,
+    .top = y,
+    .right = x + nWidth,
+    .bottom = y + nHeight
+  };
   if (!AdjustWindowRectEx(&window_pos, dwStyle, FALSE, dwExStyle)) {
 #ifdef LOG_WINDOW
     try {
@@ -175,10 +176,9 @@ HWND Window::InitializeWindow(Window* window_instance,
                                   window_pos.bottom - window_pos.top, 
                                   kNoParent, kNoMenu, hInstance, 
                                   window_instance)};
-  static constexpr auto WindowCreationFailed = [](HWND const& wnd) {
-    return wnd == NULL;
-  };
-  if (WindowCreationFailed(hwnd)) /* TODO: Mb lambda make local if variable? */ {
+  if (static constexpr auto WindowCreationFailed =
+          [](HWND const& wnd) { return wnd == NULL; };
+      WindowCreationFailed(hwnd)) {
 #ifdef LOG_WINDOW
     try {
       std::wcerr << L"Window creation failed\n";
@@ -228,7 +228,6 @@ LRESULT WINAPI Window::SetupWindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
     assert(((void)"lParam must be a pointer to window creation struct",
             creation_params != nullptr));
     __assume(creation_params != nullptr);
-    // TODO: replace static_cast with reinterpret
     Window* const window_instance{static_cast<Window*>(creation_params->lpCreateParams)};
     assert(((void)"Window creation struct must have the pointer to Window "
                   "class object",
