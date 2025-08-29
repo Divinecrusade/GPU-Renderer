@@ -171,6 +171,7 @@
     <ClCompile Include="CrtError.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="dxerr.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Mouse.cpp" />
@@ -184,6 +185,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
+    <None Include="DXGetErrorDescription.inl" />
+    <None Include="DXGetErrorString.inl" />
+    <None Include="DXTrace.inl" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
@@ -192,6 +196,7 @@
     <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="Console.hpp" />
     <ClInclude Include="CrtError.hpp" />
+    <ClInclude Include="dxerr.h" />
     <ClInclude Include="FrameTimer.hpp" />
     <ClInclude Include="Graphics.hpp" />
     <ClInclude Include="Keyboard.hpp" />

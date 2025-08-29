@@ -81,10 +81,22 @@
     <ClCompile Include="Graphics.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="dxerr.cpp">
+      <Filter>Исходные файлы\debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
     <None Include="vcpkg.json" />
+    <None Include="DXGetErrorDescription.inl">
+      <Filter>Файлы заголовков\debug</Filter>
+    </None>
+    <None Include="DXGetErrorString.inl">
+      <Filter>Файлы заголовков\debug</Filter>
+    </None>
+    <None Include="DXTrace.inl">
+      <Filter>Файлы заголовков\debug</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -146,6 +158,9 @@
     </ClInclude>
     <ClInclude Include="OptimisedWindowsHeader.hpp">
       <Filter>Файлы заголовков\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="dxerr.h">
+      <Filter>Файлы заголовков\debug</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
