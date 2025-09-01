@@ -133,8 +133,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <EnablePREfast>true</EnablePREfast>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>5045</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -171,6 +170,7 @@
     <ClCompile Include="CrtError.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="DirectXError.cpp" />
     <ClCompile Include="dxerr.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Keyboard.cpp" />
@@ -196,6 +196,7 @@
     <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="Console.hpp" />
     <ClInclude Include="CrtError.hpp" />
+    <ClInclude Include="DirectXError.hpp" />
     <ClInclude Include="dxerr.h" />
     <ClInclude Include="FrameTimer.hpp" />
     <ClInclude Include="Graphics.hpp" />

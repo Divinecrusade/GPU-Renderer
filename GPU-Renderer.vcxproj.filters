@@ -84,6 +84,9 @@
     <ClCompile Include="dxerr.cpp">
       <Filter>Исходные файлы\debug</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXError.cpp">
+      <Filter>Исходные файлы\exception</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
@@ -161,6 +164,9 @@
     </ClInclude>
     <ClInclude Include="dxerr.h">
       <Filter>Файлы заголовков\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXError.hpp">
+      <Filter>Файлы заголовков\exception</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

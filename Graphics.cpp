@@ -1,12 +1,14 @@
 ﻿#include "Graphics.hpp"
 
+#include "DirectXError.hpp"
+
 #pragma comment(lib, "d3d11")
 
 namespace gpu_renderer {
 Graphics::Graphics(HWND hwnd) {
-  assert(((void)"HWND cannot be null", hwnd != NULL));
+  assert(hwnd != NULL);
   __assume(hwnd != NULL);
-
+  
   static constexpr UINT kUseWindowDimension{0u};
   static constexpr UINT kUseDoubleBuffer{1u};
   static constexpr UINT kUseDeafultSwapChainBehaviorOptions{0u};
@@ -32,40 +34,75 @@ Graphics::Graphics(HWND hwnd) {
   static constexpr D3D_FEATURE_LEVEL* kDefaultFeatureLevel{nullptr};
   static constexpr UINT kUseDefaultNumberOfFeatures{0u};
   static constexpr D3D_FEATURE_LEVEL* kIgnoreFeatureLevelReturn{nullptr};
-  std::ignore = D3D11CreateDeviceAndSwapChain(
-      kDefaultAdapter, D3D_DRIVER_TYPE_HARDWARE, kNoSoftwareRasterizer,
-      kNoRuntimeLayers, kDefaultFeatureLevel, kUseDefaultNumberOfFeatures,
-      D3D11_SDK_VERSION, &swap_chain_conf, &swap_chain_, &device_,
-      kIgnoreFeatureLevelReturn, &device_context_);
-  assert(device_);
-  assert(device_context_);
-  assert(swap_chain_);
+  if (HRESULT const operation_status = D3D11CreateDeviceAndSwapChain(
+          kDefaultAdapter, D3D_DRIVER_TYPE_HARDWARE, kNoSoftwareRasterizer,
+          kNoRuntimeLayers, kDefaultFeatureLevel, kUseDefaultNumberOfFeatures,
+          D3D11_SDK_VERSION, &swap_chain_conf, &swap_chain_, &device_,
+          kIgnoreFeatureLevelReturn, &device_context_);
+      FAILED(operation_status)) {
+#ifdef _DEBUG
+    throw exception::DirectXError{__FILEW__, __LINE__, 
+                                  "Creating device and swap chain failed", 
+                                  operation_status};
+#else
+    throw exception::DirectXError{"Resource for Graphics was not allocated",
+                                  operation_status};
+#endif  // _DEBUG
+  }
+  assert(((void)"Device must be allocated at this point", device_));
+  __assume(device_);
+  assert(((void)"Device context must be allocated at this point", 
+          device_context_));
+  __assume(device_context_);
+  assert(((void)"Swap chain must be allocated at this point", 
+          swap_chain_));
+  __assume(swap_chain_);
 
   ID3D11Resource* back_buffer{nullptr};
   static constexpr UINT kBackBufferId{0u};
 #pragma warning(push)
 #pragma warning(disable : 26490)
-  std::ignore = swap_chain_->GetBuffer(kBackBufferId, __uuidof(ID3D11Resource),
-                                       reinterpret_cast<void**>(&back_buffer));
+  if (HRESULT const operation_status =
+          swap_chain_->GetBuffer(kBackBufferId, __uuidof(ID3D11Resource),
+                                 reinterpret_cast<void**>(&back_buffer));
 #pragma warning(pop)
-  assert(back_buffer);
+      FAILED(operation_status)) {
+#ifdef _DEBUG
+    throw exception::DirectXError{__FILEW__, __LINE__,
+                                  "Backbuffer wasn't created",
+                                  operation_status};
+#else
+    throw exception::DirectXError{"Resource for Graphics was not allocated",
+                                  operation_status};
+#endif  // _DEBUG
+  }
+  assert(((void)"Back buffer context must be allocated at this point", 
+          back_buffer));
+  __assume(back_buffer);
 
   static constexpr D3D11_RENDER_TARGET_VIEW_DESC const*
       kGiveAccessToAllMipmapLevels{nullptr};
-  std::ignore = device_->CreateRenderTargetView(
-      back_buffer, kGiveAccessToAllMipmapLevels, &target_);
-  assert(target_);
+  if (HRESULT const operation_status = device_->CreateRenderTargetView(
+          back_buffer, kGiveAccessToAllMipmapLevels, &render_target_);
+      FAILED(operation_status)) {
+#ifdef _DEBUG
+    throw exception::DirectXError{__FILEW__, __LINE__, 
+                                  "Target view wasn't created", 
+                                  operation_status};
+#else
+    throw exception::DirectXError{"Resource for Graphics was not allocated",
+                                  operation_status};
+#endif  // _DEBUG
+  }
+  assert(((void)"Render target view must be allocated at this point", 
+          render_target_));
 
   std::ignore = back_buffer->Release();
 }
 
 Graphics::~Graphics() noexcept {
-  assert(target_);
-  assert(swap_chain_);
-  assert(device_context_);
-  assert(device_);
   try {
-    std::ignore = target_->Release();
+    std::ignore = render_target_->Release();
     std::ignore = swap_chain_->Release();
     std::ignore = device_context_->Release();
     std::ignore = device_->Release();
@@ -84,12 +121,21 @@ Graphics::~Graphics() noexcept {
 void Graphics::EndFrame() {
   static constexpr UINT kNoSwapChainSync{0u};
   static constexpr UINT kDefaultSwapChainPresention{0u};
-  std::ignore =
+  if (HRESULT const operation_status = 
       swap_chain_->Present(kNoSwapChainSync, kDefaultSwapChainPresention);
+      FAILED(operation_status)) {
+#ifdef _DEBUG
+    throw exception::DirectXError{__FILEW__, __LINE__, 
+                                  "Back buffer wasn't present (swapped with front buffer)", 
+                                  operation_status};
+#else
+    throw exception::DirectXError{"Render failed", operation_status};
+#endif  // _DEBUG
+  }
 }
 
 void Graphics::ClearBuffer(Color const& c) {
-  device_context_->ClearRenderTargetView(target_, &c);
+  device_context_->ClearRenderTargetView(render_target_, &c);
 }
 
 Graphics::Color::Color(float r, float g, float b) noexcept

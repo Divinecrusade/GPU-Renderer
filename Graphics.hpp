@@ -48,10 +48,10 @@ class Graphics final {
   void ClearBuffer(Color const& c);
 
  private:
-  IDXGISwapChain* swap_chain_{};
-  ID3D11Device* device_{};
-  ID3D11DeviceContext* device_context_{};
-  ID3D11RenderTargetView* target_{};
+  IDXGISwapChain* swap_chain_{nullptr};
+  ID3D11Device* device_{nullptr};
+  ID3D11DeviceContext* device_context_{nullptr};
+  ID3D11RenderTargetView* render_target_{nullptr};
 };
 } // namespace gpu_renderer
 
