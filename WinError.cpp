@@ -19,7 +19,7 @@ WinError::WinError(char const* message, DWORD error_code_) noexcept
 }
 
 int WinError::GetErrorCode() const noexcept {
-  return gsl::narrow_cast<int>(error_code_);
+  return gsl::narrow<int>(error_code_);
 }
 
 std::wstring_view WinError::GetTypeOfException() const noexcept {
