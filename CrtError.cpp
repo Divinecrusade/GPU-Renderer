@@ -1,9 +1,7 @@
 ﻿#include "CrtError.hpp"
 
-#include <cassert>
-#include <iostream>
-
 #include "OptimisedWindowsHeader.hpp"
+#include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::exception {
 #ifdef _DEBUG

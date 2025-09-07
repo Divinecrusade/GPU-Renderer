@@ -21,18 +21,12 @@ class WinError : public SystemError {
   [[nodiscard]] std::wstring_view GetTypeOfException() const noexcept override;
   [[nodiscard]] std::wstring WhatHappened() const override;
 
-#pragma warning(push)
-#pragma warning(disable : 4514)
   [[nodiscard]] static constexpr bool OperationFailed(BOOL result) noexcept {
     return result == -1;
   };
-#pragma warning(pop)
 
  private:
-#pragma warning(push)
-#pragma warning(disable : 4820)
   DWORD error_code_{};
-#pragma warning(pop)
 };
 }  // namespace gpu_renderer::exception
 

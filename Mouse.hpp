@@ -83,10 +83,7 @@ class Mouse final {
   std::queue<Event, boost::circular_buffer<Event>> events_queue_;
   bool left_button_pressed_{false};
   bool right_button_pressed_{false};
-#pragma warning(push)
-#pragma warning(disable : 4820)
   bool in_window_{false};
-#pragma warning(pop)
   int accumulated_wheel_delta_{0};
 };
 } // namespace gpu_renderer::input

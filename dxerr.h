@@ -13,7 +13,10 @@
 
 #pragma once
 #include "OptimisedWindowsHeader.hpp"
+#pragma warning(push)
+#pragma warning(disable : 4365)
 #include <sal.h>
+#pragma warning(pop)
 
 #ifdef __cplusplus
 extern "C" {

@@ -11,7 +11,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 #pragma warning(push)
-#pragma warning(disable : 4820 5045 4514 26485)
+#pragma warning(disable : 4820 4365 5045 4514 26485)
 #include "dxerr.h"
 
 #include <stdio.h>

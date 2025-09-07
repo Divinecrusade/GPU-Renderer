@@ -38,11 +38,8 @@ class SystemError : public std::exception {
 
  private:
 #ifdef _DEBUG
-#pragma warning(push)
-#pragma warning(disable : 4820)
   std::filesystem::path file_{};
   int line_{};
-#pragma warning(pop)
 #endif  // _DEBUG
 };
 }  // namespace gpu_renderer::exception

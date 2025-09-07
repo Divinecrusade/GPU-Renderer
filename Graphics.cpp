@@ -169,8 +169,6 @@ FLOAT const* Graphics::Color::operator&() const noexcept {
   return encoded_.data();
 }
 
-#pragma warning(push)
-#pragma warning(disable : 26446)
 float Graphics::Color::GetR() const noexcept {
   return encoded_[kIndexComponentR];
 }
@@ -203,5 +201,4 @@ void Graphics::Color::SetB(float b) noexcept {
   __assume((0.f <= b && b <= 1.f));
   encoded_[kIndexComponentR] = b;
 }
-#pragma warning(pop)
 }  // namespace gpu_renderer

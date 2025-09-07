@@ -1,6 +1,6 @@
-﻿DX_CHAR strBufferLine[128];
-DX_CHAR strBufferError[256];
-DX_CHAR strBuffer[BUFFER_SIZE];
+﻿DX_CHAR strBufferLine[128]{'\0'};
+DX_CHAR strBufferError[256]{'\0'};
+DX_CHAR strBuffer[BUFFER_SIZE]{'\0'};
 
 DX_SPRINTF_S( strBufferLine, 128, DX_STR_WRAP("%lu"), dwLine );
 if( strFile )

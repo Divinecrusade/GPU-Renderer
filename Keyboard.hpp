@@ -74,10 +74,7 @@ class Keyboard final {
   void ClearCharsBuffer() noexcept;
 
  private:
-#pragma warning(push)
-#pragma warning(disable : 4820)
   bool auto_repeating_{false};
-#pragma warning(pop)
   std::bitset<std::numeric_limits<KeyCode>::max() + 1> keys_state_{};
 
   std::queue<Event, boost::circular_buffer<Event>> events_queue_;

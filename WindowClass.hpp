@@ -32,8 +32,6 @@ class WindowClass {
   struct wstring_hash {
     using is_transparent = void;
 
-#pragma warning(push)
-#pragma warning(disable : 4514)
     [[nodiscard]] std::size_t operator()(std::wstring_view txt) const noexcept {
       return std::hash<std::wstring_view>{}(txt);
     }
@@ -45,7 +43,6 @@ class WindowClass {
     [[nodiscard]] std::size_t operator()(const std::wstring& txt) const noexcept {
       return std::hash<std::wstring>{}(txt);
     }
-#pragma warning(pop)
   };
 
  private:
