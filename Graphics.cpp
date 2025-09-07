@@ -1,6 +1,7 @@
 ﻿#include "Graphics.hpp"
 
 #include "DirectXError.hpp"
+#include "DeviceRemovedError.hpp"
 
 #pragma comment(lib, "d3d11")
 
@@ -124,13 +125,26 @@ void Graphics::EndFrame() {
   if (HRESULT const operation_status = 
       swap_chain_->Present(kNoSwapChainSync, kDefaultSwapChainPresention);
       FAILED(operation_status)) {
+      if (exception::DeviceRemovedError::IsDeviceRemovedErrorHappened(operation_status)) {
 #ifdef _DEBUG
-    throw exception::DirectXError{__FILEW__, __LINE__, 
-                                  "Back buffer wasn't present (swapped with front buffer)", 
-                                  operation_status};
+        throw exception::DeviceRemovedError{
+            __FILEW__, __LINE__,
+            "Back buffer wasn't present (swapped with front buffer)",
+            *device_};
 #else
-    throw exception::DirectXError{"Render failed", operation_status};
+        throw exception::DeviceRemovedError{"Render failed", *device};
+#endif  // _DEBUG     
+      }
+      else {
+#ifdef _DEBUG
+        throw exception::DirectXError{
+            __FILEW__, __LINE__,
+            "Back buffer wasn't present (swapped with front buffer)",
+            operation_status};
+#else
+        throw exception::DirectXError{"Render failed", operation_status};
 #endif  // _DEBUG
+      }
   }
 }
 

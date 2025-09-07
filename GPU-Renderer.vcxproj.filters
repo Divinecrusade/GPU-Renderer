@@ -87,6 +87,9 @@
     <ClCompile Include="DirectXError.cpp">
       <Filter>Исходные файлы\exception</Filter>
     </ClCompile>
+    <ClCompile Include="DeviceRemovedError.cpp">
+      <Filter>Исходные файлы\exception</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
@@ -166,6 +169,9 @@
       <Filter>Файлы заголовков\debug</Filter>
     </ClInclude>
     <ClInclude Include="DirectXError.hpp">
+      <Filter>Файлы заголовков\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceRemovedError.hpp">
       <Filter>Файлы заголовков\exception</Filter>
     </ClInclude>
   </ItemGroup>

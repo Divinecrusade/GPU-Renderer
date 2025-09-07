@@ -1,7 +1,6 @@
 ﻿#include "DirectXError.hpp"
 
-#include "dxerr.h"
-
+#include "OptimisedDirect3dHeader.hpp"
 #include "OptimisedStlHeader.hpp"
 #include "OptimisedGslHeader.hpp"
 
