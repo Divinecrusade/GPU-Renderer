@@ -35,13 +35,22 @@ Graphics::Graphics(HWND hwnd) {
   static constexpr D3D_FEATURE_LEVEL* kDefaultFeatureLevel{nullptr};
   static constexpr UINT kUseDefaultNumberOfFeatures{0u};
   static constexpr D3D_FEATURE_LEVEL* kIgnoreFeatureLevelReturn{nullptr};
+#ifdef _DEBUG
+  debug_info_.StartTrace();
+#endif  // _DEBUG
   if (HRESULT const operation_status = D3D11CreateDeviceAndSwapChain(
           kDefaultAdapter, D3D_DRIVER_TYPE_HARDWARE, kNoSoftwareRasterizer,
-          kNoRuntimeLayers, kDefaultFeatureLevel, kUseDefaultNumberOfFeatures,
+#ifdef _DEBUG
+          D3D11_CREATE_DEVICE_DEBUG,
+#else
+          kNoRuntimeLayers,
+#endif  // _DEBUG
+          kDefaultFeatureLevel, kUseDefaultNumberOfFeatures,
           D3D11_SDK_VERSION, &swap_chain_conf, &swap_chain_, &device_,
           kIgnoreFeatureLevelReturn, &device_context_);
       FAILED(operation_status)) {
 #ifdef _DEBUG
+    std::wcerr << debug_info_.GetTraceLog();
     throw exception::DirectXError{__FILEW__, __LINE__, 
                                   "Creating device and swap chain failed", 
                                   operation_status};
@@ -61,6 +70,9 @@ Graphics::Graphics(HWND hwnd) {
 
   ID3D11Resource* back_buffer{nullptr};
   static constexpr UINT kBackBufferId{0u};
+#ifdef _DEBUG
+  debug_info_.StartTrace();
+#endif  // _DEBUG
 #pragma warning(push)
 #pragma warning(disable : 26490)
   if (HRESULT const operation_status =
@@ -69,6 +81,7 @@ Graphics::Graphics(HWND hwnd) {
 #pragma warning(pop)
       FAILED(operation_status)) {
 #ifdef _DEBUG
+    std::wcerr << debug_info_.GetTraceLog();
     throw exception::DirectXError{__FILEW__, __LINE__,
                                   "Backbuffer wasn't created",
                                   operation_status};
@@ -83,10 +96,14 @@ Graphics::Graphics(HWND hwnd) {
 
   static constexpr D3D11_RENDER_TARGET_VIEW_DESC const*
       kGiveAccessToAllMipmapLevels{nullptr};
+#ifdef _DEBUG
+  debug_info_.StartTrace();
+#endif  // _DEBUG
   if (HRESULT const operation_status = device_->CreateRenderTargetView(
           back_buffer, kGiveAccessToAllMipmapLevels, &render_target_);
       FAILED(operation_status)) {
 #ifdef _DEBUG
+    std::wcerr << debug_info_.GetTraceLog();
     throw exception::DirectXError{__FILEW__, __LINE__, 
                                   "Target view wasn't created", 
                                   operation_status};
@@ -112,8 +129,7 @@ Graphics::~Graphics() noexcept {
     try {
       std::wcerr << L"Unknown exception happened in Graphics destructor\n";
     } catch (...) {
-      OutputDebugStringW(
-          L"Unknown exception happened in Graphics destructor logging\n");
+      OutputDebugStringW(L"Unknown exception happened in Graphics destructor logging\n");
     }
 #endif  // LOG_GRAPHICS
   }
@@ -122,11 +138,15 @@ Graphics::~Graphics() noexcept {
 void Graphics::EndFrame() {
   static constexpr UINT kNoSwapChainSync{0u};
   static constexpr UINT kDefaultSwapChainPresention{0u};
+#ifdef _DEBUG
+  debug_info_.StartTrace();
+#endif  // _DEBUG
   if (HRESULT const operation_status = 
       swap_chain_->Present(kNoSwapChainSync, kDefaultSwapChainPresention);
       FAILED(operation_status)) {
       if (exception::DeviceRemovedError::IsDeviceRemovedErrorHappened(operation_status)) {
 #ifdef _DEBUG
+        std::wcerr << debug_info_.GetTraceLog(); 
         throw exception::DeviceRemovedError{
             __FILEW__, __LINE__,
             "Back buffer wasn't present (swapped with front buffer)",
@@ -137,6 +157,7 @@ void Graphics::EndFrame() {
       }
       else {
 #ifdef _DEBUG
+        std::wcerr << debug_info_.GetTraceLog();
         throw exception::DirectXError{
             __FILEW__, __LINE__,
             "Back buffer wasn't present (swapped with front buffer)",

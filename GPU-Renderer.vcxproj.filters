@@ -90,6 +90,9 @@
     <ClCompile Include="DeviceRemovedError.cpp">
       <Filter>Исходные файлы\exception</Filter>
     </ClCompile>
+    <ClCompile Include="DXDebugInfoManager.cpp">
+      <Filter>Исходные файлы\debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
@@ -173,6 +176,9 @@
     </ClInclude>
     <ClInclude Include="DeviceRemovedError.hpp">
       <Filter>Файлы заголовков\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="DXDebugInfoManager.hpp">
+      <Filter>Файлы заголовков\debug</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

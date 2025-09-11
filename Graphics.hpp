@@ -5,6 +5,10 @@
 #include "OptimisedDirect3dHeader.hpp"
 #include "OptimisedStlHeader.hpp"
 
+#ifdef _DEBUG
+#include "DXDebugInfoManager.hpp"
+#endif  // _DEBUG
+
 namespace gpu_renderer {
 class Graphics final {
  public:
@@ -52,6 +56,10 @@ class Graphics final {
   ID3D11Device* device_{nullptr};
   ID3D11DeviceContext* device_context_{nullptr};
   ID3D11RenderTargetView* render_target_{nullptr};
+
+#ifdef _DEBUG
+  debug::DXDebugInfoManager debug_info_{};
+#endif  // _DEBUG
 };
 } // namespace gpu_renderer
 

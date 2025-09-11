@@ -29,7 +29,7 @@ std::wstring CrtError::WhatHappened() const {
   static constexpr auto FormatFailed = [](errno_t format_result) {
     return format_result != 0;
   };
-  std::wstring error_description('\0', kMaxErrorMessageLength);
+  std::wstring error_description{'\0', kMaxErrorMessageLength};
   
   errno_t const format_result{
       _wcserror_s(error_description.data(), 
