@@ -24,12 +24,10 @@ void Console::InitStdStreams(std::wstring_view console_window_title) {
 
 Console::Console(std::wstring_view console_window_title) {
   if (!AllocConsole()) [[unlikely]] {
-#ifdef _DEBUG
-    throw exception::WinError{__FILEW__, __LINE__, "Console wasn't allocated",
-                              GetLastError()};
-#else
-    throw exception::WinError{"Console wasn't allocated", GetLastError()};
-#endif  // _DEBUG
+    throw exception::WinError::CreateFromGetLastError(
+        "Console wasn't allocated",
+        "Console wasn't allocated",
+        __FILEW__, __LINE__);
   }
 
   FILE* cout_stream{nullptr};
@@ -79,24 +77,16 @@ Console::Console(std::wstring_view console_window_title) {
 
   static constexpr UINT kCpUnicode{65001u};
   if (!SetConsoleOutputCP(kCpUnicode)) [[unlikely]] {
-#ifdef _DEBUG
-    throw exception::WinError{__FILEW__, __LINE__,
-                              "Console output code page was not set to Unicode",
-                              GetLastError()};
-#else
-    throw exception::WinError{"Console code page was not properly set",
-                              GetLastError()};
-#endif  // _DEBUG
+    throw exception::WinError::CreateFromGetLastError(
+        "Console output code page was not set to Unicode",
+        "Console code page was not properly set",
+        __FILEW__, __LINE__);
   }
   if (!SetConsoleCP(kCpUnicode)) [[unlikely]] {
-#ifdef _DEBUG
-    throw exception::WinError{__FILEW__, __LINE__,
-                              "Console input code page was not set to Unicode",
-                              GetLastError()};
-#else
-    throw exception::WinError{"Console code page was not properly set",
-                              GetLastError()};
-#endif  // _DEBUG
+    throw exception::WinError::CreateFromGetLastError(
+        "Console input code page was not set to Unicode",
+        "Console code page was not properly set",
+        __FILEW__, __LINE__);
   }
 
   static constexpr auto SetModeFailed = [](auto op_status) {

@@ -12,9 +12,9 @@ bool Window::first_show_done_{false};
 #endif  // _DEBUG
 
 Window::Window(WindowClass const& window_class,
-                             LPCWSTR lpszWindowName, DWORD dwStyle, int x,
-                             int y, int nWidth, int nHeight,
-                             HINSTANCE hInstance, DWORD dwExStyle)
+               LPCWSTR lpszWindowName, DWORD dwStyle, int x,
+               int y, int nWidth, int nHeight,
+               HINSTANCE hInstance, DWORD dwExStyle)
     : width_{nWidth}, height_{nHeight} {
   hwnd_ = InitializeWindow(this, window_class.GetLpClassName(), lpszWindowName,
                            dwStyle, x, y, width_, height_, hInstance, dwExStyle);
@@ -188,14 +188,10 @@ HWND Window::InitializeWindow(Window* window_instance,
       OutputDebugStringW(L"Exception raised in log Window constructor\n");
     }
 #endif  // LOG_WINDOW
-#ifdef _DEBUG
-    throw exception::WinError{__FILEW__, __LINE__,
-                              "CreateWindowExW returned NULL hwnd",
-                              GetLastError()};
-#else
-    throw exception::WinError{"It was not able to create window",
-                              GetLastError()};
-#endif  // _DEBUG
+    throw exception::WinError::CreateFromGetLastError(
+        "CreateWindowExW returned NULL hwnd",
+        "It was not able to create window",
+        __FILEW__, __LINE__);
   }
 
 #ifdef LOG_WINDOW
@@ -339,12 +335,12 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         try {
           kbd_.ClearEventsQueue();
         } 
-        catch (std::exception const& e) {
+        catch (...) {
 #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Keyboard "
                         L"ClearEventsQueue. What happened:\n";
   #endif  // LOG_WINDOW
-          throw e;
+          throw;
         }
       } break;
       case WM_KEYDOWN: [[fallthrough]];
@@ -353,12 +349,12 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
           try {
             kbd_.OnKeyDown(gsl::narrow_cast<unsigned char>(wParam));
           } 
-          catch (std::exception const& e) {
+          catch (...) {
   #ifdef LOG_WINDOW
             std::wcerr << L"Exception raised during Keyboard OnKeyDown. "
                           L"What happened:\n";
   #endif  // LOG_WINDOW
-            throw e;
+            throw;
           }
         }
       } break;
@@ -366,72 +362,72 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         try {
           kbd_.OnKeyUp(gsl::narrow_cast<unsigned char>(wParam));
         } 
-        catch (std::exception const& e) {
+        catch (...) {
   #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Keyboard "
                         L"OnKeyUp. What happened:\n";
   #endif  // LOG_WINDOW
-          throw e;
+          throw;
         }
       } break;
       case WM_CHAR: {
         try {
           kbd_.OnChar(gsl::narrow_cast<wchar_t>(wParam));
         } 
-        catch (std::exception const& e) {
+        catch (...) {
   #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Keyboard "
                         L"OnChar. What happened:\n";
   #endif  // LOG_WINDOW
-          throw e;
+          throw;
         }
       } break;
       case WM_LBUTTONDOWN: {
         try {
           mse_.OnLButtonDown(lParam);
         } 
-        catch (std::exception const& e) {
+        catch (...) {
   #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Mouse "
                         L"OnLButtonDown. What happened:\n";
   #endif  // LOG_WINDOW
-          throw e;
+          throw;
         }
       } break;
       case WM_LBUTTONUP: {
         try {
           mse_.OnLButtonUp(lParam);
         } 
-        catch (std::exception const& e) {
+        catch (...) {
   #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Mouse "
                         L"OnLButtonUp. What happened:\n";
   #endif  // LOG_WINDOW
-          throw e;
+          throw;
         }
       } break;
       case WM_RBUTTONDOWN: {
         try {
           mse_.OnRButtonDown(lParam);
         } 
-        catch (std::exception const& e) {
+        catch (...) {
   #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Mouse "
                         L"OnRButtonDown. What happened:\n";
   #endif  // LOG_WINDOW
-          throw e;
+          throw;
         }
       } break;
       case WM_RBUTTONUP: {
         try {
           mse_.OnRButtonUp(lParam);
         } 
-        catch (std::exception const& e) {
+        catch (...) {
   #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Mouse "
                         L"OnRButtonUp. What happened:\n";
   #endif  // LOG_WINDOW
-          throw e;
+          throw;
         }
       } break;
       case WM_MOUSEMOVE: {
@@ -456,24 +452,24 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
             }
           }
         } 
-        catch (std::exception const& e) {
+        catch (...) {
   #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during mouse move handling. "
                         L"What happened:\n";
   #endif  // LOG_WINDOW
-          throw e;
+          throw;
         }
       } break;
       case WM_MOUSEWHEEL: {
         try {
           mse_.OnWheel(lParam, wParam);
         } 
-        catch (std::exception const& e) {
+        catch (...) {
   #ifdef LOG_WINDOW
           std::wcerr << L"Exception raised during Mouse "
                         L"OnWheel. What happened:\n";
   #endif  // LOG_WINDOW
-          throw e;
+          throw;
         }
       } break;
       default: return DefWindowProcW(hwnd_, Msg, wParam, lParam);

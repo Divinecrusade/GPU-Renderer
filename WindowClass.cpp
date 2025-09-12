@@ -57,13 +57,9 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
       assert(((void)"Reference count must remain zero on registration failure",
               it->second == 0ull));
       class_ref_counts_.erase(it->first);
-#ifdef _DEBUG
-      throw exception::WinError{__FILEW__, __LINE__, "RegisterClassExW failed",
-                                GetLastError()};
-#else
-      throw exception::WinError{"Class for window was not registered",
-                                GetLastError()};
-#endif  // _DEBUG
+      throw exception::WinError::CreateFromGetLastError(
+          "RegisterClassExW failed", "Class for window was not registered",
+          __FILEW__, __LINE__);
     } 
 #ifdef LOG_WINDOW_CLASS
     else {

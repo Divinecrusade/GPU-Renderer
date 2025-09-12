@@ -5,7 +5,7 @@ Canvas::Canvas(CachedDC& window_class, LPCWSTR lpszWindowName,
                int left_top_pos_x, int left_top_pos_y, int width, int height,
                HINSTANCE hInstance)
     : Window{Keyboard::kDefaultEventsQueueSize,
-             0ull,
+             0u,
              Mouse::kDefaultEventsQueueSize,
              window_class,
              lpszWindowName,
