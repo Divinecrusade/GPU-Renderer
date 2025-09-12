@@ -9,7 +9,8 @@
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                     [[maybe_unused]] _In_opt_ HINSTANCE,
-                    [[maybe_unused]] _In_ LPWSTR, _In_ int nCmdShow) {
+                    [[maybe_unused]] _In_ LPWSTR, 
+                    _In_ int nCmdShow) {
 #ifdef _DEBUG
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF |
                  _CRTDBG_CHECK_ALWAYS_DF);
@@ -45,17 +46,23 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   } catch (SystemError const& e) {
     MessageBoxW(NULL, e.WhatHappened().c_str(), e.GetTypeOfException().data(),
                 MB_OK | MB_ICONERROR);
-    return e.GetErrorCode();
+    exit_code = e.GetErrorCode();
   } catch (std::exception const& e) {
     std::string const narrow{e.what()};
     MessageBoxW(NULL, std::wstring{narrow.begin(), narrow.end()}.c_str(),
                 L"C++ standard exception", MB_OK | MB_ICONERROR);
-    return EXIT_FAILURE;
+    exit_code = EXIT_FAILURE;
   } catch (...) {
     MessageBoxW(NULL, L"Something unexpected happened", L"Unknown error",
                 MB_OK | MB_ICONERROR);
-    return EXIT_FAILURE;
+    exit_code = EXIT_FAILURE;
   }
+#ifdef _DEBUG
+  std::wclog << L"\n=========================================\n"
+             << L"Execution of application finished\n"
+             << L"Press any key to close the console window...";
+  std::wcin.get();
+#endif  // _DEBUG
 
   return exit_code;
 }
