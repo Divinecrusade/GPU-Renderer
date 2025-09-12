@@ -1,24 +1,25 @@
 ﻿#include "CrtError.hpp"
 
 #include "OptimisedWindowsHeader.hpp"
+#include "OptimisedGslheader.hpp"
 #include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::exception {
 #ifdef _DEBUG
 CrtError::CrtError(wchar_t const* file, int line, char const* message,
-                   int error_code)
+                   errno_t error_code)
     : SystemError{file, line, message},
       error_code_{error_code} {
   assert(((void)"CRT error code cannot be 0", error_code_ != 0));
 }
 #endif  // _DEBUG
 
-CrtError::CrtError(char const* message, int error_code) noexcept
+CrtError::CrtError(char const* message, errno_t error_code) noexcept
     : SystemError{message}, error_code_{error_code} {
   assert(((void)"CRT error code cannot be 0", error_code_ != 0));
 }
 
-int CrtError::GetErrorCode() const noexcept { return error_code_; }
+int CrtError::GetErrorCode() const noexcept { return gsl::narrow<int>(error_code_); }
 
 std::wstring_view CrtError::GetTypeOfException() const noexcept {
   return kTypeOfException;
@@ -41,7 +42,8 @@ std::wstring CrtError::WhatHappened() const {
     try {
       std::wcerr << L"strerror_s failed with error code: " << format_result
                  << L" for errno: " << error_code_ << L"\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Exception raised in log CrtError WhatHappened\n");
     }
 #endif  // _DEBUG
