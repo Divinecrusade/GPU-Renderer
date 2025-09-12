@@ -9,7 +9,7 @@
 namespace gpu_renderer::exception {
 class DirectXError : public SystemError {
  public:
-  static constexpr std::wstring_view kTypeOfException{L"DirectX error"};
+  static constexpr std::wstring_view kTypeOfException = L"DirectX error";
 
  public:
 #ifdef _DEBUG
@@ -32,7 +32,7 @@ class DirectXError : public SystemError {
  private:
   HRESULT error_code_{};
 #ifdef _DEBUG
-  std::optional<std::wstring> trace_log_{std::nullopt};
+  std::optional<std::wstring> trace_log_ = std::nullopt;
 #endif  // _DEBUG
 };
 }  // namespace gpu_renderer::exception

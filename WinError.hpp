@@ -8,7 +8,7 @@
 namespace gpu_renderer::exception {
 class WinError : public SystemError {
  public:
-  static constexpr std::wstring_view kTypeOfException{L"WinAPI error"};
+  static constexpr std::wstring_view kTypeOfException = L"WinAPI error";
 
  public:
 #ifdef _DEBUG

@@ -4,7 +4,8 @@
 #include "WinError.hpp"
 
 namespace gpu_renderer::window {
-std::unordered_map<std::wstring, std::size_t, WindowClass::wstring_hash,
+std::unordered_map<std::wstring, std::size_t, 
+                   WindowClass::wstring_hash,
                    std::equal_to<>>
     WindowClass::class_ref_counts_{};
 
@@ -21,7 +22,7 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
   assert(((void)"Instance handle cannot be null", hInstance != NULL));
   __assume(hInstance != NULL);
 
-  auto const [it, _]{class_ref_counts_.try_emplace(lpszClassName, 0ull)};
+  auto const [it, _]{class_ref_counts_.try_emplace(lpszClassName, 0u)};
   class_name_ = it->first;
 
   assert(((void)"string_view must reference map key",
@@ -29,7 +30,7 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
   assert(((void)"string_view size must match map key size",
           class_name_.size() == it->first.size()));
 
-  if (it->second == 0ull) {
+  if (it->second == 0u) {
     static constexpr auto ClassRegistrationFailed = [](ATOM aClass) {
       return aClass == NULL;
     };
@@ -47,7 +48,7 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
                          .lpszClassName = class_name_.data(),
                          .hIconSm = hIconSm};
 
-    if (ATOM const aClass{RegisterClassExW(&wc)};
+    if (ATOM const aClass = RegisterClassExW(&wc);
         ClassRegistrationFailed(aClass)) {
 #ifdef LOG_WINDOW_CLASS
       std::wcerr << L"Class with name '" << class_name_
@@ -55,7 +56,7 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
       std::wcerr << L"Error code: " << GetLastError() << L"\n";
 #endif  // LOG_WINDOW_CLASS
       assert(((void)"Reference count must remain zero on registration failure",
-              it->second == 0ull));
+              it->second == 0u));
       class_ref_counts_.erase(it->first);
       throw exception::WinError::CreateFromGetLastError(
           "RegisterClassExW failed", "Class for window was not registered",
@@ -82,21 +83,21 @@ WindowClass::~WindowClass() noexcept {
   __assume(!class_name_.empty());
 
   try {
-    if (auto const it{class_ref_counts_.find(class_name_)};
+    if (auto const it = class_ref_counts_.find(class_name_);
         it != class_ref_counts_.end()) [[likely]] {
       assert(((void)"string_view must still reference map key",
               class_name_.data() == it->first.data()));
       __assume(class_name_.data() == it->first.data());
       assert(((void)"Reference count must be positive before decrement",
-              it->second > 0ull));
-      __assume(it->second > 0ull);
+              it->second > 0u));
+      __assume(it->second > 0u);
       --it->second;
 #ifdef LOG_WINDOW_CLASS
       std::wclog << L"Class '" << class_name_ << L"' ref count: " << it->second
                  << L"\n";
 #endif  // LOG_WINDOW_CLASS
 
-      if (it->second == 0ull) [[likely]] {
+      if (it->second == 0u) [[likely]] {
         if (!UnregisterClassW(class_name_.data(), hInstance_)) [[unlikely]] {
 #ifdef LOG_WINDOW_CLASS
           std::wcerr << L"Class with name '" << class_name_
@@ -111,8 +112,8 @@ WindowClass::~WindowClass() noexcept {
         }
 #endif  // LOG_WINDOW_CLASS
         assert(((void)"Reference count must be zero before map erase",
-                it->second == 0ull));
-        __assume(it->second == 0ull);
+                it->second == 0u));
+        __assume(it->second == 0u);
         class_ref_counts_.erase(it);
       }
     } 
@@ -120,12 +121,13 @@ WindowClass::~WindowClass() noexcept {
       assert(((void)"Class name not found in reference count map during "
                     "destruction",
               false));
+      std::unreachable();
     }
   } 
   catch ([[maybe_unused]] std::exception const& e) {
 #ifdef LOG_WINDOW_CLASS
     try {
-      std::string const narrow_what{e.what()};
+      std::string const narrow_what = e.what();
       std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
       std::wcerr << L"Exception raised during WindowClass "
                     L"destructor. What happened:"

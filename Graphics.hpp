@@ -16,10 +16,10 @@ class Graphics final {
  public:
   class Color final {
    private:
-    static constexpr std::size_t kNumberOfColorComponents{4ull};
-    static constexpr std::size_t kIndexComponentR{0ull};
-    static constexpr std::size_t kIndexComponentG{1ull};
-    static constexpr std::size_t kIndexComponentB{2ull};
+    static constexpr std::size_t kNumberOfColorComponents = 4u;
+    static constexpr std::size_t kIndexComponentR = 0u;
+    static constexpr std::size_t kIndexComponentG = 1u;
+    static constexpr std::size_t kIndexComponentB = 2u;
 
    public:
     Color(float r, float g, float b) noexcept;

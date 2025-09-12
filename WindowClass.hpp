@@ -7,10 +7,10 @@
 namespace gpu_renderer::window {
 class WindowClass {
  public:
-  static constexpr HICON kDefaultIcon{NULL};
-  static constexpr HCURSOR kDefaultCursor{NULL};
-  static constexpr HBRUSH kNoBackground{NULL};
-  static constexpr LPCWSTR kMenuName{NULL};
+  static constexpr HICON kDefaultIcon = NULL;
+  static constexpr HCURSOR kDefaultCursor = NULL;
+  static constexpr HBRUSH kNoBackground = NULL;
+  static constexpr LPCWSTR kMenuName = NULL;
 
  public:
   WindowClass() = delete;

@@ -10,9 +10,9 @@ Graphics::Graphics(HWND hwnd) {
   assert(hwnd != NULL);
   __assume(hwnd != NULL);
   
-  static constexpr UINT kUseWindowDimension{0u};
-  static constexpr UINT kUseDoubleBuffer{1u};
-  static constexpr UINT kUseDeafultSwapChainBehaviorOptions{0u};
+  static constexpr UINT kUseWindowDimension = 0u;
+  static constexpr UINT kUseDoubleBuffer = 1u;
+  static constexpr UINT kUseDeafultSwapChainBehaviorOptions = 0u;
   DXGI_SWAP_CHAIN_DESC const swap_chain_conf{
       .BufferDesc = {.Width = kUseWindowDimension,
                      .Height = kUseWindowDimension,
@@ -29,12 +29,12 @@ Graphics::Graphics(HWND hwnd) {
       .SwapEffect = DXGI_SWAP_EFFECT_DISCARD,
       .Flags = kUseDeafultSwapChainBehaviorOptions};
 
-  static constexpr IDXGIAdapter* kDefaultAdapter{nullptr};
-  static constexpr HMODULE kNoSoftwareRasterizer{NULL};
-  static constexpr UINT kNoRuntimeLayers{0u};
-  static constexpr D3D_FEATURE_LEVEL* kDefaultFeatureLevel{nullptr};
-  static constexpr UINT kUseDefaultNumberOfFeatures{0u};
-  static constexpr D3D_FEATURE_LEVEL* kIgnoreFeatureLevelReturn{nullptr};
+  static constexpr IDXGIAdapter* kDefaultAdapter = nullptr;
+  static constexpr HMODULE kNoSoftwareRasterizer = NULL;
+  static constexpr UINT kNoRuntimeLayers = 0u;
+  static constexpr D3D_FEATURE_LEVEL* kDefaultFeatureLevel = nullptr;
+  static constexpr UINT kUseDefaultNumberOfFeatures = 0u;
+  static constexpr D3D_FEATURE_LEVEL* kIgnoreFeatureLevelReturn = nullptr;
   
   StartTraceInDebugMode();
   
@@ -63,8 +63,8 @@ Graphics::Graphics(HWND hwnd) {
           swap_chain_));
   __assume(swap_chain_);
 
-  ID3D11Resource* back_buffer{nullptr};
-  static constexpr UINT kBackBufferId{0u};
+  ID3D11Resource* back_buffer = nullptr;
+  static constexpr UINT kBackBufferId = 0u;
   
   StartTraceInDebugMode();
 
@@ -85,7 +85,7 @@ Graphics::Graphics(HWND hwnd) {
   __assume(back_buffer);
 
   static constexpr D3D11_RENDER_TARGET_VIEW_DESC const*
-      kGiveAccessToAllMipmapLevels{nullptr};
+      kGiveAccessToAllMipmapLevels = nullptr;
 
   StartTraceInDebugMode();
 
@@ -109,11 +109,13 @@ Graphics::~Graphics() noexcept {
     std::ignore = swap_chain_->Release();
     std::ignore = device_context_->Release();
     std::ignore = device_->Release();
-  } catch (...) {
+  } 
+  catch (...) {
 #ifdef LOG_GRAPHICS
     try {
       std::wcerr << L"Unknown exception happened in Graphics destructor\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Unknown exception happened in Graphics destructor logging\n");
     }
 #endif  // LOG_GRAPHICS
@@ -121,8 +123,8 @@ Graphics::~Graphics() noexcept {
 }
 
 void Graphics::EndFrame() {
-  static constexpr UINT kNoSwapChainSync{0u};
-  static constexpr UINT kDefaultSwapChainPresention{0u};
+  static constexpr UINT kNoSwapChainSync = 0u;
+  static constexpr UINT kDefaultSwapChainPresention = 0u;
 
   StartTraceInDebugMode();
 

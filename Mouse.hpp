@@ -53,7 +53,7 @@ class Mouse final {
   };
 
  public:
-  static constexpr std::size_t kDefaultEventsQueueSize{512ull};
+  static constexpr std::size_t kDefaultEventsQueueSize = 512u;
 
  public:
   Mouse() = delete;
@@ -81,10 +81,10 @@ class Mouse final {
 
  private:
   std::queue<Event, boost::circular_buffer<Event>> events_queue_;
-  bool left_button_pressed_{false};
-  bool right_button_pressed_{false};
-  bool in_window_{false};
-  int accumulated_wheel_delta_{0};
+  bool left_button_pressed_ = false;
+  bool right_button_pressed_ = false;
+  bool in_window_ = false;
+  int accumulated_wheel_delta_ = 0;
 };
 } // namespace gpu_renderer::input
 

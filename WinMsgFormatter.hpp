@@ -7,16 +7,16 @@
 namespace gpu_renderer::debug {
 struct WinMsgFormatter final {
  private:
-  static constexpr std::wstring_view kUnknownMessageName{L"UNKNOWN"};
-  static constexpr std::wstring_view kHexLiteral{L"0x"};
-  static constexpr auto kHexDigitsInByte{2};
-  static constexpr std::streamsize kMessageNameWidth{24};
-  static constexpr std::streamsize kMessageCodeWidth{
-      static_cast<std::streamsize>(sizeof(UINT)) * kHexDigitsInByte};
-  static constexpr std::streamsize kMessageWparamWidth{
-      static_cast<std::streamsize>(sizeof(WPARAM)) * kHexDigitsInByte};
-  static constexpr std::streamsize kMessageLparamWidth{
-      static_cast<std::streamsize>(sizeof(LPARAM)) * kHexDigitsInByte};
+  static constexpr std::wstring_view kUnknownMessageName = L"UNKNOWN";
+  static constexpr std::wstring_view kHexLiteral = L"0x";
+  static constexpr auto kHexDigitsInByte = 2;
+  static constexpr std::streamsize kMessageNameWidth = 24;
+  static constexpr std::streamsize kMessageCodeWidth = 
+      static_cast<std::streamsize>(sizeof(UINT)) * kHexDigitsInByte;
+  static constexpr std::streamsize kMessageWparamWidth = 
+      static_cast<std::streamsize>(sizeof(WPARAM)) * kHexDigitsInByte;
+  static constexpr std::streamsize kMessageLparamWidth = 
+      static_cast<std::streamsize>(sizeof(LPARAM)) * kHexDigitsInByte;
 
  public:
   [[nodiscard]] std::wstring operator()(UINT Msg, WPARAM wParam, LPARAM lParam) {

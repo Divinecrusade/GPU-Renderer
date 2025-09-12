@@ -6,9 +6,9 @@
 #endif  // LOG_WINDOW_MESSAGES
 
 namespace gpu_renderer::window {
-unsigned Window::active_windows_count_{0u};
+unsigned Window::active_windows_count_ = 0u;
 #ifdef _DEBUG
-bool Window::first_show_done_{false};
+bool Window::first_show_done_ = false;
 #endif  // _DEBUG
 
 Window::Window(WindowClass const& window_class,
@@ -87,11 +87,10 @@ void Window::Hide() const noexcept {
 }
 
 void Window::Enable() const noexcept {
-  if (BOOL const was_disabled{EnableWindow(hwnd_, TRUE)}; !was_disabled) {
+  if (BOOL const was_disabled = EnableWindow(hwnd_, TRUE); !was_disabled) {
 #ifdef LOG_WINDOW
     try {
-      std::wcerr
-          << L"Enable method called, but window has been enabled already\n";
+      std::wcerr << L"Enable method called, but window has been enabled already\n";
     } 
     catch (...) {
       OutputDebugStringW(L"Exception raised in log Window Enable\n");
@@ -220,11 +219,11 @@ LRESULT WINAPI Window::SetupWindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
 #endif  // LOG_WINDOW_MESSAGES
 #pragma warning(push)
 #pragma warning(disable : 26490)
-    CREATESTRUCTW const* const creation_params{reinterpret_cast<CREATESTRUCTW const*>(lParam)};
+    CREATESTRUCTW const* const creation_params = reinterpret_cast<CREATESTRUCTW const*>(lParam);
     assert(((void)"lParam must be a pointer to window creation struct",
             creation_params != nullptr));
     __assume(creation_params != nullptr);
-    Window* const window_instance{static_cast<Window*>(creation_params->lpCreateParams)};
+    Window* const window_instance = static_cast<Window*>(creation_params->lpCreateParams);
     assert(((void)"Window creation struct must have the pointer to Window "
                   "class object",
             window_instance != nullptr));
@@ -263,8 +262,8 @@ LRESULT WINAPI Window::DisptachWindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
 #endif  // LOG_WINDOW_MESSAGES
 #pragma warning(push)
 #pragma warning(disable : 26490)
-  Window* const window_instance{reinterpret_cast<Window*>(GetWindowLongPtrW(hWnd, 
-                                                                            GWLP_USERDATA))};
+  Window* const window_instance = reinterpret_cast<Window*>(GetWindowLongPtrW(hWnd, 
+                                                                GWLP_USERDATA));
 #pragma warning(pop)
   assert(((void)"Window data must have the pointer to Window class object",
           window_instance != nullptr));
@@ -299,7 +298,7 @@ Window::Window(std::size_t keyboard_events_queue_size,
 }
 
 LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
-  static constexpr auto kPreviousKeyStateMask{0b1000000000000000000000000000000};
+  static constexpr auto kPreviousKeyStateMask = 0b1000000000000000000000000000000;
 #ifdef LOG_WINDOW_MESSAGES
   try {
     std::wclog << L"Message catched in Window object\n";
@@ -478,7 +477,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
 #ifdef LOG_WINDOW
   catch (std::exception const& e) {
     try {
-      std::string const narrow_what{e.what()};
+      std::string const narrow_what = e.what();
       std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
       std::wcerr << wide_what << "\n";
     }

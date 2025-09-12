@@ -31,30 +31,34 @@ std::wstring WinError::WhatHappened() const {
 
 #pragma warning(push)
 #pragma warning(disable : 26490)
-  DWORD const format_result{FormatMessageW(
-          FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-          FORMAT_MESSAGE_IGNORE_INSERTS,
-      nullptr, error_code_, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-      reinterpret_cast<LPWSTR>(&lpMsgBuf), 0, nullptr)};
+  DWORD const format_result = FormatMessageW(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+      FORMAT_MESSAGE_FROM_SYSTEM |
+      FORMAT_MESSAGE_IGNORE_INSERTS,
+      nullptr, error_code_, 
+      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      reinterpret_cast<LPWSTR>(&lpMsgBuf), 0, nullptr);
 #pragma warning(pop)
 
   std::wstring error_description{};
-  if (bool const format_succeded{format_result != 0 && lpMsgBuf != nullptr};
+  if (bool const format_succeded = (format_result != 0 && lpMsgBuf != nullptr);
       format_succeded) {
     error_description = lpMsgBuf;
 #ifdef _DEBUG
-    if (bool const free_failed{LocalFree(lpMsgBuf) != NULL}; free_failed) {
+    if (!LocalFree(lpMsgBuf)) {
       try {
         std::wcerr << "Error happened during free FormatMessage buffer, code: "
                    << GetLastError() << "\n";
-      } catch (...) {
+      } 
+      catch (...) {
         OutputDebugStringW(L"Exception raised in log WinError WhatHappened");
       }
     }
 #else
     std::ignore = LocalFree(lpMsgBuf);
 #endif  // _DEBUG
-  } else {
+  } 
+  else {
     error_description = L"Unknown error";
   }
 

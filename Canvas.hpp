@@ -27,9 +27,9 @@ class Canvas : public Window {
   Graphics gfx;
 
  private:
-  static constexpr DWORD kFrameWithMinimize{WS_MINIMIZEBOX | 
-                                            WS_CAPTION |
-                                            WS_SYSMENU};
+  static constexpr DWORD kFrameWithMinimize= WS_MINIMIZEBOX | 
+                                             WS_CAPTION |
+                                             WS_SYSMENU;
 };
 }  // namespace gpu_renderer
 

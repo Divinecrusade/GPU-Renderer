@@ -19,18 +19,16 @@ int SystemError::InWhatLineOfCodeThrowed() const noexcept { return line_; }
 
 SystemError::SystemError(char const* message) noexcept : exception{message} {}
 
-std::wstring SystemError::FormatErrorMessage(
-    std::wstring_view error_description) const {
-  std::string const narrow_what{what()};
+std::wstring SystemError::FormatErrorMessage(std::wstring_view error_description) const {
+  std::string const narrow_what = what();
   std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
 
 #ifdef _DEBUG
-  return std::format(
-      L"[What] {}\n[Code] {}\n[Description] {}\n[File] {}\n[Line] {}",
-      wide_what, GetErrorCode(), error_description, file_.wstring(), line_);
+  return std::format(L"[What] {}\n[Code] {}\n[Description] {}\n[File] {}\n[Line] {}",
+                     wide_what, GetErrorCode(), error_description, file_.wstring(), line_);
 #else
-  return std::format(L"[What] {}\n[Code] {}\n[Description] {}", wide_what,
-                     GetErrorCode(), error_description);
+  return std::format(L"[What] {}\n[Code] {}\n[Description] {}", 
+                     wide_what, GetErrorCode(), error_description);
 #endif  // _DEBUG
 }
 }  // namespace gpu_renderer::exception

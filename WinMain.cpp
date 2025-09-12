@@ -27,7 +27,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                 MB_OK | MB_ICONERROR);
     return e.GetErrorCode();
   } catch (std::exception const& e) {
-    std::string const narrow{e.what()};
+    std::string const narrow = e.what();
     MessageBoxW(NULL, std::wstring{narrow.begin(), narrow.end()}.c_str(),
                 L"C++ standard exception", MB_OK | MB_ICONERROR);
     return EXIT_FAILURE;
@@ -48,7 +48,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                 MB_OK | MB_ICONERROR);
     exit_code = e.GetErrorCode();
   } catch (std::exception const& e) {
-    std::string const narrow{e.what()};
+    std::string const narrow = e.what();
     MessageBoxW(NULL, std::wstring{narrow.begin(), narrow.end()}.c_str(),
                 L"C++ standard exception", MB_OK | MB_ICONERROR);
     exit_code = EXIT_FAILURE;

@@ -8,7 +8,7 @@
 namespace gpu_renderer::exception {
 class CrtError : public SystemError {
  public:
-  static constexpr std::wstring_view kTypeOfException{L"C runtime library (CRT) error"};
+  static constexpr std::wstring_view kTypeOfException = L"C runtime library (CRT) error";
 
  public:
 #ifdef _DEBUG

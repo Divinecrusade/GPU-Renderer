@@ -22,7 +22,7 @@ class DXDebugInfoManager {
  private:
   HMODULE dxgi_debug_lib_{};
 
-  UINT64 next_message_id_ = 0ull;
+  UINT64 next_message_id_ = 0u;
   IDXGIInfoQueue* messages_queue_ = nullptr;
 };
 }

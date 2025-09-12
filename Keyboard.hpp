@@ -46,8 +46,8 @@ class Keyboard final {
   };
 
  public:
-  static constexpr std::size_t kDefaultEventsQueueSize{128ull};
-  static constexpr std::size_t kDefaultCharsBufferSize{64ull};
+  static constexpr std::size_t kDefaultEventsQueueSize = 128u;
+  static constexpr std::size_t kDefaultCharsBufferSize = kDefaultEventsQueueSize / 2u;
 
  public:
   Keyboard() = delete;
@@ -74,7 +74,7 @@ class Keyboard final {
   void ClearCharsBuffer() noexcept;
 
  private:
-  bool auto_repeating_{false};
+  bool auto_repeating_ = false;
   std::bitset<std::numeric_limits<KeyCode>::max() + 1> keys_state_{};
 
   std::queue<Event, boost::circular_buffer<Event>> events_queue_;

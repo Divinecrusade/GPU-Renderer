@@ -13,15 +13,15 @@ using ExitCode = int;
 
 class Window {
  public:
-  static constexpr DWORD kNoExtraStyle{NULL};
+  static constexpr DWORD kNoExtraStyle = NULL;
 
  private:
-  static constexpr HWND kNoParent{NULL};
-  static constexpr HMENU kNoMenu{NULL};
+  static constexpr HWND kNoParent = NULL;
+  static constexpr HMENU kNoMenu = NULL;
 
-  static constexpr HWND kAllWindows{NULL};
-  static constexpr UINT kNoMinRangeFilterMsg{NULL};
-  static constexpr UINT kNoMaxRangeFilterMsg{NULL};
+  static constexpr HWND kAllWindows = NULL;
+  static constexpr UINT kNoMinRangeFilterMsg = NULL;
+  static constexpr UINT kNoMaxRangeFilterMsg = NULL;
 
  public:
   Window() = delete;
@@ -59,13 +59,9 @@ class Window {
                                                  kNoMinRangeFilterMsg, 
                                                  kNoMaxRangeFilterMsg)}) {
       if (exception::WinError::OperationFailed(operation_done)) {
-#ifdef _DEBUG
-        throw exception::WinError{__FILEW__, __LINE__,
-                                  "Handling message provokes error",
-                                  GetLastError()};
-#else
-        throw exception::WinError{"Event goes wrong", GetLastError()};
-#endif  // _DEBUG
+        throw exception::WinError::CreateFromGetLastError(
+            "Handling message provokes error", "Event goes wrong", 
+            __FILEW__, __LINE__);
       } 
       else {
         if constexpr (kTranslateMessages) {
@@ -75,7 +71,7 @@ class Window {
       }
     }
 
-    return gsl::narrow<ExitCode>(msg.wParam);
+    return gsl::narrow_cast<ExitCode>(msg.wParam);
   }
 
   template <bool kTranslateMessages = true>
@@ -85,7 +81,7 @@ class Window {
     while (PeekMessageW(&msg, kAllWindows, kNoMinRangeFilterMsg,
                         kNoMaxRangeFilterMsg, PM_REMOVE)) {
       if (msg.message == WM_QUIT) {
-        return gsl::narrow<ExitCode>(msg.wParam);
+        return gsl::narrow_cast<ExitCode>(msg.wParam);
       }
 
       if constexpr (kTranslateMessages) {
@@ -133,7 +129,7 @@ class Window {
                 Keyboard::kDefaultCharsBufferSize};
   Mouse mse_{Mouse::kDefaultEventsQueueSize};
 
-  HWND hwnd_{NULL};
+  HWND hwnd_ = NULL;
 
   static unsigned active_windows_count_;
 #ifdef _DEBUG

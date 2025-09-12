@@ -7,11 +7,11 @@
 namespace gpu_renderer {
 class Application final {
  private:
-  static constexpr int kWidth{640};
-  static constexpr int kHeight{480};
-  static constexpr int kLeftTopCornerPosX{15};
-  static constexpr int kLeftTopCornerPosY{30};
-  static constexpr LPCWSTR kName{L"GPU-Renderer"};
+  static constexpr int kWidth = 640;
+  static constexpr int kHeight = 480;
+  static constexpr int kLeftTopCornerPosX = 15;
+  static constexpr int kLeftTopCornerPosY = 30;
+  static constexpr LPCWSTR kName = L"GPU-Renderer";
 
  public:
   Application() = delete;

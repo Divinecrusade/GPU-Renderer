@@ -10,7 +10,7 @@ Application::Application(HINSTANCE hInstance, int nCmdShow)
 }
 
 window::ExitCode Application::Run() {
-  std::optional<window::ExitCode> exit_code{Process()};
+  std::optional<window::ExitCode> exit_code = Process();
 
   for (FrameTimer ft{}; !exit_code; exit_code = Process()) {
     Update(ft.Mark());
@@ -21,12 +21,12 @@ window::ExitCode Application::Run() {
 }
 
 std::optional<window::ExitCode> Application::Process() {
-  static constexpr bool kLockInQueue{false};
+  static constexpr bool kLockInQueue = false;
   return window_.ProcessMessagesFromQueue<kLockInQueue>();
 }
 
 void Application::Update(FrameTimer::DeltaTime dt) {
-  constexpr float kDeltaTheta{3.14f / 4.f};
+  constexpr float kDeltaTheta = 3.14f / 4.f;
   theta = std::fmodf(theta + kDeltaTheta * dt, 3.14f);
 }
 

@@ -123,14 +123,14 @@ void Mouse::OnWheel(LPARAM lParam, WPARAM wParam) {
 #ifdef LOG_MOUSE
   try {
     std::wclog << L"Mouse wheeled. Accumulated delta: " << accumulated_wheel_delta_ 
-               <<L"\nCurrent position: (" << pos.x << L", " << pos.y << L")\n";
+               << L"\nCurrent position: (" << pos.x << L", " << pos.y << L")\n";
   } 
   catch (...) {
     OutputDebugStringW(L"Exception raised in log Mouse OnWheel\n");
   }
 #endif  // LOG_MOUSE
 #ifdef LOG_MOUSE
-  int i{0};
+  int i = 0;
 #endif  // LOG_MOUSE
   if (accumulated_wheel_delta_ < 0) {
 #ifdef LOG_MOUSE
