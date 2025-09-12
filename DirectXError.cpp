@@ -12,6 +12,14 @@ DirectXError::DirectXError(wchar_t const* file, int line, char const* message,
       error_code_{operation_status} {
   assert(FAILED(operation_status));
 }
+
+DirectXError::DirectXError(wchar_t const* file, int line, char const* message,
+                           HRESULT operation_status,
+                           debug::DXDebugInfoManager const& debug_tracer)
+    : DirectXError{file, line, message, operation_status} {
+    trace_log_ = debug_tracer.GetTraceLog();
+    std::wcerr << *trace_log_;
+}
 #endif  // _DEBUG
 
 DirectXError::DirectXError(char const* message, HRESULT operation_status) noexcept
@@ -28,6 +36,13 @@ std::wstring_view DirectXError::GetTypeOfException() const noexcept {
 }
 
 std::wstring DirectXError::WhatHappened() const {
-  return FormatErrorMessage(DXGetErrorStringW(error_code_));
+  auto const error_description = DXGetErrorStringW(error_code_);
+#ifdef  _DEBUG
+  if (trace_log_) {
+    return FormatErrorMessage(std::format(L"{}\nTrace log:\n{}", 
+                              error_description, *trace_log_));
+  }
+#endif  //  _DEBUG
+  return FormatErrorMessage(error_description);
 }
 }  // namespace gpu_renderer::exception

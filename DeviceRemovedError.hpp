@@ -3,6 +3,7 @@
 
 #include "OptimisedDirect3dHeader.hpp"
 #include "DirectXError.hpp"
+#include "DXDebugInfoManager.hpp"
 
 namespace gpu_renderer::exception {
 class DeviceRemovedError : public DirectXError {
@@ -10,6 +11,9 @@ class DeviceRemovedError : public DirectXError {
 #ifdef _DEBUG
   DeviceRemovedError(wchar_t const* file, int line, char const* message,
                      ID3D11Device& removed_device);
+  DeviceRemovedError(wchar_t const* file, int line, char const* message,
+                     ID3D11Device& removed_device,
+                     debug::DXDebugInfoManager const& debug_tracer);
 #endif  // _DEBUG
   DeviceRemovedError(char const* message, ID3D11Device& removed_device);
   

@@ -4,6 +4,7 @@
 #include "OptimisedStlHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "SystemError.hpp"
+#include "DXDebugInfoManager.hpp"
 
 namespace gpu_renderer::exception {
 class DirectXError : public SystemError {
@@ -14,6 +15,9 @@ class DirectXError : public SystemError {
 #ifdef _DEBUG
   DirectXError(wchar_t const* file, int line, char const* message,
                HRESULT operation_status);
+  DirectXError(wchar_t const* file, int line, char const* message,
+               HRESULT operation_status,
+               debug::DXDebugInfoManager const& debug_tracer);
 #endif  // _DEBUG
   DirectXError(char const* message, HRESULT operation_status) noexcept;
 
@@ -27,6 +31,9 @@ class DirectXError : public SystemError {
 
  private:
   HRESULT error_code_{};
+#ifdef _DEBUG
+  std::optional<std::wstring> trace_log_{std::nullopt};
+#endif  // _DEBUG
 };
 }  // namespace gpu_renderer::exception
 
