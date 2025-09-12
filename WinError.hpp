@@ -25,6 +25,17 @@ class WinError : public SystemError {
     return result == -1;
   };
 
+  static WinError CreateFromGetLastError([[maybe_unused]] char const* message_debug,
+                                         [[maybe_unused]] char const* message_release,
+                                         [[maybe_unused]] wchar_t const* file,
+                                         [[maybe_unused]] int line) {
+#ifdef _DEBUG
+    return {file, line, message_debug, GetLastError()};
+#else
+    return {message_release, GetLastError()};
+#endif  // _DEBUG
+  }
+
  private:
   DWORD error_code_{};
 };
