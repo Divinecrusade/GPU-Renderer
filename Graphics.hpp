@@ -8,6 +8,8 @@
 #ifdef _DEBUG
 #include "DXDebugInfoManager.hpp"
 #endif  // _DEBUG
+#include "DirectXError.hpp"
+#include "DeviceRemovedError.hpp"
 
 namespace gpu_renderer {
 class Graphics final {
@@ -52,6 +54,38 @@ class Graphics final {
   void ClearBuffer(Color const& c);
 
  private:
+  void StartTraceInDebugMode() {
+#ifdef _DEBUG
+    debug_info_.StartTrace();
+#endif  // _DEBUG
+  }
+  
+  exception::DirectXError CreateDirectXError(HRESULT operation_status,
+                                             [[maybe_unused]] char const* message_debug,
+                                             [[maybe_unused]] char const* message_release,
+                                             [[maybe_unused]] wchar_t const* file,
+                                             [[maybe_unused]] int line) {
+#ifdef _DEBUG
+    return {file, line, message_debug, operation_status, debug_info_};
+#else
+    return {message_release, operation_status};
+#endif  // _DEBUG
+  }
+
+  exception::DeviceRemovedError CreateDeviceRemovedError(
+      ID3D11Device& removed_device, 
+      [[maybe_unused]] char const* message_debug,
+      [[maybe_unused]] char const* message_release,
+      [[maybe_unused]] wchar_t const* file, 
+      [[maybe_unused]] int line) {
+#ifdef _DEBUG
+    return {file, line, message_debug, removed_device, debug_info_};
+#else
+    return {message_release, removed_device};
+#endif  // _DEBUG
+  }
+
+ private:
   IDXGISwapChain* swap_chain_{nullptr};
   ID3D11Device* device_{nullptr};
   ID3D11DeviceContext* device_context_{nullptr};
@@ -61,6 +95,6 @@ class Graphics final {
   debug::DXDebugInfoManager debug_info_{};
 #endif  // _DEBUG
 };
-} // namespace gpu_renderer
+}  // namespace gpu_renderer
 
 #endif  // !GRAPHICS_HPP
