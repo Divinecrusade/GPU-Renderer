@@ -51,7 +51,8 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
     if (ATOM const aClass = RegisterClassExW(&wc);
         ClassRegistrationFailed(aClass)) {
 #ifdef LOG_WINDOW_CLASS
-      std::wcerr << L"Class with name '" << class_name_
+      OutputDebugStringW(L"Window Class was not registered\n");
+      std::wcerr << L"Window Class with name '" << class_name_
                  << L"' was not registered\n";
       std::wcerr << L"Error code: " << GetLastError() << L"\n";
 #endif  // LOG_WINDOW_CLASS
@@ -64,7 +65,8 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
     } 
 #ifdef LOG_WINDOW_CLASS
     else {
-      std::wclog << L"Class '" << class_name_ << L"' registered successfully\n";
+      OutputDebugStringW(L"Window Class registered successfully\n");
+      std::wclog << L"Window Class '" << class_name_ << L"' registered successfully\n";
     }
 #endif  // LOG_WINDOW_CLASS
   }
@@ -72,13 +74,13 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
   ++it->second;
 
 #ifdef LOG_WINDOW_CLASS
-  std::wclog << L"Class '" << class_name_ << L"' ref count: " << it->second
+  std::wclog << L"Window Class '" << class_name_ << L"' ref count: " << it->second
              << L"\n";
 #endif  // LOG_WINDOW_CLASS
 }
 
 WindowClass::~WindowClass() noexcept {
-  assert(((void)"Class name must be valid in destructor", 
+  assert(((void)"Window Class name must be valid in destructor", 
          !class_name_.empty()));
   __assume(!class_name_.empty());
 
@@ -93,14 +95,15 @@ WindowClass::~WindowClass() noexcept {
       __assume(it->second > 0u);
       --it->second;
 #ifdef LOG_WINDOW_CLASS
-      std::wclog << L"Class '" << class_name_ << L"' ref count: " << it->second
+      std::wclog << L"Window Class '" << class_name_ << L"' ref count: " << it->second
                  << L"\n";
 #endif  // LOG_WINDOW_CLASS
 
       if (it->second == 0u) [[likely]] {
         if (!UnregisterClassW(class_name_.data(), hInstance_)) [[unlikely]] {
 #ifdef LOG_WINDOW_CLASS
-          std::wcerr << L"Class with name '" << class_name_
+          OutputDebugStringW(L"Attempt to unregister Window Class that had not registered\n");
+          std::wcerr << L"Window Class with name '" << class_name_
                      << L"' was not unregistered\n";
           std::wcerr << L"Error code: " << GetLastError() << L"\n";
 #endif  // LOG_WINDOW_CLASS

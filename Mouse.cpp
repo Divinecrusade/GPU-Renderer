@@ -42,6 +42,7 @@ void Mouse::OnLButtonDown(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
+    OutputDebugStringW(L"Mouse left button pressed\n");
     std::wclog << L"Mouse left button pressed. Current position: (" 
                << pos.x << L", " << pos.y << L")\n";
   } 
@@ -58,6 +59,7 @@ void Mouse::OnLButtonUp(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
+    OutputDebugStringW(L"Mouse left button released\n");
     std::wclog << L"Mouse left button released. Current position: (" 
                << pos.x << L", " << pos.y << L")\n";
   } 
@@ -74,6 +76,7 @@ void Mouse::OnRButtonDown(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
+    OutputDebugStringW(L"Mouse right button pressed");
     std::wclog << L"Mouse right button pressed. Current position: (" 
                << pos.x << L", " << pos.y << L")\n";
   } 
@@ -90,6 +93,7 @@ void Mouse::OnRButtonUp(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
+    OutputDebugStringW(L"Mouse right button released\n");
     std::wclog << L"Mouse right button released. Current position: (" 
                << pos.x << L", " << pos.y << L")\n";
   } 
@@ -106,6 +110,7 @@ void Mouse::OnMove(LPARAM lParam) {
 #ifdef LOG_MOUSE
   auto const pos{MAKEPOINTS(lParam)};
   try {
+    OutputDebugStringW(L"Mouse moved\n");
     std::wclog << L"Mouse moved. Current position: (" 
                << pos.x << L", " << pos.y << L")\n";
   } 
@@ -122,6 +127,7 @@ void Mouse::OnWheel(LPARAM lParam, WPARAM wParam) {
   accumulated_wheel_delta_ += GET_WHEEL_DELTA_WPARAM(wParam);
 #ifdef LOG_MOUSE
   try {
+    OutputDebugStringW(L"Mouse wheeled\n");
     std::wclog << L"Mouse wheeled. Accumulated delta: " << accumulated_wheel_delta_ 
                << L"\nCurrent position: (" << pos.x << L", " << pos.y << L")\n";
   } 
@@ -135,6 +141,7 @@ void Mouse::OnWheel(LPARAM lParam, WPARAM wParam) {
   if (accumulated_wheel_delta_ < 0) {
 #ifdef LOG_MOUSE
       try {
+        OutputDebugStringW(L"Mouse wheel rolled down\n");
         std::wclog << L"Mouse wheel rolled down\n";
       } 
       catch (...) {
@@ -152,6 +159,7 @@ void Mouse::OnWheel(LPARAM lParam, WPARAM wParam) {
   else if (accumulated_wheel_delta_ > 0) {
 #ifdef LOG_MOUSE
     try {
+      OutputDebugStringW(L"Mouse wheel rolled up\n");
       std::wclog << L"Mouse wheel rolled up\n";
     } 
     catch (...) {
@@ -180,6 +188,7 @@ void Mouse::OnHoverWindow(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
+    OutputDebugStringW(L"Mouse entered window\n");
     std::wclog << L"Mouse entered window. Current position: (" 
                << pos.x << L", " << pos.y << L")\n";
   } 
@@ -196,6 +205,7 @@ void Mouse::OnLeaveWindow(LPARAM lParam) {
 #ifdef LOG_MOUSE
   try {
     auto const pos{MAKEPOINTS(lParam)};
+    OutputDebugStringW(L"Mouse left window\n");
     std::wclog << L"Mouse left window. Current position: (" 
                << pos.x << L", " << pos.y << L")\n";
   } 

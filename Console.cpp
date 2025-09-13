@@ -14,8 +14,10 @@ void Console::InitStdStreams(std::wstring_view console_window_title) {
 #ifdef _DEBUG
   static constinit bool std_streams_initialized = false;
   if (std_streams_initialized) {
+    OutputDebugStringW(L"Called InitStdStreans but "
+                       L"std streams (wclog, wcout, wcerr, wcin) are already initialized");
     std::wcerr << L"Called InitStdStreans but "
-               << L"Std streams (wclog, wcout, wcerr, wcin) are already initialized";
+               << L"std streams (wclog, wcout, wcerr, wcin) are already initialized";
   }
   std_streams_initialized = true;
 #endif  // _DEBUG
@@ -101,6 +103,7 @@ Console::Console(std::wstring_view console_window_title) {
   std::wclog.clear();
 
   if (!SetConsoleTitleW(console_window_title.data())) [[unlikely]] {
+    OutputDebugStringW(L"Console title was not set");
     std::wcerr << L"Console title was not set, error code: " 
                << GetLastError()
                << "\n";

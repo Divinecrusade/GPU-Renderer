@@ -49,9 +49,9 @@ DXDebugInfoManager::DXDebugInfoManager() noexcept
   }
   catch (exception::SystemError const& e) {
     try {
-    OutputDebugStringW(L"Exception raised in DXDebugInfoManager constructor\n");
-    std::wcerr << L"Exception raised in DXDebugInfoManager constructor. " 
-               << e.GetTypeOfException() << L": " << e.WhatHappened();
+      OutputDebugStringW(L"Exception raised in DXDebugInfoManager constructor\n");
+      std::wcerr << L"Exception raised in DXDebugInfoManager constructor. " 
+                 << e.GetTypeOfException() << L": " << e.WhatHappened();
     }
     catch (...) {
       OutputDebugStringW(L"Failed to log in console exception raised in DXDebugInfoManager constructor\n");

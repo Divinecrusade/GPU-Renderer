@@ -40,6 +40,7 @@ std::wstring CrtError::WhatHappened() const {
     error_description = L"Unknown CRT error";
 #ifdef _DEBUG
     try {
+      OutputDebugStringW(L"strerror_s failed");
       std::wcerr << L"strerror_s failed with error code: " << format_result
                  << L" for errno: " << error_code_ << L"\n";
     } 

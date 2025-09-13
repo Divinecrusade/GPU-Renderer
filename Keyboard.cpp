@@ -62,6 +62,8 @@ void Keyboard::EnableAutoRepeat() noexcept {
 #ifdef LOG_KEYBOARD
   if (auto_repeating_) {
     try {
+      OutputDebugStringW(L"EnableAutoRepeat method called, but auto repeating " 
+                         L"is already enabled\n");
       std::wcerr << L"EnableAutoRepeat method called, but auto repeating is "
                     L"already enabled\n";
     } 
@@ -77,6 +79,8 @@ void Keyboard::DisableAutoRepeat() noexcept {
 #ifdef LOG_KEYBOARD
   if (auto_repeating_) {
     try {
+      OutputDebugStringW(L"DisableAutoRepeat method called, but auto repeating is "
+                         L"already disabled\n");
       std::wcerr << L"DisableAutoRepeat method called, but auto repeating is "
                     L"already disabled\n";
     } 

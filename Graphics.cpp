@@ -113,6 +113,7 @@ Graphics::~Graphics() noexcept {
   catch (...) {
 #ifdef LOG_GRAPHICS
     try {
+      OutputDebugStringW(L"Unknown exception happened in Graphics destructor\n");
       std::wcerr << L"Unknown exception happened in Graphics destructor\n";
     } 
     catch (...) {

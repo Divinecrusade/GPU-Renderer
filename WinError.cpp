@@ -47,7 +47,8 @@ std::wstring WinError::WhatHappened() const {
 #ifdef _DEBUG
     if (!LocalFree(lpMsgBuf)) {
       try {
-        std::wcerr << "Error happened during free FormatMessage buffer, code: "
+        OutputDebugStringW(L"Error happened during free FormatMessage buffer\n");
+        std::wcerr << L"Error happened during free FormatMessage buffer, code: "
                    << GetLastError() << "\n";
       } 
       catch (...) {

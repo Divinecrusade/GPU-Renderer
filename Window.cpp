@@ -27,6 +27,7 @@ Window::~Window() noexcept {
   if (DestroyWindow(hwnd_)) {
 #ifdef LOG_WINDOW
     try {
+      OutputDebugStringW(L"Window destroyed successfully\n");
       std::wclog << L"Window destroyed successfully\n";
     } 
     catch (...) {
@@ -37,6 +38,7 @@ Window::~Window() noexcept {
 #ifdef LOG_WINDOW
   else {
     try {
+      OutputDebugStringW(L"Window destruction failed\n");
       std::wcerr << L"Window destruction failed. " << L"Error code: "
                  << GetLastError() << L"\n";
     } 
@@ -62,7 +64,9 @@ void Window::Show(int nCmdShow) const noexcept {
   if (first_show_done_) {
 #ifdef LOG_WINDOW
     try {
-      std::wcerr << L"Warning: This overloaded option of Show called but "
+      OutputDebugStringW(L"This overloaded option of Show called but "
+                         L"application first show already occurred\n");
+      std::wcerr << L"This overloaded option of Show called but "
                     L"application first show already occurred\n";
     } 
     catch (...) {
@@ -90,6 +94,7 @@ void Window::Enable() const noexcept {
   if (BOOL const was_disabled = EnableWindow(hwnd_, TRUE); !was_disabled) {
 #ifdef LOG_WINDOW
     try {
+      OutputDebugStringW(L"Enable method called, but window has been enabled already\n");
       std::wcerr << L"Enable method called, but window has been enabled already\n";
     } 
     catch (...) {
@@ -103,6 +108,7 @@ void Window::Disable() const noexcept {
   if (BOOL const was_disabled{EnableWindow(hwnd_, FALSE)}; was_disabled) {
 #ifdef LOG_WINDOW
     try {
+      OutputDebugStringW(L"Disable method called, but window has been disabled already\n");
       std::wcerr << L"Disable method called, but window has been disabled already\n";
     } 
     catch (...) {
@@ -160,7 +166,8 @@ HWND Window::InitializeWindow(Window* window_instance,
   if (!AdjustWindowRectEx(&window_pos, dwStyle, FALSE, dwExStyle)) {
 #ifdef LOG_WINDOW
     try {
-      std::wcerr << L"AdjustWindowRectEx failed during Window constructing,"
+      OutputDebugStringW(L"AdjustWindowRectEx failed during Window constructing\n");
+      std::wcerr << L"AdjustWindowRectEx failed during Window constructing, "
                  << L"error code: " << GetLastError() << "\n";
     } 
     catch (...) {
@@ -180,6 +187,7 @@ HWND Window::InitializeWindow(Window* window_instance,
       WindowCreationFailed(hwnd)) {
 #ifdef LOG_WINDOW
     try {
+      OutputDebugStringW(L"Window creation failed\n");
       std::wcerr << L"Window creation failed\n";
       std::wcerr << L"Error code: " << GetLastError() << L"\n";
     } 
@@ -195,6 +203,7 @@ HWND Window::InitializeWindow(Window* window_instance,
 
 #ifdef LOG_WINDOW
   try {
+    OutputDebugStringW(L"Window created successfully\n");
     std::wclog << L"Window '" << lpszWindowName << L"' of class '"
                << lpClassName << L"' created successfully\n";
   } 
@@ -210,6 +219,7 @@ LRESULT WINAPI Window::SetupWindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
   if (Msg == WM_CREATE) {
 #ifdef LOG_WINDOW_MESSAGES
     try {
+      OutputDebugStringW(L"Installing wndproc for new instance of Window...\n");
       std::wclog << L"Installing wndproc for new instance of Window...\n";
       std::wclog << debug::WinMsgFormatter{}(Msg, wParam, lParam) << "\n";
     } 
@@ -237,6 +247,7 @@ LRESULT WINAPI Window::SetupWindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
     ++active_windows_count_;
 #ifdef LOG_WINDOW
     try {
+      OutputDebugStringW(L"Done installing wndproc for new instance of Window\n");
       std::wclog << L"Done installing wndproc for new instance of Window\n";
       std::wclog << L"There're " << active_windows_count_ 
                  << L" active windows right now\n";
@@ -253,6 +264,7 @@ LRESULT WINAPI Window::DisptachWindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
                                            _In_ WPARAM wParam, _In_ LPARAM lParam) noexcept {
 #ifdef LOG_WINDOW_MESSAGES
   try {
+    OutputDebugStringW(L"Dispatcher get windows message...\n");
     std::wclog << L"Dispatcher get windows message...\n";
     std::wclog << debug::WinMsgFormatter{}(Msg, wParam, lParam) << "\n";
   } 
@@ -270,7 +282,8 @@ LRESULT WINAPI Window::DisptachWindowProcW(_In_ HWND hWnd, _In_ UINT Msg,
   __assume(window_instance != nullptr);
 #ifdef LOG_WINDOW_MESSAGES
   try {
-    std::wclog << L"...forward this message to Window object\n";
+    OutputDebugStringW(L"...and forward this message to Window object\n");
+    std::wclog << L"...and forward this message to Window object\n";
   } 
   catch (...) {
     OutputDebugStringW(L"Exception raised in log Window DisptachWindowProcW\n");
@@ -301,6 +314,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
   static constexpr auto kPreviousKeyStateMask = 0b1000000000000000000000000000000;
 #ifdef LOG_WINDOW_MESSAGES
   try {
+    OutputDebugStringW(L"Message catched in Window object\n");
     std::wclog << L"Message catched in Window object\n";
   } 
   catch (...) {
@@ -318,11 +332,13 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         Disable();
         Hide();
 #ifdef LOG_WINDOW
+        OutputDebugStringW(L"Window disabled and hidden (inactive)\n");
         std::wclog << L"Window disabled and hidden (inactive). There're "
                    << active_windows_count_ << L" active windows right now\n";
 #endif  // LOG_WINDOW
         if (active_windows_count_ == 0u) {
 #ifdef LOG_WINDOW
+          OutputDebugStringW(L"No active windows, posting quit message queue...\n");
           std::wclog << L"No active windows, posting quit message queue...\n";
 #endif  // LOG_WINDOW
           PostQuitMessage(EXIT_SUCCESS);
@@ -336,6 +352,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         } 
         catch (...) {
 #ifdef LOG_WINDOW
+          OutputDebugStringW(L"Exception raised during Keyboard ClearEventsQueue\n");
           std::wcerr << L"Exception raised during Keyboard "
                         L"ClearEventsQueue. What happened:\n";
   #endif  // LOG_WINDOW
@@ -350,6 +367,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
           } 
           catch (...) {
   #ifdef LOG_WINDOW
+            OutputDebugStringW(L"Exception raised during Keyboard OnKeyDown\n");
             std::wcerr << L"Exception raised during Keyboard OnKeyDown. "
                           L"What happened:\n";
   #endif  // LOG_WINDOW
@@ -363,6 +381,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         } 
         catch (...) {
   #ifdef LOG_WINDOW
+          OutputDebugStringW(L"Exception raised during Keyboard OnKeyUp\n");
           std::wcerr << L"Exception raised during Keyboard "
                         L"OnKeyUp. What happened:\n";
   #endif  // LOG_WINDOW
@@ -375,6 +394,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         } 
         catch (...) {
   #ifdef LOG_WINDOW
+          OutputDebugStringW(L"Exception raised during Keyboard OnChar\n");
           std::wcerr << L"Exception raised during Keyboard "
                         L"OnChar. What happened:\n";
   #endif  // LOG_WINDOW
@@ -387,6 +407,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         } 
         catch (...) {
   #ifdef LOG_WINDOW
+          OutputDebugStringW(L"Exception raised during Mouse OnLButtonDown\n");
           std::wcerr << L"Exception raised during Mouse "
                         L"OnLButtonDown. What happened:\n";
   #endif  // LOG_WINDOW
@@ -399,6 +420,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         } 
         catch (...) {
   #ifdef LOG_WINDOW
+          OutputDebugStringW(L"Exception raised during Mouse OnLButtonUp\n");
           std::wcerr << L"Exception raised during Mouse "
                         L"OnLButtonUp. What happened:\n";
   #endif  // LOG_WINDOW
@@ -411,6 +433,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         } 
         catch (...) {
   #ifdef LOG_WINDOW
+          OutputDebugStringW(L"Exception raised during Mouse OnRButtonDown\n");
           std::wcerr << L"Exception raised during Mouse "
                         L"OnRButtonDown. What happened:\n";
   #endif  // LOG_WINDOW
@@ -423,6 +446,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         } 
         catch (...) {
   #ifdef LOG_WINDOW
+          OutputDebugStringW(L"Exception raised during Mouse OnRButtonUp");
           std::wcerr << L"Exception raised during Mouse "
                         L"OnRButtonUp. What happened:\n";
   #endif  // LOG_WINDOW
@@ -453,6 +477,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         } 
         catch (...) {
   #ifdef LOG_WINDOW
+          OutputDebugStringW(L"Exception raised during mouse move handling\n");
           std::wcerr << L"Exception raised during mouse move handling. "
                         L"What happened:\n";
   #endif  // LOG_WINDOW
@@ -465,6 +490,7 @@ LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
         } 
         catch (...) {
   #ifdef LOG_WINDOW
+          OutputDebugStringW(L"Exception raised during Mouse OnWheel\n");
           std::wcerr << L"Exception raised during Mouse "
                         L"OnWheel. What happened:\n";
   #endif  // LOG_WINDOW

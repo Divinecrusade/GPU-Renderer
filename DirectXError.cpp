@@ -19,7 +19,8 @@ DirectXError::DirectXError(wchar_t const* file, int line, char const* message,
                            debug::DXDebugInfoManager const& debug_tracer)
     : DirectXError{file, line, message, operation_status} {
     trace_log_ = debug_tracer.GetTraceLog();
-    std::wcerr << *trace_log_;
+    OutputDebugStringW(trace_log_->data());
+    std::wclog << *trace_log_;
 }
 #endif  // _DEBUG
 
