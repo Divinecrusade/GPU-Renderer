@@ -7,7 +7,7 @@
 namespace gpu_renderer::debug {
 class DXDebugInfoManager {
  public:
-  DXDebugInfoManager();
+  DXDebugInfoManager() noexcept;
   DXDebugInfoManager(DXDebugInfoManager const&) = delete;
   DXDebugInfoManager(DXDebugInfoManager&&) = delete;
 

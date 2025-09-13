@@ -13,7 +13,7 @@ class WinError : public SystemError {
  public:
 #ifdef _DEBUG
   WinError(wchar_t const* file, int line, char const* message,
-           DWORD error_code);
+           DWORD error_code) noexcept;
 #endif  // _DEBUG
   WinError(char const* message, DWORD error_code_) noexcept;
 
@@ -28,7 +28,7 @@ class WinError : public SystemError {
   static WinError CreateFromGetLastError([[maybe_unused]] char const* message_debug,
                                          [[maybe_unused]] char const* message_release,
                                          [[maybe_unused]] wchar_t const* file,
-                                         [[maybe_unused]] int line) {
+                                         [[maybe_unused]] int line) noexcept {
 #ifdef _DEBUG
     return {file, line, message_debug, GetLastError()};
 #else

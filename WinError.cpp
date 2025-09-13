@@ -6,7 +6,7 @@
 namespace gpu_renderer::exception {
 #ifdef _DEBUG
 WinError::WinError(wchar_t const* file, int line, char const* message,
-                   DWORD error_code)
+                   DWORD error_code) noexcept
     : SystemError{file, line, message},
       error_code_{error_code} {
   assert(((void)"WinAPI error code cannot be 0", error_code_ != 0));

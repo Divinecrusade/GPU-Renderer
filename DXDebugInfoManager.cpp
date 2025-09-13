@@ -6,67 +6,100 @@
 #pragma comment(lib, "dxguid")
 
 namespace gpu_renderer::debug {
-DXDebugInfoManager::DXDebugInfoManager() 
+DXDebugInfoManager::DXDebugInfoManager() noexcept 
 : dxgi_debug_lib_{LoadLibraryExW(L"dxgidebug.dll", NULL,
                                  LOAD_LIBRARY_SEARCH_SYSTEM32)} {
-  if (!dxgi_debug_lib_) {
-#ifdef _DEBUG
-    throw exception::WinError{__FILEW__, __LINE__, "DXGI debug dll wasn't loaded",
-                              GetLastError()};
-#else
-    throw exception::WinError{"Debug library was not loaded",
-                              GetLastError()};
-#endif  // _DEBUG
-  }
+  try {
+    if (!dxgi_debug_lib_) {
+      throw exception::WinError::CreateFromGetLastError(
+          "DXGI debug dll wasn't loaded", 
+          "Debug library was not loaded",
+          __FILEW__, __LINE__);
+    }
 
 #pragma warning(push)
 #pragma warning(disable : 26490 4191)
-  auto const get_debug_interface = reinterpret_cast<decltype(DXGIGetDebugInterface)*>(
-      GetProcAddress(dxgi_debug_lib_, "DXGIGetDebugInterface"));
+    auto const get_debug_interface = reinterpret_cast<decltype(DXGIGetDebugInterface)*>(
+        GetProcAddress(dxgi_debug_lib_, "DXGIGetDebugInterface"));
 #pragma warning(pop)
-  if (!get_debug_interface) {
-    std::ignore = FreeLibrary(dxgi_debug_lib_);
-#ifdef _DEBUG
-    throw exception::WinError{__FILEW__, __LINE__,
-                              "DXGIGetDebugInterface wasn't found", GetLastError()};
-#else
-    throw exception::WinError{"Debug function was not founded", GetLastError()};
-#endif  // _DEBUG
-  }
+    if (!get_debug_interface) {
+      std::ignore = FreeLibrary(dxgi_debug_lib_);
+      dxgi_debug_lib_ = NULL;
+      throw exception::WinError::CreateFromGetLastError(
+          "DXGIGetDebugInterface wasn't found",
+          "Debug function was not founded",
+          __FILEW__, __LINE__);
+    }
 
 #pragma warning(push)
 #pragma warning(disable : 26490)
-  if (HRESULT const operation_status =
-          get_debug_interface(__uuidof(IDXGIInfoQueue), reinterpret_cast<void**>(&messages_queue_));
-     FAILED(operation_status)) {
+    if (HRESULT const operation_status =
+            get_debug_interface(__uuidof(IDXGIInfoQueue), reinterpret_cast<void**>(&messages_queue_));
+       FAILED(operation_status)) {
 #pragma warning(pop)
-    std::ignore = FreeLibrary(dxgi_debug_lib_);
-#ifdef _DEBUG
-    throw exception::DirectXError{__FILEW__, __LINE__,
-                                  "Failed to access debug info queue",
-                                  operation_status};
-#else
-    throw exception::DirectXError{"Failed to access debug info",
-                                  operation_status};
-#endif  // _DEBUG
+      std::ignore = FreeLibrary(dxgi_debug_lib_);
+      dxgi_debug_lib_ = NULL;
+      throw exception::DirectXError::Create(
+          operation_status,
+          "Failed to access debug info queue",
+          "Failed to access debug info",
+          __FILEW__, __LINE__);
+    }
+    assert(messages_queue_ != nullptr);
   }
-  assert(messages_queue_ != nullptr);
+  catch (exception::SystemError const& e) {
+    try {
+    OutputDebugStringW(L"Exception raised in DXDebugInfoManager constructor\n");
+    std::wcerr << L"Exception raised in DXDebugInfoManager constructor. " 
+               << e.GetTypeOfException() << L": " << e.WhatHappened();
+    }
+    catch (...) {
+      OutputDebugStringW(L"Failed to log in console exception raised in DXDebugInfoManager constructor\n");
+    }
+  }
+  catch (...) {
+    OutputDebugStringW(L"Something went wrong in DXDebugInfoManager constructor\n");
+  }
 }
 
 DXDebugInfoManager::~DXDebugInfoManager() noexcept {
-  std::ignore = FreeLibrary(dxgi_debug_lib_);
+  if (dxgi_debug_lib_) { 
+    std::ignore = FreeLibrary(dxgi_debug_lib_);
+  }
   try {
-    std::ignore = messages_queue_->Release();
+    if (messages_queue_) {
+      std::ignore = messages_queue_->Release();
+    }
   } catch (...) {
     OutputDebugStringW(L"Exception raised during messages_queue_ releasing in destructor of DXDebugInfoManager\n");
   }
 }
 
 void DXDebugInfoManager::StartTrace() {
+  if (!messages_queue_) {
+    OutputDebugStringW(L"SetTrace called on incorrect state of DXDebugInfoManager object\n");
+    try {
+      std::wcerr << L"SetTrace called on incorrect state of DXDebugInfoManager object\n";
+    } catch (...) {
+      OutputDebugStringW(L"Failed to log in console in DXDebugInfoManager StartTrace\n");
+    }
+    return;
+  }
+  
   next_message_id_ = messages_queue_->GetNumStoredMessages(DXGI_DEBUG_ALL);
 }
 
 std::wstring DXDebugInfoManager::GetTraceLog() const {
+  if (!messages_queue_) {
+    OutputDebugStringW(L"GetTraceLog called on incorrect state of DXDebugInfoManager object\n");
+    try {
+      std::wcerr << L"GetTraceLog called on incorrect state of DXDebugInfoManager object\n";
+    } catch (...) {
+      OutputDebugStringW(L"Failed to log in console in DXDebugInfoManager GetTraceLog\n");
+    }
+    return L"Unable to get info from dxgidebug.dll\n";
+  }
+
   std::wostringstream log{};
   UINT64 const end = messages_queue_->GetNumStoredMessages(DXGI_DEBUG_ALL);
   for (UINT64 cur = next_message_id_; cur != end; ++cur) {
