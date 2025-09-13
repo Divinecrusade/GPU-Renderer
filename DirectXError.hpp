@@ -29,6 +29,18 @@ class DirectXError : public SystemError {
     return result == -1;
   };
 
+  static DirectXError Create(HRESULT operation_status,
+                             [[maybe_unused]] char const* message_debug,
+                             [[maybe_unused]] char const* message_release,
+                             [[maybe_unused]] wchar_t const* file,
+                             [[maybe_unused]] int line) {
+#ifdef _DEBUG
+    return {file, line, message_debug, operation_status};
+#else
+    return {message_release, operation_status};
+#endif  // _DEBUG
+  }
+
  private:
   HRESULT error_code_{};
 #ifdef _DEBUG
