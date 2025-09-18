@@ -13,7 +13,7 @@ class CrtError : public SystemError {
  public:
 #ifdef _DEBUG
   CrtError(wchar_t const* file, int line, char const* message,
-           errno_t error_code);
+           errno_t error_code) noexcept;
 #endif  // _DEBUG
   CrtError(char const* message, errno_t error_code_) noexcept;
 
@@ -29,7 +29,7 @@ class CrtError : public SystemError {
                          [[maybe_unused]] char const* message_debug,
                          [[maybe_unused]] char const* message_release,
                          [[maybe_unused]] wchar_t const* file,
-                         [[maybe_unused]] int line) {
+                         [[maybe_unused]] int line) noexcept {
 #ifdef _DEBUG
     return {file, line, message_debug, error_code};
 #else

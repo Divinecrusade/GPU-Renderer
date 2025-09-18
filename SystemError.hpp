@@ -17,12 +17,12 @@ class SystemError : public std::exception {
 
  protected:
 #ifdef _DEBUG
-  SystemError(wchar_t const* file, int line, char const* message);
+  SystemError(wchar_t const* file, int line, char const* message) noexcept;
 #endif  // _DEBUG
   SystemError(char const* message) noexcept;
 
 #ifdef _DEBUG
-  [[nodiscard]] std::filesystem::path const& InWhatFileThrowed() const noexcept;
+  [[nodiscard]] std::filesystem::path InWhatFileThrowed() const;
   [[nodiscard]] int InWhatLineOfCodeThrowed() const noexcept;
 #endif  // _DEBUG
 
@@ -38,7 +38,7 @@ class SystemError : public std::exception {
 
  private:
 #ifdef _DEBUG
-  std::filesystem::path file_{};
+  wchar_t const* file_{};
   int line_{};
 #endif  // _DEBUG
 };

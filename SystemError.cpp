@@ -4,13 +4,13 @@
 
 namespace gpu_renderer::exception {
 #ifdef _DEBUG
-SystemError::SystemError(wchar_t const* file, int line, char const* message)
+SystemError::SystemError(wchar_t const* file, int line, char const* message) noexcept
     : std::exception{message}, file_{file}, line_{line} {
   assert(((void)"File path cannot be nullptr", file != nullptr));
   assert(((void)"Line number must be positive", line > 0));
 }
 
-std::filesystem::path const& SystemError::InWhatFileThrowed() const noexcept {
+std::filesystem::path SystemError::InWhatFileThrowed() const {
   return file_;
 }
 
@@ -25,7 +25,7 @@ std::wstring SystemError::FormatErrorMessage(std::wstring_view error_description
 
 #ifdef _DEBUG
   return std::format(L"[What] {}\n[Code] {}\n[Description] {}\n[File] {}\n[Line] {}",
-                     wide_what, GetErrorCode(), error_description, file_.wstring(), line_);
+                     wide_what, GetErrorCode(), error_description, file_, line_);
 #else
   return std::format(L"[What] {}\n[Code] {}\n[Description] {}", 
                      wide_what, GetErrorCode(), error_description);

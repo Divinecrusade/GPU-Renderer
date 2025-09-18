@@ -75,7 +75,7 @@ class Window {
   }
 
   template <bool kTranslateMessages = true>
-  static std::optional<ExitCode> ProcessMessagesFromQueue() {
+  static std::optional<ExitCode> ProcessMessagesFromQueue() noexcept {
     static MSG msg{};
 
     while (PeekMessageW(&msg, kAllWindows, kNoMinRangeFilterMsg,
