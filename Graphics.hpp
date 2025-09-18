@@ -47,7 +47,7 @@ class Graphics final {
   Graphics& operator=(Graphics const&) = delete;
   Graphics& operator=(Graphics&&) = delete;
 
-  ~Graphics() noexcept;
+  ~Graphics() = default;
 
   void EndFrame();
 
@@ -86,11 +86,11 @@ class Graphics final {
   }
 
  private:
-  IDXGISwapChain* swap_chain_{nullptr};
-  ID3D11Device* device_{nullptr};
-  ID3D11DeviceContext* device_context_{nullptr};
-  ID3D11RenderTargetView* render_target_{nullptr};
-
+  Microsoft::WRL::ComPtr<IDXGISwapChain> swap_chain_{};
+  Microsoft::WRL::ComPtr<ID3D11Device> device_{};
+  Microsoft::WRL::ComPtr<ID3D11DeviceContext> device_context_{};
+  Microsoft::WRL::ComPtr<ID3D11RenderTargetView> render_target_{};
+  
 #ifdef _DEBUG
   debug::DXDebugInfoManager debug_info_{};
 #endif  // _DEBUG

@@ -63,8 +63,8 @@ Graphics::Graphics(HWND hwnd) {
           swap_chain_));
   __assume(swap_chain_);
 
-  ID3D11Resource* back_buffer = nullptr;
   static constexpr UINT kBackBufferId = 0u;
+  Microsoft::WRL::ComPtr<ID3D11Resource> back_buffer{};
   
   StartTraceInDebugMode();
 
@@ -72,7 +72,7 @@ Graphics::Graphics(HWND hwnd) {
 #pragma warning(disable : 26490)
   if (HRESULT const operation_status =
           swap_chain_->GetBuffer(kBackBufferId, __uuidof(ID3D11Resource),
-                                 reinterpret_cast<void**>(&back_buffer));
+                                 &back_buffer);
 #pragma warning(pop)
       FAILED(operation_status)) {
     throw CreateDirectXError(operation_status, 
@@ -90,7 +90,7 @@ Graphics::Graphics(HWND hwnd) {
   StartTraceInDebugMode();
 
   if (HRESULT const operation_status = device_->CreateRenderTargetView(
-          back_buffer, kGiveAccessToAllMipmapLevels, &render_target_);
+          back_buffer.Get(), kGiveAccessToAllMipmapLevels, &render_target_);
       FAILED(operation_status)) {
     throw CreateDirectXError(operation_status, 
                              "Target view wasn't created",
@@ -99,28 +99,6 @@ Graphics::Graphics(HWND hwnd) {
   }
   assert(((void)"Render target view must be allocated at this point", 
           render_target_));
-
-  std::ignore = back_buffer->Release();
-}
-
-Graphics::~Graphics() noexcept {
-  try {
-    std::ignore = render_target_->Release();
-    std::ignore = swap_chain_->Release();
-    std::ignore = device_context_->Release();
-    std::ignore = device_->Release();
-  } 
-  catch (...) {
-#ifdef LOG_GRAPHICS
-    try {
-      OutputDebugStringW(L"Unknown exception happened in Graphics destructor\n");
-      std::wcerr << L"Unknown exception happened in Graphics destructor\n";
-    } 
-    catch (...) {
-      OutputDebugStringW(L"Unknown exception happened in Graphics destructor logging\n");
-    }
-#endif  // LOG_GRAPHICS
-  }
 }
 
 void Graphics::EndFrame() {
@@ -133,7 +111,7 @@ void Graphics::EndFrame() {
       swap_chain_->Present(kNoSwapChainSync, kDefaultSwapChainPresention);
       FAILED(operation_status)) {
       if (exception::DeviceRemovedError::IsDeviceRemovedErrorHappened(operation_status)) {
-        throw CreateDeviceRemovedError(*device_, 
+        throw CreateDeviceRemovedError(*device_.Get(), 
                                        "Device removed unexpectly and frame wasn't present",
                                        "Render failed", 
                                        __FILEW__, __LINE__);  
@@ -148,7 +126,7 @@ void Graphics::EndFrame() {
 }
 
 void Graphics::ClearBuffer(Color const& c) {
-  device_context_->ClearRenderTargetView(render_target_, &c);
+  device_context_->ClearRenderTargetView(render_target_.Get(), &c);
 }
 
 Graphics::Color::Color(float r, float g, float b) noexcept
