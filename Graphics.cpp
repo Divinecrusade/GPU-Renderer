@@ -169,13 +169,13 @@ void Graphics::Color::SetG(float g) noexcept {
   assert(((void)"Color component must be normalised (0..1)",
           (0.f <= g && g <= 1.f)));
   __assume((0.f <= g && g <= 1.f));
-  encoded_[kIndexComponentR] = g;
+  encoded_[kIndexComponentG] = g;
 }
 
 void Graphics::Color::SetB(float b) noexcept {
   assert(((void)"Color component must be normalised (0..1)",
           (0.f <= b && b <= 1.f)));
   __assume((0.f <= b && b <= 1.f));
-  encoded_[kIndexComponentR] = b;
+  encoded_[kIndexComponentB] = b;
 }
 }  // namespace gpu_renderer
