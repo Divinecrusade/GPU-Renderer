@@ -1,10 +1,10 @@
 ﻿#ifndef ERROR_WITH_CODE_HPP
 #define ERROR_WITH_CODE_HPP
 
-#include "OptimisedStlHeader.hpp"
+#include "Error.hpp"
 
 namespace gpu_renderer::exception {
-class ErrorWithCode : public std::exception {
+class ErrorWithCode : public Error {
  public:
   ErrorWithCode() = default;
   ErrorWithCode(ErrorWithCode const&) = default;
@@ -21,26 +21,12 @@ class ErrorWithCode : public std::exception {
 #endif  // _DEBUG
   ErrorWithCode(char const* message) noexcept;
 
-#ifdef _DEBUG
-  [[nodiscard]] std::filesystem::path InWhatFileThrowed() const;
-  [[nodiscard]] int InWhatLineOfCodeThrowed() const noexcept;
-#endif  // _DEBUG
-
  public:
   [[nodiscard]] virtual int GetErrorCode() const noexcept = 0;
-  [[nodiscard]] virtual std::wstring_view GetTypeOfException()
-      const noexcept = 0;
-  [[nodiscard]] virtual std::wstring WhatHappened() const = 0;
 
  protected:
   [[nodiscard]] std::wstring FormatErrorMessage(
-      std::wstring_view error_description) const;
-
- private:
-#ifdef _DEBUG
-  wchar_t const* file_{};
-  int line_{};
-#endif  // _DEBUG
+      std::wstring_view error_description) const override;
 };
 }  // namespace gpu_renderer::exception
 

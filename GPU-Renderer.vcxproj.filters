@@ -93,6 +93,9 @@
     <ClCompile Include="DXDebugInfoManager.cpp">
       <Filter>Исходные файлы\debug</Filter>
     </ClCompile>
+    <ClCompile Include="Error.cpp">
+      <Filter>Исходные файлы\exception</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
@@ -179,6 +182,9 @@
     </ClInclude>
     <ClInclude Include="DXDebugInfoManager.hpp">
       <Filter>Файлы заголовков\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="Error.hpp">
+      <Filter>Файлы заголовков\exception</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

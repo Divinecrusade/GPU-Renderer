@@ -180,6 +180,7 @@
     <ClCompile Include="DirectXError.cpp" />
     <ClCompile Include="DXDebugInfoManager.cpp" />
     <ClCompile Include="dxerr.cpp" />
+    <ClCompile Include="Error.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Mouse.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="DirectXError.hpp" />
     <ClInclude Include="dxerr.h" />
     <ClInclude Include="DXDebugInfoManager.hpp" />
+    <ClInclude Include="Error.hpp" />
     <ClInclude Include="FrameTimer.hpp" />
     <ClInclude Include="Graphics.hpp" />
     <ClInclude Include="Keyboard.hpp" />
