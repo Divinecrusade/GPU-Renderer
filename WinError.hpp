@@ -3,10 +3,10 @@
 
 #include "OptimisedStlHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
-#include "SystemError.hpp"
+#include "ErrorWithCode.hpp"
 
 namespace gpu_renderer::exception {
-class WinError : public SystemError {
+class WinError : public ErrorWithCode {
  public:
   static constexpr std::wstring_view kTypeOfException = L"WinAPI error";
 

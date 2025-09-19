@@ -183,7 +183,7 @@
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Mouse.cpp" />
-    <ClCompile Include="SystemError.cpp" />
+    <ClCompile Include="ErrorWithCode.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowClass.cpp" />
     <ClCompile Include="WinError.cpp">
@@ -218,7 +218,7 @@
     <ClInclude Include="OptimisedStlHeader.hpp" />
     <ClInclude Include="OptimisedWindowsHeader.hpp" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="SystemError.hpp" />
+    <ClInclude Include="ErrorWithCode.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="WindowClass.hpp" />
     <ClInclude Include="WinError.hpp" />

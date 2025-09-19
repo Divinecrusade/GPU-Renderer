@@ -1,11 +1,10 @@
 ﻿#include "Application.hpp"
 #ifdef _DEBUG
 #include "Console.hpp"
-#include "CrtError.hpp"
 #endif  // DCSONSOLE
 #include "OptimisedGslHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
-#include "WinError.hpp"
+#include "ErrorWithCode.hpp"
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                     [[maybe_unused]] _In_opt_ HINSTANCE,
@@ -16,22 +15,25 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                  _CRTDBG_CHECK_ALWAYS_DF);
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 #endif  // _DEBUG
-  using gpu_renderer::exception::SystemError;
+  using gpu_renderer::exception::ErrorWithCode;
 #ifdef _DEBUG
   using gpu_renderer::debug::Console;
 
   try {
     Console::InitStdStreams(L"GPU-Renderer Debug Console");
-  } catch (SystemError const& e) {
+  } 
+  catch (ErrorWithCode const& e) {
     MessageBoxW(NULL, e.WhatHappened().c_str(), e.GetTypeOfException().data(),
                 MB_OK | MB_ICONERROR);
     return e.GetErrorCode();
-  } catch (std::exception const& e) {
+  } 
+  catch (std::exception const& e) {
     std::string const narrow = e.what();
     MessageBoxW(NULL, std::wstring{narrow.begin(), narrow.end()}.c_str(),
                 L"C++ standard exception", MB_OK | MB_ICONERROR);
     return EXIT_FAILURE;
-  } catch (...) {
+  } 
+  catch (...) {
     MessageBoxW(NULL, L"Something unexpected happened", L"Unknown error",
                 MB_OK | MB_ICONERROR);
     return EXIT_FAILURE;
@@ -43,16 +45,19 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
   try {
     Application app{hInstance, nCmdShow};
     exit_code = app.Run();
-  } catch (SystemError const& e) {
+  } 
+  catch (ErrorWithCode const& e) {
     MessageBoxW(NULL, e.WhatHappened().c_str(), e.GetTypeOfException().data(),
                 MB_OK | MB_ICONERROR);
     exit_code = e.GetErrorCode();
-  } catch (std::exception const& e) {
+  } 
+  catch (std::exception const& e) {
     std::string const narrow = e.what();
     MessageBoxW(NULL, std::wstring{narrow.begin(), narrow.end()}.c_str(),
                 L"C++ standard exception", MB_OK | MB_ICONERROR);
     exit_code = EXIT_FAILURE;
-  } catch (...) {
+  }
+  catch (...) {
     MessageBoxW(NULL, L"Something unexpected happened", L"Unknown error",
                 MB_OK | MB_ICONERROR);
     exit_code = EXIT_FAILURE;

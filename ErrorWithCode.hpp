@@ -1,25 +1,25 @@
-﻿#ifndef SYSTEM_ERROR_HPP
-#define SYSTEM_ERROR_HPP
+﻿#ifndef ERROR_WITH_CODE_HPP
+#define ERROR_WITH_CODE_HPP
 
 #include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::exception {
-class SystemError : public std::exception {
+class ErrorWithCode : public std::exception {
  public:
-  SystemError() = default;
-  SystemError(SystemError const&) = default;
-  SystemError(SystemError&&) = default;
+  ErrorWithCode() = default;
+  ErrorWithCode(ErrorWithCode const&) = default;
+  ErrorWithCode(ErrorWithCode&&) = default;
 
-  SystemError& operator=(SystemError const&) = default;
-  SystemError& operator=(SystemError&&) = default;
+  ErrorWithCode& operator=(ErrorWithCode const&) = default;
+  ErrorWithCode& operator=(ErrorWithCode&&) = default;
 
-  virtual ~SystemError() = default;
+  virtual ~ErrorWithCode() = default;
 
  protected:
 #ifdef _DEBUG
-  SystemError(wchar_t const* file, int line, char const* message) noexcept;
+  ErrorWithCode(wchar_t const* file, int line, char const* message) noexcept;
 #endif  // _DEBUG
-  SystemError(char const* message) noexcept;
+  ErrorWithCode(char const* message) noexcept;
 
 #ifdef _DEBUG
   [[nodiscard]] std::filesystem::path InWhatFileThrowed() const;

@@ -47,7 +47,7 @@ DXDebugInfoManager::DXDebugInfoManager() noexcept
     }
     assert(messages_queue_ != nullptr);
   }
-  catch (exception::SystemError const& e) {
+  catch (exception::ErrorWithCode const& e) {
     try {
       OutputDebugStringW(L"Exception raised in DXDebugInfoManager constructor\n");
       std::wcerr << L"Exception raised in DXDebugInfoManager constructor. " 

@@ -8,14 +8,14 @@ namespace gpu_renderer::exception {
 #ifdef _DEBUG
 CrtError::CrtError(wchar_t const* file, int line, char const* message,
                    errno_t error_code) noexcept
-    : SystemError{file, line, message},
+    : ErrorWithCode{file, line, message},
       error_code_{error_code} {
   assert(((void)"CRT error code cannot be 0", error_code_ != 0));
 }
 #endif  // _DEBUG
 
 CrtError::CrtError(char const* message, errno_t error_code) noexcept
-    : SystemError{message}, error_code_{error_code} {
+    : ErrorWithCode{message}, error_code_{error_code} {
   assert(((void)"CRT error code cannot be 0", error_code_ != 0));
 }
 

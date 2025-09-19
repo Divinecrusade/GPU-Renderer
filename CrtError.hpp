@@ -3,10 +3,10 @@
 
 #include <corecrt.h>
 
-#include "SystemError.hpp"
+#include "ErrorWithCode.hpp"
 
 namespace gpu_renderer::exception {
-class CrtError : public SystemError {
+class CrtError : public ErrorWithCode {
  public:
   static constexpr std::wstring_view kTypeOfException = L"C runtime library (CRT) error";
 

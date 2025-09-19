@@ -75,7 +75,7 @@
     <ClCompile Include="CrtError.cpp">
       <Filter>Исходные файлы\exception</Filter>
     </ClCompile>
-    <ClCompile Include="SystemError.cpp">
+    <ClCompile Include="ErrorWithCode.cpp">
       <Filter>Исходные файлы\exception</Filter>
     </ClCompile>
     <ClCompile Include="Graphics.cpp">
@@ -147,7 +147,7 @@
     <ClInclude Include="CrtError.hpp">
       <Filter>Файлы заголовков\exception</Filter>
     </ClInclude>
-    <ClInclude Include="SystemError.hpp">
+    <ClInclude Include="ErrorWithCode.hpp">
       <Filter>Файлы заголовков\exception</Filter>
     </ClInclude>
     <ClInclude Include="Graphics.hpp">

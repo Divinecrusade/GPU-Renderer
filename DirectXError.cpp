@@ -8,7 +8,7 @@ namespace gpu_renderer::exception {
 #ifdef _DEBUG
 DirectXError::DirectXError(wchar_t const* file, int line, char const* message,
                            HRESULT operation_status) noexcept
-    : SystemError{file, line, message}, 
+    : ErrorWithCode{file, line, message}, 
       error_code_{operation_status} {
   assert(((void)"Exception must be created from failed code status", 
           FAILED(operation_status)));
@@ -25,7 +25,7 @@ DirectXError::DirectXError(wchar_t const* file, int line, char const* message,
 #endif  // _DEBUG
 
 DirectXError::DirectXError(char const* message, HRESULT operation_status) noexcept
-    : SystemError{message}, error_code_{operation_status} {
+    : ErrorWithCode{message}, error_code_{operation_status} {
   assert(((void)"Exception must be created from failed code status",
           FAILED(operation_status)));
 }

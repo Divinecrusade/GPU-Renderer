@@ -32,9 +32,6 @@
     <ClCompile Include="..\WinError.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\SystemError.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="ColorClassTest.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
@@ -51,6 +48,9 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="..\dxerr.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ErrorWithCode.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

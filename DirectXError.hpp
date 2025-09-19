@@ -3,11 +3,11 @@
 
 #include "OptimisedStlHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
-#include "SystemError.hpp"
+#include "ErrorWithCode.hpp"
 #include "DXDebugInfoManager.hpp"
 
 namespace gpu_renderer::exception {
-class DirectXError : public SystemError {
+class DirectXError : public ErrorWithCode {
  public:
   static constexpr std::wstring_view kTypeOfException = L"DirectX error";
 
