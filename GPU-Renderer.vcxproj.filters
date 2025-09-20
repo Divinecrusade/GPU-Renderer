@@ -96,6 +96,9 @@
     <ClCompile Include="Error.cpp">
       <Filter>Исходные файлы\exception</Filter>
     </ClCompile>
+    <ClCompile Include="DebugLayerMessage.cpp">
+      <Filter>Исходные файлы\exception</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
@@ -184,6 +187,9 @@
       <Filter>Файлы заголовков\debug</Filter>
     </ClInclude>
     <ClInclude Include="Error.hpp">
+      <Filter>Файлы заголовков\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugLayerMessage.hpp">
       <Filter>Файлы заголовков\exception</Filter>
     </ClInclude>
   </ItemGroup>
