@@ -4,6 +4,8 @@
 #include "OptimisedStlHeader.hpp"
 #include "OptimisedGslHeader.hpp"
 
+using namespace std::string_literals;
+
 namespace gpu_renderer::exception {
 #ifdef _DEBUG
 DirectXError::DirectXError(wchar_t const* file, int line, char const* message,
@@ -18,7 +20,14 @@ DirectXError::DirectXError(wchar_t const* file, int line, char const* message,
                            HRESULT operation_status,
                            debug::DXDebugInfoManager const& debug_tracer)
     : DirectXError{file, line, message, operation_status} {
-    trace_log_ = debug_tracer.GetTraceLog();
+    if (auto const expected_trace_result{debug_tracer.GetTraceLog()};
+        expected_trace_result) {
+      trace_log_ = (expected_trace_result->empty() ? L"No debug layer messages\n"s
+                                                   : *expected_trace_result);
+    }
+    else {
+      trace_log_ = expected_trace_result.error();
+    }
     OutputDebugStringW(trace_log_->data());
     std::wclog << *trace_log_;
 }

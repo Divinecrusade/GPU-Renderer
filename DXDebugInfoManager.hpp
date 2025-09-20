@@ -17,7 +17,7 @@ class DXDebugInfoManager {
   ~DXDebugInfoManager() noexcept;
 
   void StartTrace();
-  std::wstring GetTraceLog() const;
+  std::expected<std::wstring, std::wstring> GetTraceLog() const;
 
  private:
   HMODULE dxgi_debug_lib_{};

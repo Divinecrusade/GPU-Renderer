@@ -89,7 +89,7 @@ void DXDebugInfoManager::StartTrace() {
   next_message_id_ = messages_queue_->GetNumStoredMessages(DXGI_DEBUG_ALL);
 }
 
-std::wstring DXDebugInfoManager::GetTraceLog() const {
+std::expected<std::wstring, std::wstring> DXDebugInfoManager::GetTraceLog() const {
   if (!messages_queue_) {
     OutputDebugStringW(L"GetTraceLog called on incorrect state of DXDebugInfoManager object\n");
     try {
@@ -97,7 +97,7 @@ std::wstring DXDebugInfoManager::GetTraceLog() const {
     } catch (...) {
       OutputDebugStringW(L"Failed to log in console in DXDebugInfoManager GetTraceLog\n");
     }
-    return L"Unable to get info from dxgidebug.dll\n";
+    return std::unexpected(L"Unable to get info from dxgidebug.dll\n");
   }
 
   std::wostringstream log{};
