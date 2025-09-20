@@ -34,8 +34,6 @@ class Application final {
  private:
   window::CachedDC window_class_;
   window::Canvas window_;
-
-  float theta = 0.f;
 };
 }  // namespace gpu_renderer
 

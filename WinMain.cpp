@@ -15,6 +15,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                  _CRTDBG_CHECK_ALWAYS_DF);
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 #endif  // _DEBUG
+  using gpu_renderer::exception::Error;
   using gpu_renderer::exception::ErrorWithCode;
 #ifdef _DEBUG
   using gpu_renderer::debug::Console;
@@ -50,6 +51,11 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     MessageBoxW(NULL, e.WhatHappened().c_str(), e.GetTypeOfException().data(),
                 MB_OK | MB_ICONERROR);
     exit_code = e.GetErrorCode();
+  } 
+  catch (Error const& e) {
+    MessageBoxW(NULL, e.WhatHappened().c_str(), e.GetTypeOfException().data(),
+                MB_OK | MB_ICONERROR);
+    exit_code = EXIT_FAILURE;
   } 
   catch (std::exception const& e) {
     std::string const narrow = e.what();

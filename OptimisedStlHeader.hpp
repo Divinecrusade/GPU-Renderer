@@ -8,6 +8,7 @@
 #include <cassert>
 #include <chrono>
 #include <exception>
+#include <expected>
 #include <format>
 #include <filesystem>
 #include <iostream>

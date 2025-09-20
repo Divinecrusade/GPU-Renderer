@@ -21,10 +21,10 @@ std::wstring Error::FormatErrorMessage(std::wstring_view error_description) cons
   std::wstring const wide_what{narrow_what.begin(), narrow_what.end()};
 
 #ifdef _DEBUG
-  return std::format(L"[What] {}\n[Description] {}\n[File] {}\n[Line] {}",
+  return std::format(L"[What] {}\n[Description]\n {}\n[File] {}\n[Line] {}",
                      wide_what, error_description, file_, line_);
 #else
-  return std::format(L"[What] {}\n[Description] {}", 
+  return std::format(L"[What] {}\n[Description]\n {}", 
                      wide_what, error_description);
 #endif  // _DEBUG
 }

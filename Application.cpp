@@ -26,12 +26,11 @@ std::optional<window::ExitCode> Application::Process() {
 }
 
 void Application::Update(FrameTimer::DeltaTime dt) {
-  constexpr float kDeltaTheta = 3.14f / 4.f;
-  theta = std::fmodf(theta + kDeltaTheta * dt, 3.14f);
 }
 
 void Application::Render() { 
-  window_.gfx.ClearBuffer({std::sinf(theta), 1.f, 1.f});
+  window_.gfx.ClearBuffer({0.f, 0.f, 0.f});
+  window_.gfx.DrawTestTriangle();
   window_.gfx.EndFrame(); 
 }
 }  // namespace gpu_renderer

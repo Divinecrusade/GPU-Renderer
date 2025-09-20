@@ -10,6 +10,7 @@
 #endif  // _DEBUG
 #include "DirectXError.hpp"
 #include "DeviceRemovedError.hpp"
+#include "DebugLayerMessage.hpp"
 
 namespace gpu_renderer {
 class Graphics final {
@@ -52,6 +53,53 @@ class Graphics final {
   void EndFrame();
 
   void ClearBuffer(Color const& c);
+
+  void DrawTestTriangle() {
+#ifdef _DEBUG
+    struct Vector2D {
+      float x = 0.f;
+      float y = 0.f;
+    };
+    std::array<Vector2D, 3u> triangle{
+     Vector2D{.x = -0.5f, .y = -0.5f},
+     Vector2D{.x = 0.f, .y = 0.5f},
+     Vector2D{.x = 0.5f, .y = -0.5f}
+    }; 
+
+    constexpr UINT kNoCpuAccessToBuffer = 0u;
+    constexpr UINT kNoMisc = 0u;
+    D3D11_BUFFER_DESC const vertex_buffer_conf{
+      .ByteWidth = triangle.size() * sizeof(Vector2D),
+      .Usage = D3D11_USAGE_DEFAULT,
+      .BindFlags = D3D11_BIND_VERTEX_BUFFER,
+      .CPUAccessFlags = kNoCpuAccessToBuffer,
+      .MiscFlags = kNoMisc
+    };
+    D3D11_SUBRESOURCE_DATA const vertex_buffer{.pSysMem = triangle.data()};
+    Microsoft::WRL::ComPtr<ID3D11Buffer> vertex_buffers{};
+    StartTraceInDebugMode();
+    if (HRESULT const operation_status = 
+            device_->CreateBuffer(&vertex_buffer_conf, &vertex_buffer, &vertex_buffers);
+        FAILED(operation_status)) {
+        throw exception::DirectXError::Create(operation_status,
+                                              "Buffer was not created",
+                                              "Buffer was not created",
+                                              __FILEW__, __LINE__);
+    }
+    static constexpr UINT stride = 0u;
+    static constexpr UINT offset = 0u;
+    StartTraceInDebugMode();
+    device_context_->IASetVertexBuffers(0u, 1u, vertex_buffers.GetAddressOf(),
+                                        &stride, &offset);
+    device_context_->Draw(triangle.size(), 0u); 
+    if (auto expected_trace = debug_info_.GetTraceLog(); 
+        expected_trace && !expected_trace->empty()) {
+      throw exception::DebugLayerMessage{__FILEW__, __LINE__, 
+                                         "Vertex buffer setting failed",
+                                         std::move(expected_trace.value())};
+    }
+#endif  // _DEBUG
+  }
 
  private:
   void StartTraceInDebugMode() {
