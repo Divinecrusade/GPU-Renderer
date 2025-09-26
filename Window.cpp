@@ -182,7 +182,7 @@ HWND Window::InitializeWindow(Window* window_instance,
                                   window_pos.bottom - window_pos.top, 
                                   kNoParent, kNoMenu, hInstance, 
                                   window_instance)};
-  if (static constexpr auto WindowCreationFailed =
+  if (constexpr auto WindowCreationFailed =
           [](HWND const& wnd) { return wnd == NULL; };
       WindowCreationFailed(hwnd)) {
 #ifdef LOG_WINDOW
@@ -311,7 +311,7 @@ Window::Window(std::size_t keyboard_events_queue_size,
 }
 
 LRESULT Window::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {
-  static constexpr auto kPreviousKeyStateMask = 0b1000000000000000000000000000000;
+  constexpr auto kPreviousKeyStateMask = 0b1000000000000000000000000000000;
 #ifdef LOG_WINDOW_MESSAGES
   try {
     OutputDebugStringW(L"Message catched in Window object\n");

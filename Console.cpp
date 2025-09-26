@@ -32,8 +32,7 @@ Console::Console(std::wstring_view console_window_title) {
 
   FILE* cout_stream = nullptr;
   if (errno_t const operation_code_result = freopen_s(&cout_stream, "CONOUT$", "w", stdout);
-      exception::CrtError::OperationFailed(operation_code_result))
-      [[unlikely]] {
+      exception::CrtError::OperationFailed(operation_code_result)) [[unlikely]] {
     throw exception::CrtError::Create(operation_code_result,
                                       "Cout stream wasn't reopened",
                                       "Console wasn't opened",
@@ -44,8 +43,7 @@ Console::Console(std::wstring_view console_window_title) {
   
   FILE* cerr_stream = nullptr;
   if (errno_t const operation_code_result = freopen_s(&cerr_stream, "CONOUT$", "w", stderr);
-      exception::CrtError::OperationFailed(operation_code_result))
-      [[unlikely]] {
+      exception::CrtError::OperationFailed(operation_code_result)) [[unlikely]] {
     throw exception::CrtError::Create(operation_code_result,
                                       "Cerr stream wasn't reopened",
                                       "Console wasn't opened",
@@ -56,8 +54,7 @@ Console::Console(std::wstring_view console_window_title) {
 
   FILE* cin_stream = nullptr;
   if (errno_t const operation_code_result = freopen_s(&cin_stream, "CONIN$", "r", stdin);
-      exception::CrtError::OperationFailed(operation_code_result))
-      [[unlikely]] {
+      exception::CrtError::OperationFailed(operation_code_result)) [[unlikely]] {
     throw exception::CrtError::Create(operation_code_result,
                                       "Cin stream wasn't reopened",
                                       "Console wasn't opened",
@@ -80,7 +77,7 @@ Console::Console(std::wstring_view console_window_title) {
         __FILEW__, __LINE__);
   }
 
-  static constexpr auto SetModeFailed = [](auto op_status) {
+  constexpr auto SetModeFailed = [](auto op_status) {
     return op_status < 0;
   };
   if (SetModeFailed(_setmode(_fileno(stdout), _O_U8TEXT))) [[unlikely]] {

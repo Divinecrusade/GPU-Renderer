@@ -26,17 +26,17 @@ std::wstring_view CrtError::GetTypeOfException() const noexcept {
 }
 
 std::wstring CrtError::WhatHappened() const {
-  static constexpr std::size_t kMaxErrorMessageLength{256ull};
-  static constexpr auto FormatFailed = [](errno_t format_result) {
+  constexpr std::size_t kMaxErrorMessageLength = 256u;
+  constexpr auto FormatFailed = [](errno_t format_result) {
     return format_result != 0;
   };
   std::wstring error_description{'\0', kMaxErrorMessageLength};
   
-  errno_t const format_result{
-      _wcserror_s(error_description.data(), 
-                  sizeof(wchar_t) * kMaxErrorMessageLength, error_code_)};
-
-  if (FormatFailed(format_result)) {
+  if (errno_t const format_result =
+          _wcserror_s(error_description.data(),
+                      sizeof(wchar_t) * kMaxErrorMessageLength, 
+                      error_code_);
+      FormatFailed(format_result)) {
     error_description = L"Unknown CRT error";
 #ifdef _DEBUG
     try {

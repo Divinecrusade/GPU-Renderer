@@ -34,7 +34,8 @@ DXDebugInfoManager::DXDebugInfoManager() noexcept
 #pragma warning(push)
 #pragma warning(disable : 26490)
     if (HRESULT const operation_status =
-            get_debug_interface(__uuidof(IDXGIInfoQueue), reinterpret_cast<void**>(&messages_queue_));
+            get_debug_interface(__uuidof(IDXGIInfoQueue), 
+                                reinterpret_cast<void**>(&messages_queue_));
        FAILED(operation_status)) {
 #pragma warning(pop)
       std::ignore = FreeLibrary(dxgi_debug_lib_);
@@ -70,7 +71,8 @@ DXDebugInfoManager::~DXDebugInfoManager() noexcept {
     if (messages_queue_) {
       std::ignore = messages_queue_->Release();
     }
-  } catch (...) {
+  } 
+  catch (...) {
     OutputDebugStringW(L"Exception raised during messages_queue_ releasing in destructor of DXDebugInfoManager\n");
   }
 }
@@ -80,7 +82,8 @@ void DXDebugInfoManager::StartTrace() {
     OutputDebugStringW(L"SetTrace called on incorrect state of DXDebugInfoManager object\n");
     try {
       std::wcerr << L"SetTrace called on incorrect state of DXDebugInfoManager object\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Failed to log in console in DXDebugInfoManager StartTrace\n");
     }
     return;
@@ -94,10 +97,11 @@ std::expected<std::wstring, std::wstring> DXDebugInfoManager::GetTraceLog() cons
     OutputDebugStringW(L"GetTraceLog called on incorrect state of DXDebugInfoManager object\n");
     try {
       std::wcerr << L"GetTraceLog called on incorrect state of DXDebugInfoManager object\n";
-    } catch (...) {
+    } 
+    catch (...) {
       OutputDebugStringW(L"Failed to log in console in DXDebugInfoManager GetTraceLog\n");
     }
-    return std::unexpected(L"Unable to get info from dxgidebug.dll\n");
+    return std::unexpected{L"Unable to get info from dxgidebug.dll\n"};
   }
 
   std::wostringstream log{};
@@ -110,37 +114,30 @@ std::expected<std::wstring, std::wstring> DXDebugInfoManager::GetTraceLog() cons
     if (HRESULT const operation_status = messages_queue_->GetMessageW(
             DXGI_DEBUG_ALL, cur, nullptr, &message_size);
         FAILED(operation_status)) {
-#ifdef _DEBUG
-      throw exception::DirectXError{__FILEW__, __LINE__,
-                                    "Failed to determine message length from debug queue",
-                                    operation_status};
-#else
-      throw exception::DirectXError{"Failed to retrieve debug message",
-                                    operation_status};
-#endif  // _DEBUG
+      throw exception::DirectXError::Create(
+          operation_status,
+          "Failed to determine message length from debug queue", 
+          "Failed to retrieve debug message", 
+          __FILEW__, __LINE__);
     }
 #pragma warning(push)
 #pragma warning(disable : 26414)
-    auto message_buffer = std::make_unique<std::byte[]>(message_size);
+    auto const message_buffer = std::make_unique<std::byte[]>(message_size);
 #pragma warning(pop)
 #pragma warning(push)
 #pragma warning(disable : 26490)
-    auto message = reinterpret_cast<DXGI_INFO_QUEUE_MESSAGE*>(
+    auto const message = reinterpret_cast<DXGI_INFO_QUEUE_MESSAGE*>(
         message_buffer.get());
 #pragma warning(pop)
     if (HRESULT const operation_status = messages_queue_->GetMessageW(
             DXGI_DEBUG_ALL, cur, message,
             &message_size);
         FAILED(operation_status)) {
-#ifdef _DEBUG
-      throw exception::DirectXError{
-          __FILEW__, __LINE__,
+      throw exception::DirectXError::Create(
+          operation_status,
           "Failed to determine message length from debug queue",
-          operation_status};
-#else
-      throw exception::DirectXError{"Failed to retrieve debug message",
-                                    operation_status};
-#endif  // _DEBUG
+          "Failed to retrieve debug message",
+          __FILEW__, __LINE__);
     }
     log << message->pDescription << std::endl;
   }

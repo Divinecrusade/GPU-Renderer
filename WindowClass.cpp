@@ -22,7 +22,7 @@ WindowClass::WindowClass(UINT style, WNDPROC lpfnWndProc, int cbClsExtra,
   assert(((void)"Instance handle cannot be null", hInstance != NULL));
   __assume(hInstance != NULL);
 
-  auto const [it, _]{class_ref_counts_.try_emplace(lpszClassName, 0u)};
+  auto const [it, _] = class_ref_counts_.try_emplace(lpszClassName, 0u);
   class_name_ = it->first;
 
   assert(((void)"string_view must reference map key",

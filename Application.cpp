@@ -21,7 +21,7 @@ window::ExitCode Application::Run() {
 }
 
 std::optional<window::ExitCode> Application::Process() {
-  static constexpr bool kLockInQueue = false;
+  constexpr bool kLockInQueue = false;
   return window_.ProcessMessagesFromQueue<kLockInQueue>();
 }
 

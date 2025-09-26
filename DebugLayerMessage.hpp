@@ -1,4 +1,4 @@
-#ifndef DEBUG_LAYER_MESSAGE_HPP
+﻿#ifndef DEBUG_LAYER_MESSAGE_HPP
 #define DEBUG_LAYER_MESSAGE_HPP
 
 #include "OptimisedStlHeader.hpp"
@@ -11,7 +11,7 @@ class DebugLayerMessage : public Error {
 
  public:
   DebugLayerMessage(wchar_t const* file, int line, char const* message,
-                    std::wstring trace_log);
+                    std::wstring trace_log) noexcept;
 
   [[nodiscard]] std::wstring_view GetTypeOfException() const noexcept override;
   [[nodiscard]] std::wstring WhatHappened() const override;

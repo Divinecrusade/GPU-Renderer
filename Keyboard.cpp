@@ -40,8 +40,8 @@ std::optional<wchar_t> Keyboard::View::GetFirstChar() const {
 std::wstring Keyboard::View::GetChars() const {
   if (kbd_->chars_buffer_.empty()) return L"";
 
-  std::wstring buffer_content{kbd_->chars_buffer_.begin(),
-                              kbd_->chars_buffer_.end()};
+  std::wstring const buffer_content{kbd_->chars_buffer_.begin(),
+                                    kbd_->chars_buffer_.end()};
   kbd_->chars_buffer_.clear();
   return buffer_content;
 }

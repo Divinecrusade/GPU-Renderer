@@ -1,11 +1,12 @@
-#include "DebugLayerMessage.hpp"
+﻿#include "DebugLayerMessage.hpp"
 
 namespace gpu_renderer::exception {
 DebugLayerMessage::DebugLayerMessage(wchar_t const* file, int line, 
                                      char const* message,
-                                     std::wstring trace_log)
+                                     std::wstring trace_log) noexcept
     : Error{file, line, message}, 
-      trace_log_{std::move(trace_log)} {}
+      trace_log_{std::move(trace_log)} 
+{}
 
 std::wstring_view DebugLayerMessage::GetTypeOfException() const noexcept {
   return kTypeOfException;

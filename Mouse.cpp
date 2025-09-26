@@ -17,8 +17,7 @@ bool Mouse::View::IsInWindow() const noexcept {
   return mse_->in_window_; 
 }
 
-std::optional<Mouse::Event>
-Mouse::View::GetOldestEvent() const {
+std::optional<Mouse::Event> Mouse::View::GetOldestEvent() const {
   if (mse_->events_queue_.empty()) return std::nullopt;
 
   Event const key_event{std::move(mse_->events_queue_.front())};
