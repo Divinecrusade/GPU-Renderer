@@ -133,7 +133,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <EnablePREfast>true</EnablePREfast>
-      <DisableSpecificWarnings>5045; 4514;4820;26446</DisableSpecificWarnings>
+      <DisableSpecificWarnings>5045; 4514;4820;26446;4868</DisableSpecificWarnings>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <UseDynamicDebugging>false</UseDynamicDebugging>
       <IntelJCCErratum>true</IntelJCCErratum>
