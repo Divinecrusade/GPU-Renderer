@@ -4,6 +4,7 @@
 #include "DeviceRemovedError.hpp"
 
 #pragma comment(lib, "d3d11")
+#pragma comment(lib, "D3DCompiler")
 
 namespace gpu_renderer {
 Graphics::Graphics(HWND hwnd) {
@@ -62,6 +63,32 @@ Graphics::Graphics(HWND hwnd) {
   assert(((void)"Swap chain must be allocated at this point", 
           swap_chain_));
   __assume(swap_chain_);
+
+  Microsoft::WRL::ComPtr<ID3DBlob> vertex_shader_blob{};
+  StartTraceInDebugMode();
+  if (HRESULT const operation_status = 
+          D3DReadFileToBlob(L"VertexShader.cso", &vertex_shader_blob);
+      FAILED(operation_status)) {
+    throw CreateDirectXError(operation_status, 
+                             "Failed to read compiled vertex shader into blob",
+                             "Error during shader loading",
+                             __FILEW__, __LINE__);
+  }
+
+  Microsoft::WRL::ComPtr<ID3D11VertexShader> vertex_shader{};
+  StartTraceInDebugMode();
+  if (HRESULT const operation_status = 
+          device_->CreateVertexShader(vertex_shader_blob->GetBufferPointer(),
+                                      vertex_shader_blob->GetBufferSize(),
+                                      NULL,
+                                      &vertex_shader);
+      FAILED(operation_status)) {
+    throw CreateDirectXError(operation_status, 
+                             "Failed to create vertex shader from blob",
+                             "Error during shader loading", 
+                             __FILEW__, __LINE__);
+  }
+  device_context_->VSSetShader(vertex_shader.Get(), NULL, NULL);
 
   static constexpr UINT kBackBufferId = 0u;
   Microsoft::WRL::ComPtr<ID3D11Resource> back_buffer{};

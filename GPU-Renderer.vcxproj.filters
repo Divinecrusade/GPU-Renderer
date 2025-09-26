@@ -40,6 +40,9 @@
     <Filter Include="Файлы заголовков\lib">
       <UniqueIdentifier>{f7062b9c-55a9-488f-96fd-7dad95cd05e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Шейдеры">
+      <UniqueIdentifier>{526fec0d-475e-4af2-ad21-6a287480d312}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -112,6 +115,8 @@
     <None Include="DXTrace.inl">
       <Filter>Файлы заголовков\debug</Filter>
     </None>
+    <None Include=".gitignore" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -202,5 +207,10 @@
     <Image Include="app.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="VertexShader.hlsl">
+      <Filter>Шейдеры</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
