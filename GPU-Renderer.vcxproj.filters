@@ -212,5 +212,8 @@
     <FxCompile Include="VertexShader.hlsl">
       <Filter>Шейдеры</Filter>
     </FxCompile>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>Шейдеры</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

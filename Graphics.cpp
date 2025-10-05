@@ -11,9 +11,9 @@ Graphics::Graphics(HWND hwnd) {
   assert(hwnd != NULL);
   __assume(hwnd != NULL);
   
-  static constexpr UINT kUseWindowDimension = 0u;
-  static constexpr UINT kUseDoubleBuffer = 1u;
-  static constexpr UINT kUseDeafultSwapChainBehaviorOptions = 0u;
+  constexpr UINT kUseWindowDimension = 0u;
+  constexpr UINT kUseDoubleBuffer = 1u;
+  constexpr UINT kUseDeafultSwapChainBehaviorOptions = 0u;
   DXGI_SWAP_CHAIN_DESC const swap_chain_conf{
       .BufferDesc = {.Width = kUseWindowDimension,
                      .Height = kUseWindowDimension,
@@ -30,13 +30,18 @@ Graphics::Graphics(HWND hwnd) {
       .SwapEffect = DXGI_SWAP_EFFECT_DISCARD,
       .Flags = kUseDeafultSwapChainBehaviorOptions};
 
-  static constexpr IDXGIAdapter* kDefaultAdapter = nullptr;
-  static constexpr HMODULE kNoSoftwareRasterizer = NULL;
-  static constexpr UINT kNoRuntimeLayers = 0u;
-  static constexpr D3D_FEATURE_LEVEL* kDefaultFeatureLevel = nullptr;
-  static constexpr UINT kUseDefaultNumberOfFeatures = 0u;
-  static constexpr D3D_FEATURE_LEVEL* kIgnoreFeatureLevelReturn = nullptr;
-  
+#pragma warning(push)
+#pragma warning(disable : 26462)
+  constexpr IDXGIAdapter* kDefaultAdapter = NULL;
+  constexpr HMODULE kNoSoftwareRasterizer = NULL;
+#ifndef _DEBUG
+  constexpr UINT kNoRuntimeLayers = 0u;
+#endif  // !_DEBUG
+  constexpr D3D_FEATURE_LEVEL* kDefaultFeatureLevel = NULL;
+  constexpr UINT kUseDefaultNumberOfFeatures = 0u;
+  constexpr D3D_FEATURE_LEVEL* kIgnoreFeatureLevelReturn = NULL;
+#pragma warning(pop)
+
   StartTraceInDebugMode();
   
   if (HRESULT const operation_status = D3D11CreateDeviceAndSwapChain(
@@ -64,10 +69,12 @@ Graphics::Graphics(HWND hwnd) {
           swap_chain_));
   __assume(swap_chain_);
 
-  Microsoft::WRL::ComPtr<ID3DBlob> vertex_shader_blob{};
+  Microsoft::WRL::ComPtr<ID3DBlob> shader_blob{};
+
   StartTraceInDebugMode();
+
   if (HRESULT const operation_status = 
-          D3DReadFileToBlob(L"VertexShader.cso", &vertex_shader_blob);
+          D3DReadFileToBlob(L"VertexShader.cso", &shader_blob);
       FAILED(operation_status)) {
     throw CreateDirectXError(operation_status, 
                              "Failed to read compiled vertex shader into blob",
@@ -76,10 +83,14 @@ Graphics::Graphics(HWND hwnd) {
   }
 
   Microsoft::WRL::ComPtr<ID3D11VertexShader> vertex_shader{};
+
   StartTraceInDebugMode();
+
+  constexpr ID3D11ClassInstance* const* kNoInterfacesForShader = NULL;
+
   if (HRESULT const operation_status = 
-          device_->CreateVertexShader(vertex_shader_blob->GetBufferPointer(),
-                                      vertex_shader_blob->GetBufferSize(),
+          device_->CreateVertexShader(shader_blob->GetBufferPointer(),
+                                      shader_blob->GetBufferSize(),
                                       NULL,
                                       &vertex_shader);
       FAILED(operation_status)) {
@@ -88,7 +99,37 @@ Graphics::Graphics(HWND hwnd) {
                              "Error during shader loading", 
                              __FILEW__, __LINE__);
   }
-  device_context_->VSSetShader(vertex_shader.Get(), NULL, NULL);
+  device_context_->VSSetShader(vertex_shader.Get(), 
+                               kNoInterfacesForShader,
+                               0);
+
+  if (HRESULT const operation_status =
+          D3DReadFileToBlob(L"PixelShader.cso", &shader_blob);
+      FAILED(operation_status)) {
+    throw CreateDirectXError(operation_status, 
+                             "Failed to read compiled pixel shader into blob",
+                             "Error during shader loading", 
+                             __FILEW__, __LINE__);
+  }
+
+  Microsoft::WRL::ComPtr<ID3D11PixelShader> pixel_shader{};
+
+  StartTraceInDebugMode();
+
+  if (HRESULT const operation_status = 
+          device_->CreatePixelShader(shader_blob->GetBufferPointer(), 
+                                      shader_blob->GetBufferSize(), 
+                                      NULL,
+                                      &pixel_shader);
+      FAILED(operation_status)) {
+    throw CreateDirectXError(operation_status, 
+                             "Failed to create pixel shader from blob",
+                             "Error during shader loading", 
+                             __FILEW__, __LINE__);
+  }
+  device_context_->PSSetShader(pixel_shader.Get(), 
+                               kNoInterfacesForShader, 
+                               0);
 
   static constexpr UINT kBackBufferId = 0u;
   Microsoft::WRL::ComPtr<ID3D11Resource> back_buffer{};
