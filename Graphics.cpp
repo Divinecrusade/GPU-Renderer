@@ -86,7 +86,10 @@ Graphics::Graphics(HWND hwnd) {
 
   StartTraceInDebugMode();
 
+#pragma warning(push)
+#pragma warning(disable : 26462)
   constexpr ID3D11ClassInstance* const* kNoInterfacesForShader = NULL;
+#pragma warning(pop)
 
   if (HRESULT const operation_status = 
           device_->CreateVertexShader(shader_blob->GetBufferPointer(),
@@ -167,6 +170,24 @@ Graphics::Graphics(HWND hwnd) {
   }
   assert(((void)"Render target view must be allocated at this point", 
           render_target_));
+
+  constexpr D3D11_VIEWPORT kViewPortSettings{
+    .TopLeftX = 0.f,
+    .TopLeftY = 0.f,
+    .Width = 800.f,
+    .Height = 600.f,
+    .MinDepth = 0.f,
+    .MaxDepth = 1.f
+  };
+  device_context_->RSSetViewports(1u, &kViewPortSettings);
+
+#pragma warning(push)
+#pragma warning(disable : 26462)
+  constexpr ID3D11DepthStencilView* kNoZBuffer = NULL;
+#pragma warning(pop)
+
+  device_context_->OMSetRenderTargets(1u, render_target_.GetAddressOf(),
+                                      kNoZBuffer);
 }
 
 void Graphics::EndFrame() {
