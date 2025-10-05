@@ -73,6 +73,37 @@ Graphics::Graphics(HWND hwnd) {
 
   StartTraceInDebugMode();
 
+  if (HRESULT const operation_status =
+          D3DReadFileToBlob(L"PixelShader.cso", &shader_blob);
+      FAILED(operation_status)) {
+    throw CreateDirectXError(operation_status, 
+                             "Failed to read compiled pixel shader into blob",
+                             "Error during shader loading", 
+                             __FILEW__, __LINE__);
+  }
+
+  Microsoft::WRL::ComPtr<ID3D11PixelShader> pixel_shader{};
+
+  StartTraceInDebugMode();
+
+  if (HRESULT const operation_status = 
+          device_->CreatePixelShader(shader_blob->GetBufferPointer(), 
+                                     shader_blob->GetBufferSize(), NULL,
+                                     &pixel_shader);
+      FAILED(operation_status)) {
+    throw CreateDirectXError(
+        operation_status, "Failed to create pixel shader from blob",
+        "Error during shader loading", __FILEW__, __LINE__);
+  }
+#pragma warning(push)
+#pragma warning(disable : 26462)
+  constexpr ID3D11ClassInstance* const* kNoInterfacesForShader = NULL;
+#pragma warning(pop)
+  device_context_->PSSetShader(pixel_shader.Get(), kNoInterfacesForShader, 0);
+
+
+  StartTraceInDebugMode();
+
   if (HRESULT const operation_status = 
           D3DReadFileToBlob(L"VertexShader.cso", &shader_blob);
       FAILED(operation_status)) {
@@ -83,13 +114,6 @@ Graphics::Graphics(HWND hwnd) {
   }
 
   Microsoft::WRL::ComPtr<ID3D11VertexShader> vertex_shader{};
-
-  StartTraceInDebugMode();
-
-#pragma warning(push)
-#pragma warning(disable : 26462)
-  constexpr ID3D11ClassInstance* const* kNoInterfacesForShader = NULL;
-#pragma warning(pop)
 
   if (HRESULT const operation_status = 
           device_->CreateVertexShader(shader_blob->GetBufferPointer(),
@@ -106,33 +130,29 @@ Graphics::Graphics(HWND hwnd) {
                                kNoInterfacesForShader,
                                0);
 
-  if (HRESULT const operation_status =
-          D3DReadFileToBlob(L"PixelShader.cso", &shader_blob);
-      FAILED(operation_status)) {
-    throw CreateDirectXError(operation_status, 
-                             "Failed to read compiled pixel shader into blob",
-                             "Error during shader loading", 
-                             __FILEW__, __LINE__);
-  }
-
-  Microsoft::WRL::ComPtr<ID3D11PixelShader> pixel_shader{};
-
+  Microsoft::WRL::ComPtr<ID3D11InputLayout> input_layout{};
+  constexpr D3D11_INPUT_ELEMENT_DESC input_element2d_descriptor{
+    .SemanticName = "Position",
+    .SemanticIndex = 0u,
+    .Format = DXGI_FORMAT_R32G32_FLOAT,
+    .InputSlot = 0u,
+    .AlignedByteOffset = 0u,
+    .InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA,
+    .InstanceDataStepRate = 0u
+  };
   StartTraceInDebugMode();
-
-  if (HRESULT const operation_status = 
-          device_->CreatePixelShader(shader_blob->GetBufferPointer(), 
-                                      shader_blob->GetBufferSize(), 
-                                      NULL,
-                                      &pixel_shader);
+  if (HRESULT const operation_status = device_->CreateInputLayout(
+          &input_element2d_descriptor, 1u, shader_blob->GetBufferPointer(),
+          shader_blob->GetBufferSize(), &input_layout);
       FAILED(operation_status)) {
     throw CreateDirectXError(operation_status, 
-                             "Failed to create pixel shader from blob",
-                             "Error during shader loading", 
-                             __FILEW__, __LINE__);
+                             "Failed to create input layout",
+                             "Resource for Graphics was not allocated",
+                             __FILEW__, __LINE__);  
   }
-  device_context_->PSSetShader(pixel_shader.Get(), 
-                               kNoInterfacesForShader, 
-                               0);
+
+  device_context_->IASetInputLayout(input_layout.Get());
+  device_context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
   static constexpr UINT kBackBufferId = 0u;
   Microsoft::WRL::ComPtr<ID3D11Resource> back_buffer{};
@@ -174,8 +194,8 @@ Graphics::Graphics(HWND hwnd) {
   constexpr D3D11_VIEWPORT kViewPortSettings{
     .TopLeftX = 0.f,
     .TopLeftY = 0.f,
-    .Width = 800.f,
-    .Height = 600.f,
+    .Width = 640.f,
+    .Height = 480.f,
     .MinDepth = 0.f,
     .MaxDepth = 1.f
   };

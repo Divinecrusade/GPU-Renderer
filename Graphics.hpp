@@ -86,12 +86,11 @@ class Graphics final {
                                               "Buffer was not created",
                                               __FILEW__, __LINE__);
     }
-    constexpr UINT stride = 0u;
+    constexpr UINT stride = sizeof(Vector2D);
     constexpr UINT offset = 0u;
     StartTraceInDebugMode();
     device_context_->IASetVertexBuffers(0u, 1u, vertex_buffers.GetAddressOf(),
                                         &stride, &offset);
-    device_context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     device_context_->Draw(triangle.size(), 0u); 
     if (auto expected_trace = debug_info_.GetTraceLog(); 
         expected_trace && !expected_trace->empty()) {
