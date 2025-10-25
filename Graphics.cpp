@@ -69,8 +69,6 @@ Graphics::Graphics(HWND hwnd) {
           swap_chain_));
   __assume(swap_chain_);
 
-  Microsoft::WRL::ComPtr<ID3DBlob> shader_blob{};
-
   StartTraceInDebugMode();
 
   if (HRESULT const operation_status =
@@ -129,30 +127,6 @@ Graphics::Graphics(HWND hwnd) {
   device_context_->VSSetShader(vertex_shader.Get(), 
                                kNoInterfacesForShader,
                                0);
-
-  Microsoft::WRL::ComPtr<ID3D11InputLayout> input_layout{};
-  constexpr D3D11_INPUT_ELEMENT_DESC input_element2d_descriptor{
-    .SemanticName = "Position",
-    .SemanticIndex = 0u,
-    .Format = DXGI_FORMAT_R32G32_FLOAT,
-    .InputSlot = 0u,
-    .AlignedByteOffset = 0u,
-    .InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA,
-    .InstanceDataStepRate = 0u
-  };
-  StartTraceInDebugMode();
-  if (HRESULT const operation_status = device_->CreateInputLayout(
-          &input_element2d_descriptor, 1u, shader_blob->GetBufferPointer(),
-          shader_blob->GetBufferSize(), &input_layout);
-      FAILED(operation_status)) {
-    throw CreateDirectXError(operation_status, 
-                             "Failed to create input layout",
-                             "Resource for Graphics was not allocated",
-                             __FILEW__, __LINE__);  
-  }
-
-  device_context_->IASetInputLayout(input_layout.Get());
-  device_context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
   static constexpr UINT kBackBufferId = 0u;
   Microsoft::WRL::ComPtr<ID3D11Resource> back_buffer{};
