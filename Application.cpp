@@ -26,11 +26,14 @@ std::optional<window::ExitCode> Application::Process() {
 }
 
 void Application::Update(FrameTimer::DeltaTime dt) {
+  cur_angle_ += dt * std::numbers::pi_v<float> / 4.f;
+  while (cur_angle_ > 2.f * std::numbers::pi_v<float>)
+    cur_angle_ -= 2.f * std::numbers::pi_v<float>;
 }
 
 void Application::Render() { 
   window_.gfx.ClearBuffer({0.f, 0.f, 0.f});
-  window_.gfx.DrawTestTriangle();
+  window_.gfx.DrawTestTriangle(cur_angle_);
   window_.gfx.EndFrame(); 
 }
 }  // namespace gpu_renderer

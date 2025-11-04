@@ -34,6 +34,8 @@ class Application final {
  private:
   window::CachedDC window_class_;
   window::Canvas window_;
+
+  float cur_angle_ = 0.f;
 };
 }  // namespace gpu_renderer
 

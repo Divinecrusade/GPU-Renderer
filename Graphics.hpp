@@ -54,7 +54,7 @@ class Graphics final {
 
   void ClearBuffer(Color const& c);
 
-  void DrawTestTriangle() {
+  void DrawTestTriangle(float angle = 0.f) {
 #ifdef _DEBUG
     struct ColorVector2D {
       float x = 0.f;
@@ -62,6 +62,20 @@ class Graphics final {
       unsigned char r = 0u;
       unsigned char g = 0u;
       unsigned char b = 0u;
+    };
+
+    struct ConstBuffer {
+      struct {
+        float matrix[4][4];
+      } transformation;
+    };
+    ConstBuffer const cb = {
+      {
+        3.f / 4.f * std::cos(angle), std::sin(angle), 0.f, 0.f,
+        3.f / 4.f * -std::sin(angle), std::cos(angle), 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        0.f, 0.f, 0.f, 1.f
+      }
     };
 
     std::array<ColorVector2D, 9u> vertices{
@@ -153,6 +167,24 @@ class Graphics final {
     device_context_->IASetInputLayout(input_layout.Get());
     device_context_->IASetPrimitiveTopology(
         D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    D3D11_BUFFER_DESC const const_buffer_conf{
+        .ByteWidth = sizeof(cb),
+        .Usage = D3D11_USAGE_DYNAMIC,
+        .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
+        .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
+        .MiscFlags = kNoMisc};
+    D3D11_SUBRESOURCE_DATA const const_buffer{.pSysMem = &cb};
+    Microsoft::WRL::ComPtr<ID3D11Buffer> const_buffers{};
+    StartTraceInDebugMode();
+    if (HRESULT const operation_status = device_->CreateBuffer(
+            &const_buffer_conf, &const_buffer, &const_buffers);
+        FAILED(operation_status)) {
+      throw exception::DirectXError::Create(
+          operation_status, "Buffer was not created", "Buffer was not created",
+          __FILEW__, __LINE__);
+    }
+    StartTraceInDebugMode();
+    device_context_->VSSetConstantBuffers(0u, 1u, const_buffers.GetAddressOf());
 
     device_context_->DrawIndexed(indices.size(), 0u, 0u);
     if (auto expected_trace = debug_info_.GetTraceLog(); 

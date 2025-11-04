@@ -24,6 +24,7 @@
 #include <utility>
 #include <unordered_map>
 #include <vector>
+#include <numbers>
 #pragma warning(pop)
 
 #endif  // !OPTIMISED_STL_HEADER_HPP

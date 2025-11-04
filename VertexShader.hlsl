@@ -5,10 +5,15 @@ struct VSOut
     
 };
 
+cbuffer CBuf
+{
+    row_major matrix transformation;
+};
+
 VSOut main(float2 pos : Position, float3 c : Color)
 {
     VSOut v;
-    v.pos = float4(pos.x, pos.y, 0.0f, 1.0f);
+    v.pos = mul(float4(pos.x, pos.y, 0.0f, 1.0f), transformation);
     v.c = c;
     return v;
 }
