@@ -6,6 +6,7 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <dxgidebug.h>
+#include <DirectXMath.h>
 #pragma warning(disable : 4265 4625 4626 5220 5204)
 #include <wrl.h>
 #include "dxerr.h"

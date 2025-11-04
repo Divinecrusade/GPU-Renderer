@@ -54,7 +54,7 @@ class Graphics final {
 
   void ClearBuffer(Color const& c);
 
-  void DrawTestTriangle(float angle = 0.f) {
+  void DrawTestTriangle(float x, float y, float angle = 0.f) {
 #ifdef _DEBUG
     struct ColorVector2D {
       float x = 0.f;
@@ -65,17 +65,14 @@ class Graphics final {
     };
 
     struct ConstBuffer {
-      struct {
-        float matrix[4][4];
-      } transformation;
+        DirectX::XMMATRIX transformation;
     };
     ConstBuffer const cb = {
-      {
-        3.f / 4.f * std::cos(angle), std::sin(angle), 0.f, 0.f,
-        3.f / 4.f * -std::sin(angle), std::cos(angle), 0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        0.f, 0.f, 0.f, 1.f
-      }
+      DirectX::XMMatrixTranspose(
+        DirectX::XMMatrixRotationZ(angle) * 
+        DirectX::XMMatrixScaling(3.f / 4.f, 1.f, 1.f) *
+        DirectX::XMMatrixTranslation(x, y, 0.f)
+        )
     };
 
     std::array<ColorVector2D, 9u> vertices{

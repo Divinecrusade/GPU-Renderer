@@ -36,6 +36,8 @@ class Application final {
   window::Canvas window_;
 
   float cur_angle_ = 0.f;
+  float x_ = 0.f;
+  float y_ = 0.f;
 };
 }  // namespace gpu_renderer
 
