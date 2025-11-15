@@ -175,13 +175,54 @@ Graphics::Graphics(HWND hwnd) {
   };
   device_context_->RSSetViewports(1u, &kViewPortSettings);
 
-#pragma warning(push)
-#pragma warning(disable : 26462)
-  constexpr ID3D11DepthStencilView* kNoZBuffer = NULL;
-#pragma warning(pop)
+  D3D11_DEPTH_STENCIL_DESC const depth_buf_desc{
+    .DepthEnable = TRUE,
+    .DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL,
+    .DepthFunc = D3D11_COMPARISON_LESS
+  };
+  Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depth_buf{};
 
-  device_context_->OMSetRenderTargets(1u, render_target_.GetAddressOf(),
-                                      kNoZBuffer);
+  StartTraceInDebugMode();
+  device_->CreateDepthStencilState(&depth_buf_desc, &depth_buf);
+
+  StartTraceInDebugMode();
+  device_context_->OMSetDepthStencilState(depth_buf.Get(), 1u);
+  D3D11_TEXTURE2D_DESC const depth_texture_desc{
+    .Width = 640,
+    .Height = 480,
+    .MipLevels = 1,
+    .ArraySize = 1,
+    .Format = DXGI_FORMAT_D32_FLOAT,
+    .SampleDesc = {.Count = 1},
+    .BindFlags = D3D11_BIND_DEPTH_STENCIL
+  };
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> depth_texture{};
+
+  StartTraceInDebugMode();
+  if (HRESULT const operation_status = device_->CreateTexture2D(
+          &depth_texture_desc, nullptr, &depth_texture);
+      FAILED(operation_status)) {
+    throw CreateDirectXError(operation_status, 
+                             "Texture for depth buffer wasn't created",
+                             "Resource for Graphics was not allocated",
+                             __FILEW__, __LINE__);
+  }
+  
+
+  D3D11_DEPTH_STENCIL_VIEW_DESC const depth_buf_view_desc{
+    .Format = DXGI_FORMAT_D32_FLOAT,
+    .ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D,
+    .Flags = 0u
+  };
+
+  StartTraceInDebugMode();
+  device_->CreateDepthStencilView(depth_texture.Get(), 
+                                  &depth_buf_view_desc, 
+                                  &depth_buf_view_);
+  StartTraceInDebugMode();
+  device_context_->OMSetRenderTargets(1u, render_target_.GetAddressOf(), 
+                                      depth_buf_view_.Get());
+
 }
 
 void Graphics::EndFrame() {
@@ -210,6 +251,8 @@ void Graphics::EndFrame() {
 
 void Graphics::ClearBuffer(Color const& c) {
   device_context_->ClearRenderTargetView(render_target_.Get(), &c);
+  device_context_->ClearDepthStencilView(depth_buf_view_.Get(), 
+                                         D3D11_CLEAR_DEPTH, 1.f, 0u);
 }
 
 Graphics::Color::Color(float r, float g, float b) noexcept

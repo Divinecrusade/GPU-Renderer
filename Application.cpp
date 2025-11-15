@@ -40,7 +40,7 @@ void Application::Update(FrameTimer::DeltaTime dt) {
 
 void Application::Render() { 
   window_.gfx.ClearBuffer({0.f, 0.f, 0.f});
-  window_.gfx.DrawTestTriangle(y_ + 3.f, cur_angle_);
+  window_.gfx.DrawTestTriangle(y_ * 1.5f + 3.f, cur_angle_);
   window_.gfx.DrawTestTriangle(3.f, -cur_angle_);
   window_.gfx.EndFrame(); 
 }

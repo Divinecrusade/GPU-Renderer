@@ -268,6 +268,7 @@ class Graphics final {
   Microsoft::WRL::ComPtr<ID3D11Device> device_{};
   Microsoft::WRL::ComPtr<ID3D11DeviceContext> device_context_{};
   Microsoft::WRL::ComPtr<ID3D11RenderTargetView> render_target_{};
+  Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depth_buf_view_{};
   
   Microsoft::WRL::ComPtr<ID3DBlob> shader_blob{};
 #ifdef _DEBUG
