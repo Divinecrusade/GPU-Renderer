@@ -54,7 +54,7 @@ class Graphics final {
 
   void ClearBuffer(Color const& c);
 
-  void DrawTestTriangle(float x, float y, float angle = 0.f) {
+  void DrawTestTriangle(float z, float angle = 0.f) {
 #ifdef _DEBUG
     struct Vector3D {
       float x = 0.f;
@@ -69,8 +69,8 @@ class Graphics final {
       DirectX::XMMatrixTranspose(
         DirectX::XMMatrixRotationZ(angle) * 
         DirectX::XMMatrixRotationX(angle) * 
-        DirectX::XMMatrixTranslation(x, y, 4.f) * 
-        DirectX::XMMatrixPerspectiveLH(1.f, 3.f / 4.f, 0.5f, 10.f)
+        DirectX::XMMatrixTranslation(0.f, 0.f, z) * 
+        DirectX::XMMatrixPerspectiveLH(1.f, 3.f / 4.f, 0.2f, 10.f)
         )
     };
 

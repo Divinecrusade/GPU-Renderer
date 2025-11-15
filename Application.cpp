@@ -33,7 +33,6 @@ void Application::Update(FrameTimer::DeltaTime dt) {
   for (auto event = window_.GetMouse().GetOldestEvent(); event.has_value();
        event = window_.GetMouse().GetOldestEvent()) {
     if (event->second == input::Mouse::EventType::kMove) {
-      x_ = event->first.x * (2.f / kWidth) - 1.f;
       y_ = event->first.y * (-2.f / kHeight) + 1.f;
     }
   }
@@ -41,7 +40,8 @@ void Application::Update(FrameTimer::DeltaTime dt) {
 
 void Application::Render() { 
   window_.gfx.ClearBuffer({0.f, 0.f, 0.f});
-  window_.gfx.DrawTestTriangle(x_, y_, cur_angle_);
+  window_.gfx.DrawTestTriangle(y_ + 3.f, cur_angle_);
+  window_.gfx.DrawTestTriangle(3.f, -cur_angle_);
   window_.gfx.EndFrame(); 
 }
 }  // namespace gpu_renderer
