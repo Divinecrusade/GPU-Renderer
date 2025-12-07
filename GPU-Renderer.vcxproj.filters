@@ -43,6 +43,12 @@
     <Filter Include="Шейдеры">
       <UniqueIdentifier>{526fec0d-475e-4af2-ad21-6a287480d312}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы заголовков\bindable">
+      <UniqueIdentifier>{3b01433a-9f14-4f77-9a12-e150b0efe89c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\bindable">
+      <UniqueIdentifier>{fdf03dd0-b010-4483-acd7-4617538b0b71}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -101,6 +107,9 @@
     </ClCompile>
     <ClCompile Include="DebugLayerMessage.cpp">
       <Filter>Исходные файлы\exception</Filter>
+    </ClCompile>
+    <ClCompile Include="Bindable.cpp">
+      <Filter>Исходные файлы\bindable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -196,6 +205,12 @@
     </ClInclude>
     <ClInclude Include="DebugLayerMessage.hpp">
       <Filter>Файлы заголовков\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable.hpp">
+      <Filter>Файлы заголовков\bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.hpp">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

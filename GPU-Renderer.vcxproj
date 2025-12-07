@@ -170,6 +170,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Bindable.cpp" />
     <ClCompile Include="CachedDC.cpp" />
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Console.cpp" />
@@ -204,6 +205,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
+    <ClInclude Include="Bindable.hpp" />
     <ClInclude Include="CachedDC.hpp" />
     <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="Console.hpp" />
@@ -225,6 +227,7 @@
     <ClInclude Include="OptimisedWindowsHeader.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ErrorWithCode.hpp" />
+    <ClInclude Include="Shader.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="WindowClass.hpp" />
     <ClInclude Include="WinError.hpp" />
