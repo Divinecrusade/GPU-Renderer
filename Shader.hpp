@@ -2,11 +2,9 @@
 #define SHADER_HPP
 
 #include "Bindable.hpp"
+#include "SupportedShaderType.hpp"
 
-namespace gpu_renderer {
-enum class SupportedShaderType { kPixel, kVertex };
-
-namespace bindable {
+namespace gpu_renderer::bindable {
 template <SupportedShaderType T>
 class Shader : public abstract::Bindable {
  public:
@@ -97,6 +95,5 @@ class Shader : public abstract::Bindable {
   Microsoft::WRL::ComPtr<ID3DBlob> shader_blob_;
 };
 }  // namespace gpu_renderer::bindable
-}  // namespace gpu_renderer
 
 #endif  // !SHADER_HPP
