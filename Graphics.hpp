@@ -59,7 +59,7 @@ class Graphics final {
 
   void ClearBuffer(Color const& c);
 
-  void DrawTestTriangle(float z, float angle = 0.f);
+  void DrawTestTriangle(float z, float angle, bindable::Shader<SupportedShaderType::kVertex> const& vertex_shader);
 
  private:
   friend class abstract::Bindable;
@@ -105,9 +105,6 @@ class Graphics final {
 #ifdef _DEBUG
   debug::DXDebugInfoManager debug_info_{};
 #endif  // _DEBUG
-
- bindable::Shader<SupportedShaderType::kPixel> pixel_shader_{L"PixelShader.cso"};
- bindable::Shader<SupportedShaderType::kVertex> vertex_shader_{L"VertexShader.cso"};
 };
 }  // namespace gpu_renderer
 

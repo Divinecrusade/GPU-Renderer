@@ -8,11 +8,9 @@ namespace gpu_renderer::bindable {
 template <SupportedShaderType T>
 class Shader : public abstract::Bindable {
  public:
-  std::filesystem::path kValidFileExtension{L".cso"};
-
- public:
   Shader() = delete;
-  Shader(std::filesystem::path const& shader_file) {
+  Shader(std::filesystem::path const& shader_file, Graphics& gfx)
+  : Bindable{gfx} {
     // StartTraceInDebugMode();
     // if (HRESULT const operation_status =
     //         D3DReadFileToBlob(L"PixelShader.cso", &shader_blob);
@@ -21,29 +19,14 @@ class Shader : public abstract::Bindable {
     //       operation_status, "Failed to read compiled pixel shader into blob",
     //       "Error during shader loading", __FILEW__, __LINE__);
     // }
-
-    if (shader_file.extension() != kValidFileExtension) {
-      throw std::invalid_argument{
-          "Shader source file has wrong extension. Probably it is not valid"};
-    }
+    assert(shader_file.extension() == L".cso");
     assert(SUCCEEDED(D3DReadFileToBlob(shader_file.c_str(), &shader_blob_)));
-  }
-  Shader(Shader const&) = default;
-  Shader(Shader&&) = default;
 
-  Shader& operator=(Shader const&) = default;
-  Shader& operator=(Shader&&) = default;
-
-  ~Shader() = default;
-
-  void Bind(Graphics& gfx) override {
 #pragma warning(push)
 #pragma warning(disable : 26462)
-    constexpr ID3D11ClassInstance* const* kNoInterfaces = nullptr;
     constexpr ID3D11ClassLinkage* kNoClassLinkage = nullptr;
 #pragma warning(pop)
-
-    if constexpr(T == SupportedShaderType::kPixel) {
+    if constexpr (T == SupportedShaderType::kPixel) {
       // StartTraceInDebugMode();
       // if (HRESULT const operation_status = device_->CreatePixelShader(
       //         shader_blob->GetBufferPointer(), shader_blob->GetBufferSize(),
@@ -53,46 +36,74 @@ class Shader : public abstract::Bindable {
       //       operation_status, "Failed to create pixel shader from blob",
       //       "Error during shader loading", __FILEW__, __LINE__);
       // }
-      Microsoft::WRL::ComPtr<ID3D11PixelShader> pixel_shader{};
-
-      assert(SUCCEEDED(GetDevice(gfx).CreatePixelShader(
+      assert(SUCCEEDED(GetDevice().CreatePixelShader(
           shader_blob_->GetBufferPointer(), shader_blob_->GetBufferSize(),
-          kNoClassLinkage, &pixel_shader)));
+          kNoClassLinkage, &shader_)));
+    } else if constexpr (T == SupportedShaderType::kVertex) {
+      // if (HRESULT const operation_status = device_->CreateVertexShader(
+      //         shader_blob->GetBufferPointer(), shader_blob->GetBufferSize(),
+      //         NULL, &vertex_shader);
+      //     FAILED(operation_status)) {
+      //   throw CreateDirectXError(
+      //       operation_status, "Failed to create vertex shader from blob",
+      //       "Error during shader loading", __FILEW__, __LINE__);
+      // }
+      assert(SUCCEEDED(GetDevice().CreateVertexShader(
+          shader_blob_->GetBufferPointer(), shader_blob_->GetBufferSize(),
+          kNoClassLinkage, &shader_)));
+    } else {
+      std::unreachable();
+    }
+  }
+  Shader(Shader const&) = default;
+  Shader(Shader&&) = default;
 
-      GetDeviceContext(gfx).PSSetShader(pixel_shader.Get(), kNoInterfaces,
-                                        0u);
+  Shader& operator=(Shader const&) = default;
+  Shader& operator=(Shader&&) = default;
+
+  ~Shader() = default;
+
+  void Activate() override {
+#pragma warning(push)
+#pragma warning(disable : 26462)
+    constexpr ID3D11ClassInstance* const* kNoInterfaces = nullptr;
+#pragma warning(pop)
+    if constexpr(T == SupportedShaderType::kPixel) {
+      GetDeviceContext().PSSetShader(shader_.Get(), 
+                                     kNoInterfaces,
+                                     0u);
     }
     else if constexpr(T == SupportedShaderType::kVertex) {
-      //if (HRESULT const operation_status = device_->CreateVertexShader(
-      //        shader_blob->GetBufferPointer(), shader_blob->GetBufferSize(),
-      //        NULL, &vertex_shader);
-      //    FAILED(operation_status)) {
-      //  throw CreateDirectXError(
-      //      operation_status, "Failed to create vertex shader from blob",
-      //      "Error during shader loading", __FILEW__, __LINE__);
-      //}
-      //device_context_->VSSetShader(vertex_shader.Get(), kNoInterfacesForShader,
-      //                             0);
-      Microsoft::WRL::ComPtr<ID3D11VertexShader> vertex_shader{};
-
-      assert(SUCCEEDED(GetDevice(gfx).CreateVertexShader(
-          shader_blob_->GetBufferPointer(), shader_blob_->GetBufferSize(),
-          kNoClassLinkage, &vertex_shader)));
-
-      GetDeviceContext(gfx).VSSetShader(vertex_shader.Get(), kNoInterfaces, 
-                                        0u);
+      GetDeviceContext().VSSetShader(shader_.Get(), 
+                                     kNoInterfaces, 
+                                     0u);
     }
     else {
       std::unreachable();
     }
   }
   
-  [[nodiscard]] ID3DBlob& GetByteCode() const noexcept {
+  [[nodiscard]] ID3DBlob& GetByteCode() const noexcept
+  requires(T == SupportedShaderType::kVertex)
+  {
     return *shader_blob_.Get();
   }
 
  private:
   Microsoft::WRL::ComPtr<ID3DBlob> shader_blob_;
+
+  using ShaderInterface = decltype([] {
+    if constexpr (T == SupportedShaderType::kPixel) {
+      return std::type_identity<ID3D11PixelShader>{};
+    }
+    else if constexpr (T == SupportedShaderType::kVertex) {
+      return std::type_identity<ID3D11VertexShader>{};
+    }
+    else {
+      std::unreachable();
+    }
+  }())::type;
+  Microsoft::WRL::ComPtr<ShaderInterface> shader_{};
 };
 }  // namespace gpu_renderer::bindable
 

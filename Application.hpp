@@ -3,6 +3,7 @@
 
 #include "Canvas.hpp"
 #include "FrameTimer.hpp"
+#include "Shader.hpp"
 
 namespace gpu_renderer {
 class Application final {
@@ -37,6 +38,9 @@ class Application final {
 
   float cur_angle_ = 0.f;
   float y_ = 1.f;
+
+  bindable::Shader<SupportedShaderType::kVertex> vertex_shader_{L"VertexShader.cso", window_.gfx};
+  bindable::Shader<SupportedShaderType::kPixel> pixel_shader_{L"PixelShader.cso", window_.gfx};
 };
 }  // namespace gpu_renderer
 

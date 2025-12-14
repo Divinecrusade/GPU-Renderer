@@ -163,9 +163,6 @@ Graphics::Graphics(HWND hwnd) {
   StartTraceInDebugMode();
   device_context_->OMSetRenderTargets(1u, render_target_.GetAddressOf(), 
                                       depth_buf_view_.Get());
-
-  vertex_shader_.Bind(*this);
-  pixel_shader_.Bind(*this);
 }
 
 void Graphics::EndFrame() {
@@ -198,7 +195,8 @@ void Graphics::ClearBuffer(Color const& c) {
                                          D3D11_CLEAR_DEPTH, 1.f, 0u);
 }
 
-void Graphics::DrawTestTriangle(float z, float angle) {
+void Graphics::DrawTestTriangle(float z, float angle,
+                                bindable::Shader<SupportedShaderType::kVertex> const& vertex_shader) {
 #ifdef _DEBUG
   struct Vector3D {
     float x = 0.f;
@@ -301,8 +299,8 @@ void Graphics::DrawTestTriangle(float z, float angle) {
   StartTraceInDebugMode();
   if (HRESULT const operation_status = device_->CreateInputLayout(
           input_element3d_descriptor.data(), input_element3d_descriptor.size(),
-          vertex_shader_.GetByteCode().GetBufferPointer(),
-          vertex_shader_.GetByteCode().GetBufferSize(),
+          vertex_shader.GetByteCode().GetBufferPointer(),
+          vertex_shader.GetByteCode().GetBufferSize(),
           &input_layout);
       FAILED(operation_status)) {
     throw CreateDirectXError(operation_status, "Failed to create input layout",

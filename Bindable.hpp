@@ -9,12 +9,18 @@ class Graphics;
 namespace abstract {
 class Bindable {
  public:
-  virtual void Bind(gpu_renderer::Graphics& gfx) = 0;
+  
+  Bindable(Graphics& gfx);
   virtual ~Bindable() = default;
+  
+  virtual void Activate() = 0;
 
  protected:
-  static [[nodiscard]] ID3D11DeviceContext& GetDeviceContext(Graphics const& gfx) noexcept;
-  static [[nodiscard]] ID3D11Device& GetDevice(Graphics const& gfx) noexcept;
+  ID3D11DeviceContext& GetDeviceContext() noexcept;
+  ID3D11Device& GetDevice() noexcept;
+
+ private:
+  Graphics const& gfx_;
 };
 }  // namespace pgu_renderer::abstract
 }  // namespace pgu_renderer
