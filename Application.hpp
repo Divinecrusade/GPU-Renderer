@@ -3,7 +3,7 @@
 
 #include "Canvas.hpp"
 #include "FrameTimer.hpp"
-#include "Shader.hpp"
+#include "InputLayout.hpp"
 
 namespace gpu_renderer {
 class Application final {
@@ -41,6 +41,7 @@ class Application final {
 
   bindable::Shader<SupportedShaderType::kVertex> vertex_shader_{L"VertexShader.cso", window_.gfx};
   bindable::Shader<SupportedShaderType::kPixel> pixel_shader_{L"PixelShader.cso", window_.gfx};
+  bindable::InputLayout input_layout_{vertex_shader_};
 };
 }  // namespace gpu_renderer
 

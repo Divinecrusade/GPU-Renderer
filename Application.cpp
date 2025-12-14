@@ -14,6 +14,7 @@ window::ExitCode Application::Run() {
 
   vertex_shader_.Activate();
   pixel_shader_.Activate();
+  input_layout_.Activate();
 
   for (FrameTimer ft{}; !exit_code; exit_code = Process()) {
     Update(ft.Mark());
@@ -43,8 +44,8 @@ void Application::Update(FrameTimer::DeltaTime dt) {
 
 void Application::Render() { 
   window_.gfx.ClearBuffer({0.f, 0.f, 0.f});
-  window_.gfx.DrawTestTriangle(y_ * 1.5f + 3.f, cur_angle_, vertex_shader_);
-  window_.gfx.DrawTestTriangle(3.f, -cur_angle_, vertex_shader_);
+  window_.gfx.DrawTestTriangle(y_ * 1.5f + 3.f, cur_angle_);
+  window_.gfx.DrawTestTriangle(3.f, -cur_angle_);
   window_.gfx.EndFrame(); 
 }
 }  // namespace gpu_renderer

@@ -195,8 +195,7 @@ void Graphics::ClearBuffer(Color const& c) {
                                          D3D11_CLEAR_DEPTH, 1.f, 0u);
 }
 
-void Graphics::DrawTestTriangle(float z, float angle,
-                                bindable::Shader<SupportedShaderType::kVertex> const& vertex_shader) {
+void Graphics::DrawTestTriangle(float z, float angle) {
 #ifdef _DEBUG
   struct Vector3D {
     float x = 0.f;
@@ -286,29 +285,6 @@ void Graphics::DrawTestTriangle(float z, float angle,
   device_context_->IASetIndexBuffer(indices_buffer_ptr.Get(),
                                     DXGI_FORMAT_R16_UINT, 0u);
 
-  Microsoft::WRL::ComPtr<ID3D11InputLayout> input_layout{};
-  constexpr std::array<D3D11_INPUT_ELEMENT_DESC, 1u> input_element3d_descriptor{
-      D3D11_INPUT_ELEMENT_DESC{.SemanticName = "Position",
-                               .SemanticIndex = 0u,
-                               .Format = DXGI_FORMAT_R32G32B32_FLOAT,
-                               .InputSlot = 0u,
-                               .AlignedByteOffset = 0u,
-                               .InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA,
-                               .InstanceDataStepRate = 0u},
-  };
-  StartTraceInDebugMode();
-  if (HRESULT const operation_status = device_->CreateInputLayout(
-          input_element3d_descriptor.data(), input_element3d_descriptor.size(),
-          vertex_shader.GetByteCode().GetBufferPointer(),
-          vertex_shader.GetByteCode().GetBufferSize(),
-          &input_layout);
-      FAILED(operation_status)) {
-    throw CreateDirectXError(operation_status, "Failed to create input layout",
-                             "Resource for Graphics was not allocated",
-                             __FILEW__, __LINE__);
-  }
-
-  device_context_->IASetInputLayout(input_layout.Get());
   device_context_->IASetPrimitiveTopology(
       D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   D3D11_BUFFER_DESC const const_vertex_buffer_conf{

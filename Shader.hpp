@@ -1,6 +1,8 @@
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
+#include "OptimisedStlHeader.hpp"
+
 #include "Bindable.hpp"
 #include "SupportedShaderType.hpp"
 
@@ -10,7 +12,7 @@ class Shader : public abstract::Bindable {
  public:
   Shader() = delete;
   Shader(std::filesystem::path const& shader_file, Graphics& gfx)
-  : Bindable{gfx} {
+    : Bindable{gfx} {
     // StartTraceInDebugMode();
     // if (HRESULT const operation_status =
     //         D3DReadFileToBlob(L"PixelShader.cso", &shader_blob);

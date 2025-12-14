@@ -184,6 +184,7 @@
     <ClCompile Include="dxerr.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="ErrorWithCode.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="FrameTimer.hpp" />
     <ClInclude Include="Graphics.hpp" />
+    <ClInclude Include="InputLayout.hpp" />
     <ClInclude Include="Keyboard.hpp" />
     <ClInclude Include="Mouse.hpp" />
     <ClInclude Include="OptimisedBoostHeader.hpp" />

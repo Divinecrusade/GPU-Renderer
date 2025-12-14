@@ -5,7 +5,6 @@
 #include "OptimisedDirect3dHeader.hpp"
 #include "OptimisedStlHeader.hpp"
 
-#include "Shader.hpp"
 #ifdef _DEBUG
 #include "DXDebugInfoManager.hpp"
 #endif  // _DEBUG
@@ -59,7 +58,7 @@ class Graphics final {
 
   void ClearBuffer(Color const& c);
 
-  void DrawTestTriangle(float z, float angle, bindable::Shader<SupportedShaderType::kVertex> const& vertex_shader);
+  void DrawTestTriangle(float z, float angle);
 
  private:
   friend class abstract::Bindable;

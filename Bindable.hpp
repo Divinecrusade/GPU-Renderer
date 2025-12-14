@@ -1,6 +1,7 @@
 #ifndef BINDABLE_HPP
 #define BINDABLE_HPP
 
+#include "OptimisedWindowsHeader.hpp"
 #include "OptimisedDirect3dHeader.hpp"
 
 namespace gpu_renderer {

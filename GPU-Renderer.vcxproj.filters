@@ -111,6 +111,9 @@
     <ClCompile Include="Bindable.cpp">
       <Filter>Исходные файлы\bindable</Filter>
     </ClCompile>
+    <ClCompile Include="InputLayout.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
@@ -209,10 +212,13 @@
     <ClInclude Include="Bindable.hpp">
       <Filter>Файлы заголовков\bindable</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.hpp">
+    <ClInclude Include="SupportedShaderType.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="SupportedShaderType.hpp">
+    <ClInclude Include="Shader.hpp">
+      <Filter>Файлы заголовков\bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="InputLayout.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
