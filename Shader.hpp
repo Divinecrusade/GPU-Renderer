@@ -13,46 +13,42 @@ class Shader : public Graphics::Bindable {
   Shader() = delete;
   Shader(std::filesystem::path const& shader_file, Graphics& gfx)
     : Bindable{gfx} {
-    // StartTraceInDebugMode();
-    // if (HRESULT const operation_status =
-    //         D3DReadFileToBlob(L"PixelShader.cso", &shader_blob);
-    //     FAILED(operation_status)) {
-    //   throw CreateDirectXError(
-    //       operation_status, "Failed to read compiled pixel shader into blob",
-    //       "Error during shader loading", __FILEW__, __LINE__);
-    // }
     assert(shader_file.extension() == L".cso");
-    assert(SUCCEEDED(D3DReadFileToBlob(shader_file.c_str(), &shader_blob_)));
+    GetDebugger().StartTraceInDebugMode();
+    if (HRESULT const operation_status =
+            D3DReadFileToBlob(shader_file.c_str(), &shader_blob_);
+        FAILED(operation_status)) {
+      throw GetDebugger().CreateDirectXError(operation_status, 
+                                             "Failed to read compiled pixel shader into blob",
+                                             "Error during shader loading", 
+                                             __FILEW__, __LINE__);
+    }
 
 #pragma warning(push)
 #pragma warning(disable : 26462)
     constexpr ID3D11ClassLinkage* kNoClassLinkage = nullptr;
 #pragma warning(pop)
+    GetDebugger().StartTraceInDebugMode();
     if constexpr (T == SupportedShaderType::kPixel) {
-      // StartTraceInDebugMode();
-      // if (HRESULT const operation_status = device_->CreatePixelShader(
-      //         shader_blob->GetBufferPointer(), shader_blob->GetBufferSize(),
-      //         NULL, &pixel_shader);
-      //     FAILED(operation_status)) {
-      //   throw CreateDirectXError(
-      //       operation_status, "Failed to create pixel shader from blob",
-      //       "Error during shader loading", __FILEW__, __LINE__);
-      // }
-      assert(SUCCEEDED(GetDevice().CreatePixelShader(
-          shader_blob_->GetBufferPointer(), shader_blob_->GetBufferSize(),
-          kNoClassLinkage, &shader_)));
+      if (HRESULT const operation_status = GetDevice().CreatePixelShader(
+              shader_blob_->GetBufferPointer(), shader_blob_->GetBufferSize(),
+              kNoClassLinkage, &shader_);
+          FAILED(operation_status)) {
+        throw GetDebugger().CreateDirectXError(operation_status, 
+                                               "Failed to create pixel shader from blob",
+                                               "Error during shader loading", 
+                                               __FILEW__, __LINE__);
+      }
     } else if constexpr (T == SupportedShaderType::kVertex) {
-      // if (HRESULT const operation_status = device_->CreateVertexShader(
-      //         shader_blob->GetBufferPointer(), shader_blob->GetBufferSize(),
-      //         NULL, &vertex_shader);
-      //     FAILED(operation_status)) {
-      //   throw CreateDirectXError(
-      //       operation_status, "Failed to create vertex shader from blob",
-      //       "Error during shader loading", __FILEW__, __LINE__);
-      // }
-      assert(SUCCEEDED(GetDevice().CreateVertexShader(
-          shader_blob_->GetBufferPointer(), shader_blob_->GetBufferSize(),
-          kNoClassLinkage, &shader_)));
+      if (HRESULT const operation_status = GetDevice().CreateVertexShader(
+              shader_blob_->GetBufferPointer(), shader_blob_->GetBufferSize(),
+              kNoClassLinkage, &shader_);
+          FAILED(operation_status)) {
+        throw GetDebugger().CreateDirectXError(operation_status, 
+                                               "Failed to create vertex shader from blob",
+                                               "Error during shader loading", 
+                                               __FILEW__, __LINE__);
+      }
     } else {
       std::unreachable();
     }
