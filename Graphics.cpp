@@ -42,7 +42,7 @@ Graphics::Graphics(HWND hwnd) {
   constexpr D3D_FEATURE_LEVEL* kIgnoreFeatureLevelReturn = NULL;
 #pragma warning(pop)
 
-  StartTraceInDebugMode();
+  debugger_.StartTraceInDebugMode();
   
   if (HRESULT const operation_status = D3D11CreateDeviceAndSwapChain(
           kDefaultAdapter, D3D_DRIVER_TYPE_HARDWARE, kNoSoftwareRasterizer,
@@ -55,10 +55,10 @@ Graphics::Graphics(HWND hwnd) {
           D3D11_SDK_VERSION, &swap_chain_conf, &swap_chain_, &device_,
           kIgnoreFeatureLevelReturn, &device_context_);
       FAILED(operation_status)) {
-    throw CreateDirectXError(operation_status,
-                             "Creating device and swap chain failed",
-                             "Resource for Graphics was not allocated",
-                             __FILEW__, __LINE__);
+    throw debugger_.CreateDirectXError(operation_status,
+                                       "Creating device and swap chain failed",
+                                       "Resource for Graphics was not allocated",
+                                       __FILEW__, __LINE__);
   }
   assert(((void)"Device must be allocated at this point", device_));
   __assume(device_);
@@ -72,7 +72,7 @@ Graphics::Graphics(HWND hwnd) {
   static constexpr UINT kBackBufferId = 0u;
   Microsoft::WRL::ComPtr<ID3D11Resource> back_buffer{};
   
-  StartTraceInDebugMode();
+  debugger_.StartTraceInDebugMode();
 
 #pragma warning(push)
 #pragma warning(disable : 26490)
@@ -81,10 +81,10 @@ Graphics::Graphics(HWND hwnd) {
                                  &back_buffer);
 #pragma warning(pop)
       FAILED(operation_status)) {
-    throw CreateDirectXError(operation_status, 
-                             "Backbuffer wasn't created",
-                             "Resource for Graphics was not allocated",
-                             __FILEW__, __LINE__);
+    throw debugger_.CreateDirectXError(operation_status, 
+                                       "Backbuffer wasn't created",
+                                       "Resource for Graphics was not allocated",
+                                       __FILEW__, __LINE__);
   }
   assert(((void)"Back buffer context must be allocated at this point", 
           back_buffer));
@@ -93,15 +93,15 @@ Graphics::Graphics(HWND hwnd) {
   static constexpr D3D11_RENDER_TARGET_VIEW_DESC const*
       kGiveAccessToAllMipmapLevels = nullptr;
 
-  StartTraceInDebugMode();
+  debugger_.StartTraceInDebugMode();
 
   if (HRESULT const operation_status = device_->CreateRenderTargetView(
           back_buffer.Get(), kGiveAccessToAllMipmapLevels, &render_target_);
       FAILED(operation_status)) {
-    throw CreateDirectXError(operation_status, 
-                             "Target view wasn't created",
-                             "Resource for Graphics was not allocated", 
-                             __FILEW__, __LINE__);
+    throw debugger_.CreateDirectXError(operation_status, 
+                                       "Target view wasn't created",
+                                       "Resource for Graphics was not allocated", 
+                                       __FILEW__, __LINE__);
   }
   assert(((void)"Render target view must be allocated at this point", 
           render_target_));
@@ -123,10 +123,10 @@ Graphics::Graphics(HWND hwnd) {
   };
   Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depth_buf{};
 
-  StartTraceInDebugMode();
+  debugger_.StartTraceInDebugMode();
   device_->CreateDepthStencilState(&depth_buf_desc, &depth_buf);
 
-  StartTraceInDebugMode();
+  debugger_.StartTraceInDebugMode();
   device_context_->OMSetDepthStencilState(depth_buf.Get(), 1u);
   D3D11_TEXTURE2D_DESC const depth_texture_desc{
     .Width = 640,
@@ -139,14 +139,14 @@ Graphics::Graphics(HWND hwnd) {
   };
   Microsoft::WRL::ComPtr<ID3D11Texture2D> depth_texture{};
 
-  StartTraceInDebugMode();
+  debugger_.StartTraceInDebugMode();
   if (HRESULT const operation_status = device_->CreateTexture2D(
           &depth_texture_desc, nullptr, &depth_texture);
       FAILED(operation_status)) {
-    throw CreateDirectXError(operation_status, 
-                             "Texture for depth buffer wasn't created",
-                             "Resource for Graphics was not allocated",
-                             __FILEW__, __LINE__);
+    throw debugger_.CreateDirectXError(operation_status, 
+                                       "Texture for depth buffer wasn't created",
+                                       "Resource for Graphics was not allocated",
+                                       __FILEW__, __LINE__);
   }
   
 
@@ -156,11 +156,11 @@ Graphics::Graphics(HWND hwnd) {
     .Flags = 0u
   };
 
-  StartTraceInDebugMode();
+  debugger_.StartTraceInDebugMode();
   device_->CreateDepthStencilView(depth_texture.Get(), 
                                   &depth_buf_view_desc, 
                                   &depth_buf_view_);
-  StartTraceInDebugMode();
+  debugger_.StartTraceInDebugMode();
   device_context_->OMSetRenderTargets(1u, render_target_.GetAddressOf(), 
                                       depth_buf_view_.Get());
 }
@@ -169,22 +169,21 @@ void Graphics::EndFrame() {
   static constexpr UINT kNoSwapChainSync = 0u;
   static constexpr UINT kDefaultSwapChainPresention = 0u;
 
-  StartTraceInDebugMode();
-
+  debugger_.StartTraceInDebugMode();
   if (HRESULT const operation_status = 
       swap_chain_->Present(kNoSwapChainSync, kDefaultSwapChainPresention);
       FAILED(operation_status)) {
       if (exception::DeviceRemovedError::IsDeviceRemovedErrorHappened(operation_status)) {
-        throw CreateDeviceRemovedError(*device_.Get(), 
-                                       "Device removed unexpectly and frame wasn't present",
-                                       "Render failed", 
-                                       __FILEW__, __LINE__);  
+        throw debugger_.CreateDeviceRemovedError(*device_.Get(), 
+                                                 "Device removed unexpectly and frame wasn't present",
+                                                 "Render failed", 
+                                                 __FILEW__, __LINE__);  
       }
       else {
-        throw CreateDirectXError(operation_status,
-                                 "Back buffer wasn't present (swapped with front buffer)", 
-                                  "Render failed",
-                                  __FILEW__, __LINE__);
+        throw debugger_.CreateDirectXError(operation_status,
+                                           "Back buffer wasn't present (swapped with front buffer)", 
+                                           "Render failed",
+                                           __FILEW__, __LINE__);
       }
   }
 }
@@ -251,7 +250,7 @@ void Graphics::DrawTestTriangle(float z, float angle) {
       .MiscFlags = kNoMisc};
   D3D11_SUBRESOURCE_DATA const vertex_buffer{.pSysMem = vertices.data()};
   Microsoft::WRL::ComPtr<ID3D11Buffer> vertex_buffers{};
-  StartTraceInDebugMode();
+  debugger_.StartTraceInDebugMode();
   if (HRESULT const operation_status = device_->CreateBuffer(
           &vertex_buffer_conf, &vertex_buffer, &vertex_buffers);
       FAILED(operation_status)) {
@@ -261,7 +260,8 @@ void Graphics::DrawTestTriangle(float z, float angle) {
   }
   constexpr UINT stride = sizeof(Vector3D);
   constexpr UINT offset = 0u;
-  StartTraceInDebugMode();
+
+  debugger_.StartTraceInDebugMode();
   device_context_->IASetVertexBuffers(0u, 1u, vertex_buffers.GetAddressOf(),
                                       &stride, &offset);
 
@@ -273,7 +273,8 @@ void Graphics::DrawTestTriangle(float z, float angle) {
       .MiscFlags = kNoMisc};
   D3D11_SUBRESOURCE_DATA const indices_buffer{.pSysMem = indices.data()};
   Microsoft::WRL::ComPtr<ID3D11Buffer> indices_buffer_ptr{};
-  StartTraceInDebugMode();
+  
+  debugger_.StartTraceInDebugMode();
   if (HRESULT const operation_status = device_->CreateBuffer(
           &indices_buffer_conf, &indices_buffer, &indices_buffer_ptr);
       FAILED(operation_status)) {
@@ -281,7 +282,8 @@ void Graphics::DrawTestTriangle(float z, float angle) {
         operation_status, "Buffer was not created", "Buffer was not created",
         __FILEW__, __LINE__);
   }
-  StartTraceInDebugMode();
+  
+  debugger_.StartTraceInDebugMode();
   device_context_->IASetIndexBuffer(indices_buffer_ptr.Get(),
                                     DXGI_FORMAT_R16_UINT, 0u);
 
@@ -295,7 +297,8 @@ void Graphics::DrawTestTriangle(float z, float angle) {
       .MiscFlags = kNoMisc};
   D3D11_SUBRESOURCE_DATA const_buffer{.pSysMem = &vcb};
   Microsoft::WRL::ComPtr<ID3D11Buffer> const_buffers{};
-  StartTraceInDebugMode();
+  
+  debugger_.StartTraceInDebugMode();
   if (HRESULT const operation_status = device_->CreateBuffer(
           &const_vertex_buffer_conf, &const_buffer, &const_buffers);
       FAILED(operation_status)) {
@@ -303,7 +306,8 @@ void Graphics::DrawTestTriangle(float z, float angle) {
         operation_status, "Buffer was not created", "Buffer was not created",
         __FILEW__, __LINE__);
   }
-  StartTraceInDebugMode();
+  
+  debugger_.StartTraceInDebugMode();
   device_context_->VSSetConstantBuffers(0u, 1u, const_buffers.GetAddressOf());
 
   D3D11_BUFFER_DESC const const_pixel_buffer_conf{
@@ -312,20 +316,23 @@ void Graphics::DrawTestTriangle(float z, float angle) {
       .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
       .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
       .MiscFlags = kNoMisc};
-  StartTraceInDebugMode();
+  
+  debugger_.StartTraceInDebugMode();
   const_buffer.pSysMem = &pcb;
   if (HRESULT const operation_status = device_->CreateBuffer(
           &const_pixel_buffer_conf, &const_buffer, &const_buffers);
       FAILED(operation_status)) {
-    throw exception::DirectXError::Create(
-        operation_status, "Buffer was not created", "Buffer was not created",
-        __FILEW__, __LINE__);
+    throw exception::DirectXError::Create(operation_status, 
+                                          "Buffer was not created", 
+                                          "Buffer was not created",
+                                          __FILEW__, __LINE__);
   }
-  StartTraceInDebugMode();
+  
+  debugger_.StartTraceInDebugMode();
   device_context_->PSSetConstantBuffers(0u, 1u, const_buffers.GetAddressOf());
 
   device_context_->DrawIndexed(indices.size(), 0u, 0u);
-  if (auto expected_trace = debug_info_.GetTraceLog();
+  if (auto expected_trace = debugger_.debug_info_.GetTraceLog();
       expected_trace && !expected_trace->empty()) {
     throw exception::DebugLayerMessage{__FILEW__, __LINE__,
                                        "Vertex buffer setting failed",

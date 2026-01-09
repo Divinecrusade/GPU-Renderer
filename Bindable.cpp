@@ -12,4 +12,8 @@ ID3D11DeviceContext& gpu_renderer::abstract::Bindable::GetDeviceContext() noexce
 ID3D11Device& Bindable::GetDevice() noexcept {
   return *(gfx_.device_.Get());  
 }
+
+Graphics::ProtectiveLayer& Bindable::GetDebugger() noexcept {
+  return gfx_.debugger_;
+}
 }  // namespace gpu_renderer::abstract

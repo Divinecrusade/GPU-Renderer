@@ -1,11 +1,9 @@
 #ifndef BINDABLE_HPP
 #define BINDABLE_HPP
 
-#include "OptimisedWindowsHeader.hpp"
-#include "OptimisedDirect3dHeader.hpp"
+#include "Graphics.hpp"
 
 namespace gpu_renderer {
-class Graphics;
 
 namespace abstract {
 class Bindable {
@@ -19,6 +17,7 @@ class Bindable {
  protected:
   ID3D11DeviceContext& GetDeviceContext() noexcept;
   ID3D11Device& GetDevice() noexcept;
+  Graphics::ProtectiveLayer& GetDebugger() noexcept;
 
  private:
   Graphics const& gfx_;
