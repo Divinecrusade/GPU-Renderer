@@ -72,7 +72,8 @@ class Graphics final {
     ProtectiveLayer& operator=(ProtectiveLayer&&) = delete;
 
     ~ProtectiveLayer() = default;
-  
+
+   public:
     void StartTraceInDebugMode() {
 #ifdef _DEBUG
       debug_info_.StartTrace();
