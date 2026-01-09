@@ -170,7 +170,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="Bindable.cpp" />
     <ClCompile Include="CachedDC.cpp" />
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Console.cpp" />
@@ -206,7 +205,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
-    <ClInclude Include="Bindable.hpp" />
     <ClInclude Include="CachedDC.hpp" />
     <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="Console.hpp" />

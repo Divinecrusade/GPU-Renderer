@@ -110,7 +110,23 @@ class Graphics final {
 #endif  // _DEBUG
   };
   
-  friend class abstract::Bindable;
+ public:
+  class Bindable {
+   public:
+    Bindable(Graphics& gfx) noexcept;
+    virtual ~Bindable() = default;
+
+    virtual void Activate() = 0;
+
+   protected:
+    ID3D11DeviceContext& GetDeviceContext() noexcept;
+    ID3D11Device& GetDevice() noexcept;
+    Graphics::ProtectiveLayer& GetDebugger() noexcept;
+
+   private:
+    Graphics const& gfx_;
+  };
+  friend class Bindable;
 
  private:
   Microsoft::WRL::ComPtr<IDXGISwapChain> swap_chain_{};

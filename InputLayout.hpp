@@ -4,7 +4,7 @@
 #include "Shader.hpp"
 
 namespace gpu_renderer::bindable {
-class InputLayout : public abstract::Bindable {
+class InputLayout : public Graphics::Bindable {
  public:
   InputLayout(Shader<SupportedShaderType::kVertex> const& vertex_shader);
 

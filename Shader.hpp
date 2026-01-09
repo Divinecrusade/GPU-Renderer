@@ -3,12 +3,12 @@
 
 #include "OptimisedStlHeader.hpp"
 
-#include "Bindable.hpp"
+#include "Graphics.hpp"
 #include "SupportedShaderType.hpp"
 
 namespace gpu_renderer::bindable {
 template <SupportedShaderType T>
-class Shader : public abstract::Bindable {
+class Shader : public Graphics::Bindable {
  public:
   Shader() = delete;
   Shader(std::filesystem::path const& shader_file, Graphics& gfx)
