@@ -109,7 +109,7 @@
       <Filter>Исходные файлы\exception</Filter>
     </ClCompile>
     <ClCompile Include="InputLayout.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\bindable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -213,7 +213,7 @@
       <Filter>Файлы заголовков\bindable</Filter>
     </ClInclude>
     <ClInclude Include="InputLayout.hpp">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>Файлы заголовков\bindable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
