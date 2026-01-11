@@ -13,10 +13,6 @@
 #include "DebugLayerMessage.hpp"
 
 namespace gpu_renderer {
-namespace abstract {
-  class Bindable;
-}
-
 class Graphics final {
  public:
   class Color final {
