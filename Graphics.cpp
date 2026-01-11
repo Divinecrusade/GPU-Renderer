@@ -194,7 +194,7 @@ void Graphics::ClearBuffer(Color const& c) {
                                          D3D11_CLEAR_DEPTH, 1.f, 0u);
 }
 
-void Graphics::DrawTestTriangle(float z, float angle) {
+void Graphics::DrawTestTriangle(float z, float angle, UINT indices_count) {
 #ifdef _DEBUG
   struct Vector3D {
     float x = 0.f;
@@ -235,9 +235,6 @@ void Graphics::DrawTestTriangle(float z, float angle) {
       Vector3D{.x = 1.f, .y = 1.f, .z = 1.f},
       Vector3D{.x = 1.f, .y = -1.f, .z = 1.f},
   };
-  std::array<unsigned short, 36u> indices{
-      0u, 1u, 3u, 2u, 3u, 1u, 3u, 2u, 7u, 6u, 7u, 2u, 0u, 4u, 1u, 5u, 1u, 4u,
-      6u, 5u, 7u, 4u, 7u, 5u, 1u, 5u, 2u, 6u, 2u, 5u, 4u, 0u, 7u, 3u, 7u, 0u};
 
   constexpr UINT kNoCpuAccessToBuffer = 0u;
   constexpr UINT kNoMisc = 0u;
@@ -264,28 +261,6 @@ void Graphics::DrawTestTriangle(float z, float angle) {
   debugger_.StartTraceInDebugMode();
   device_context_->IASetVertexBuffers(0u, 1u, vertex_buffers.GetAddressOf(),
                                       &stride, &offset);
-
-  D3D11_BUFFER_DESC const indices_buffer_conf{
-      .ByteWidth = indices.size() * sizeof(unsigned short),
-      .Usage = D3D11_USAGE_DEFAULT,
-      .BindFlags = D3D11_BIND_INDEX_BUFFER,
-      .CPUAccessFlags = kNoCpuAccessToBuffer,
-      .MiscFlags = kNoMisc};
-  D3D11_SUBRESOURCE_DATA const indices_buffer{.pSysMem = indices.data()};
-  Microsoft::WRL::ComPtr<ID3D11Buffer> indices_buffer_ptr{};
-  
-  debugger_.StartTraceInDebugMode();
-  if (HRESULT const operation_status = device_->CreateBuffer(
-          &indices_buffer_conf, &indices_buffer, &indices_buffer_ptr);
-      FAILED(operation_status)) {
-    throw exception::DirectXError::Create(
-        operation_status, "Buffer was not created", "Buffer was not created",
-        __FILEW__, __LINE__);
-  }
-  
-  debugger_.StartTraceInDebugMode();
-  device_context_->IASetIndexBuffer(indices_buffer_ptr.Get(),
-                                    DXGI_FORMAT_R16_UINT, 0u);
 
   device_context_->IASetPrimitiveTopology(
       D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -331,7 +306,7 @@ void Graphics::DrawTestTriangle(float z, float angle) {
   debugger_.StartTraceInDebugMode();
   device_context_->PSSetConstantBuffers(0u, 1u, const_buffers.GetAddressOf());
 
-  device_context_->DrawIndexed(indices.size(), 0u, 0u);
+  device_context_->DrawIndexed(indices_count, 0u, 0u);
   if (auto expected_trace = debugger_.debug_info_.GetTraceLog();
       expected_trace && !expected_trace->empty()) {
     throw exception::DebugLayerMessage{__FILEW__, __LINE__,

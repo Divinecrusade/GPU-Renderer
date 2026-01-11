@@ -215,6 +215,9 @@
     <ClInclude Include="InputLayout.hpp">
       <Filter>Файлы заголовков\bindable</Filter>
     </ClInclude>
+    <ClInclude Include="IndexBuffer.hpp">
+      <Filter>Файлы заголовков\bindable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GPU-Renderer.rc">

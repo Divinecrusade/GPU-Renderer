@@ -217,6 +217,7 @@
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="FrameTimer.hpp" />
     <ClInclude Include="Graphics.hpp" />
+    <ClInclude Include="IndexBuffer.hpp" />
     <ClInclude Include="InputLayout.hpp" />
     <ClInclude Include="Keyboard.hpp" />
     <ClInclude Include="Mouse.hpp" />

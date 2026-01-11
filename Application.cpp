@@ -5,7 +5,8 @@ namespace gpu_renderer {
 Application::Application(HINSTANCE hInstance, int nCmdShow)
     : window_class_{hInstance, window::Canvas::GetlpfnWndProc()},
       window_{window_class_, kName,   kLeftTopCornerPosX, kLeftTopCornerPosY,
-              kWidth,        kHeight, hInstance} {
+              kWidth,        kHeight, hInstance},
+      triangle_indices_buffer_{window_.gfx, std::span<unsigned short const>{kIndicesForTriangle}} {
   window_.Show(nCmdShow);
 }
 
@@ -15,6 +16,7 @@ window::ExitCode Application::Run() {
   vertex_shader_.Activate();
   pixel_shader_.Activate();
   input_layout_.Activate();
+  triangle_indices_buffer_.Activate();
 
   for (FrameTimer ft{}; !exit_code; exit_code = Process()) {
     Update(ft.Mark());
@@ -44,8 +46,8 @@ void Application::Update(FrameTimer::DeltaTime dt) {
 
 void Application::Render() { 
   window_.gfx.ClearBuffer({0.f, 0.f, 0.f});
-  window_.gfx.DrawTestTriangle(y_ * 1.5f + 3.f, cur_angle_);
-  window_.gfx.DrawTestTriangle(3.f, -cur_angle_);
+  window_.gfx.DrawTestTriangle(y_ * 1.5f + 3.f, cur_angle_, kIndicesForTriangle.size());
+  window_.gfx.DrawTestTriangle(3.f, -cur_angle_, kIndicesForTriangle.size());
   window_.gfx.EndFrame(); 
 }
 }  // namespace gpu_renderer
