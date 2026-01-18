@@ -42,6 +42,9 @@ class ConstBuffer : public Graphics::Bindable {
  private:
   Microsoft::WRL::ComPtr<ID3D11Buffer> const_buffer_{};
 };
+
+using VertexConstBuffer = ConstBuffer<SupportedShaderType::kVertex>;
+using PixelConstBuffer = ConstBuffer<SupportedShaderType::kPixel>;
 }  // namespace gpu_renderer::bindable
 
 #endif  // !CONST_BUFFER_HPP

@@ -103,6 +103,9 @@ class Shader : public Graphics::Bindable {
   }())::type;
   Microsoft::WRL::ComPtr<ShaderInterface> shader_{};
 };
+
+using VertexShader = Shader<SupportedShaderType::kVertex>;
+using PixelShader = Shader<SupportedShaderType::kPixel>;
 }  // namespace gpu_renderer::bindable
 
 #endif  // !SHADER_HPP

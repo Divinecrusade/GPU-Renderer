@@ -51,10 +51,10 @@ void Application::Update(FrameTimer::DeltaTime dt) {
       DirectX::XMMatrixTranslation(0.f, 0.f, y_ * 1.5f + 3.f) *
       DirectX::XMMatrixPerspectiveLH(1.f, 3.f / 4.f, 0.2f, 10.f));
 
-  pixel_const_buffer_ = std::make_unique<bindable::ConstBuffer<SupportedShaderType::kPixel>>(window_.gfx, cube_colors_);
-  pixel_const_buffer_->Activate();
-  vertex_const_buffer_ = std::make_unique<bindable::ConstBuffer<SupportedShaderType::kVertex>>(window_.gfx, cube_transformation_);
+  vertex_const_buffer_ = std::make_unique<bindable::VertexConstBuffer>(window_.gfx, cube_transformation_);
   vertex_const_buffer_->Activate();
+  pixel_const_buffer_ = std::make_unique<bindable::PixelConstBuffer>(window_.gfx, cube_colors_);
+  pixel_const_buffer_->Activate();
 }
 
 void Application::Render() { 

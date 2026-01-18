@@ -222,7 +222,7 @@
       <Filter>Файлы заголовков\bindable</Filter>
     </ClInclude>
     <ClInclude Include="VertexBuffer.hpp">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>Файлы заголовков\bindable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

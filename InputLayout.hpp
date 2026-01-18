@@ -6,7 +6,7 @@
 namespace gpu_renderer::bindable {
 class InputLayout : public Graphics::Bindable {
  public:
-  InputLayout(Shader<SupportedShaderType::kVertex> const& vertex_shader);
+  InputLayout(VertexShader const& vertex_shader);
 
   void Activate() override;
 

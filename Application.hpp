@@ -42,8 +42,8 @@ class Application final {
   float cur_angle_ = 0.f;
   float y_ = 1.f;
 
-  bindable::Shader<SupportedShaderType::kVertex> vertex_shader_{L"VertexShader.cso", window_.gfx};
-  bindable::Shader<SupportedShaderType::kPixel> pixel_shader_{L"PixelShader.cso", window_.gfx};
+  bindable::VertexShader vertex_shader_{L"VertexShader.cso", window_.gfx};
+  bindable::PixelShader pixel_shader_{L"PixelShader.cso", window_.gfx};
   bindable::InputLayout input_layout_{vertex_shader_};
 
   static constexpr std::array<unsigned short, 36u> kIndicesForTriangle {
@@ -65,8 +65,8 @@ class Application final {
                      {0.f, 1.f, 1.f}, 
                      {1.f, 0.f, 1.f}};
 
-  std::unique_ptr<bindable::ConstBuffer<SupportedShaderType::kVertex>> vertex_const_buffer_{};
-  std::unique_ptr<bindable::ConstBuffer<SupportedShaderType::kPixel>> pixel_const_buffer_{};
+  std::unique_ptr<bindable::VertexConstBuffer> vertex_const_buffer_{};
+  std::unique_ptr<bindable::PixelConstBuffer> pixel_const_buffer_{};
 
   struct Vector3D {
     float x = 0.f;

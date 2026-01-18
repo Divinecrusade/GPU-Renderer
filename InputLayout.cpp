@@ -3,7 +3,7 @@
 #include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::bindable {
-InputLayout::InputLayout(Shader<SupportedShaderType::kVertex> const& vertex_shader)
+InputLayout::InputLayout(VertexShader const& vertex_shader)
     : Bindable{vertex_shader} {
   constexpr std::array<D3D11_INPUT_ELEMENT_DESC, 1u> input_element_descriptor{
       D3D11_INPUT_ELEMENT_DESC{.SemanticName = "Position",
