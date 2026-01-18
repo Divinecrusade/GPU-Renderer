@@ -6,6 +6,7 @@
 #include "InputLayout.hpp"
 #include "IndexBuffer.hpp"
 #include "ConstBuffer.hpp"
+#include "VertexBuffer.hpp"
 
 namespace gpu_renderer {
 class Application final {
@@ -66,6 +67,24 @@ class Application final {
 
   std::unique_ptr<bindable::ConstBuffer<SupportedShaderType::kVertex>> vertex_const_buffer_{};
   std::unique_ptr<bindable::ConstBuffer<SupportedShaderType::kPixel>> pixel_const_buffer_{};
+
+  struct Vector3D {
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+  };
+  static constexpr std::array<Vector3D, 8u> kCubeVertices{
+      Vector3D{.x = -1.f, .y = -1.f, .z = -1.f},
+      Vector3D{.x = -1.f, .y = 1.f, .z = -1.f},
+      Vector3D{.x = 1.f, .y = 1.f, .z = -1.f},
+      Vector3D{.x = 1.f, .y = -1.f, .z = -1.f},
+      Vector3D{.x = -1.f, .y = -1.f, .z = 1.f},
+      Vector3D{.x = -1.f, .y = 1.f, .z = 1.f},
+      Vector3D{.x = 1.f, .y = 1.f, .z = 1.f},
+      Vector3D{.x = 1.f, .y = -1.f, .z = 1.f},
+  };
+
+  bindable::VertexBuffer cube_vertices_buffer_;
 };
 }  // namespace gpu_renderer
 

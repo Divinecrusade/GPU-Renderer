@@ -194,51 +194,8 @@ void Graphics::ClearBuffer(Color const& c) {
                                          D3D11_CLEAR_DEPTH, 1.f, 0u);
 }
 
-void Graphics::DrawTestTriangle(UINT indices_count) {
-#ifdef _DEBUG
-  struct Vector3D {
-    float x = 0.f;
-    float y = 0.f;
-    float z = 0.f;
-  };
-
-  std::array<Vector3D, 8u> vertices{
-      Vector3D{.x = -1.f, .y = -1.f, .z = -1.f},
-      Vector3D{.x = -1.f, .y = 1.f, .z = -1.f},
-      Vector3D{.x = 1.f, .y = 1.f, .z = -1.f},
-      Vector3D{.x = 1.f, .y = -1.f, .z = -1.f},
-      Vector3D{.x = -1.f, .y = -1.f, .z = 1.f},
-      Vector3D{.x = -1.f, .y = 1.f, .z = 1.f},
-      Vector3D{.x = 1.f, .y = 1.f, .z = 1.f},
-      Vector3D{.x = 1.f, .y = -1.f, .z = 1.f},
-  };
-
-  constexpr UINT kNoCpuAccessToBuffer = 0u;
-  constexpr UINT kNoMisc = 0u;
-
-  D3D11_BUFFER_DESC const vertex_buffer_conf{
-      .ByteWidth = vertices.size() * sizeof(Vector3D),
-      .Usage = D3D11_USAGE_DEFAULT,
-      .BindFlags = D3D11_BIND_VERTEX_BUFFER,
-      .CPUAccessFlags = kNoCpuAccessToBuffer,
-      .MiscFlags = kNoMisc};
-  D3D11_SUBRESOURCE_DATA const vertex_buffer{.pSysMem = vertices.data()};
-  Microsoft::WRL::ComPtr<ID3D11Buffer> vertex_buffers{};
+void Graphics::DrawIndexed(UINT indices_count) {
   debugger_.StartTraceInDebugMode();
-  if (HRESULT const operation_status = device_->CreateBuffer(
-          &vertex_buffer_conf, &vertex_buffer, &vertex_buffers);
-      FAILED(operation_status)) {
-    throw exception::DirectXError::Create(
-        operation_status, "Buffer was not created", "Buffer was not created",
-        __FILEW__, __LINE__);
-  }
-  constexpr UINT stride = sizeof(Vector3D);
-  constexpr UINT offset = 0u;
-
-  debugger_.StartTraceInDebugMode();
-  device_context_->IASetVertexBuffers(0u, 1u, vertex_buffers.GetAddressOf(),
-                                      &stride, &offset);
-
   device_context_->IASetPrimitiveTopology(
       D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   device_context_->DrawIndexed(indices_count, 0u, 0u);
@@ -248,7 +205,6 @@ void Graphics::DrawTestTriangle(UINT indices_count) {
                                        "Vertex buffer setting failed",
                                        std::move(expected_trace.value())};
   }
-#endif  // _DEBUG
 }
 
 Graphics::Color::Color(float r, float g, float b) noexcept

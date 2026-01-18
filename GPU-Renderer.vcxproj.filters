@@ -221,6 +221,9 @@
     <ClInclude Include="ConstBuffer.hpp">
       <Filter>Файлы заголовков\bindable</Filter>
     </ClInclude>
+    <ClInclude Include="VertexBuffer.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GPU-Renderer.rc">

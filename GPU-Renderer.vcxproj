@@ -231,6 +231,7 @@
     <ClInclude Include="ErrorWithCode.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="SupportedShaderType.hpp" />
+    <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="WindowClass.hpp" />
     <ClInclude Include="WinError.hpp" />

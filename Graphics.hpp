@@ -54,7 +54,7 @@ class Graphics final {
 
   void ClearBuffer(Color const& c);
 
-  void DrawTestTriangle(UINT indices_count);
+  void DrawIndexed(UINT indices_count);
 
  private:
   class ProtectiveLayer {
