@@ -194,36 +194,13 @@ void Graphics::ClearBuffer(Color const& c) {
                                          D3D11_CLEAR_DEPTH, 1.f, 0u);
 }
 
-void Graphics::DrawTestTriangle(float z, float angle, UINT indices_count) {
+void Graphics::DrawTestTriangle(UINT indices_count) {
 #ifdef _DEBUG
   struct Vector3D {
     float x = 0.f;
     float y = 0.f;
     float z = 0.f;
   };
-
-  struct VertexConstBuffer {
-    DirectX::XMMATRIX transformation;
-  };
-  VertexConstBuffer const vcb = {DirectX::XMMatrixTranspose(
-      DirectX::XMMatrixRotationZ(angle) * DirectX::XMMatrixRotationX(angle) *
-      DirectX::XMMatrixTranslation(0.f, 0.f, z) *
-      DirectX::XMMatrixPerspectiveLH(1.f, 3.f / 4.f, 0.2f, 10.f))};
-
-  struct PixelConstBuffer {
-    struct {
-      float r;
-      float g;
-      float b;
-      float a;
-    } colors[6u];
-  };
-  PixelConstBuffer const pcb{{{1.f, 0.f, 0.f},
-                              {0.f, 1.f, 0.f},
-                              {0.f, 0.f, 1.f},
-                              {1.f, 1.f, 0.f},
-                              {0.f, 1.f, 1.f},
-                              {1.f, 0.f, 1.f}}};
 
   std::array<Vector3D, 8u> vertices{
       Vector3D{.x = -1.f, .y = -1.f, .z = -1.f},
@@ -264,48 +241,6 @@ void Graphics::DrawTestTriangle(float z, float angle, UINT indices_count) {
 
   device_context_->IASetPrimitiveTopology(
       D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-  D3D11_BUFFER_DESC const const_vertex_buffer_conf{
-      .ByteWidth = sizeof(vcb),
-      .Usage = D3D11_USAGE_DYNAMIC,
-      .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
-      .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-      .MiscFlags = kNoMisc};
-  D3D11_SUBRESOURCE_DATA const_buffer{.pSysMem = &vcb};
-  Microsoft::WRL::ComPtr<ID3D11Buffer> const_buffers{};
-  
-  debugger_.StartTraceInDebugMode();
-  if (HRESULT const operation_status = device_->CreateBuffer(
-          &const_vertex_buffer_conf, &const_buffer, &const_buffers);
-      FAILED(operation_status)) {
-    throw exception::DirectXError::Create(
-        operation_status, "Buffer was not created", "Buffer was not created",
-        __FILEW__, __LINE__);
-  }
-  
-  debugger_.StartTraceInDebugMode();
-  device_context_->VSSetConstantBuffers(0u, 1u, const_buffers.GetAddressOf());
-
-  D3D11_BUFFER_DESC const const_pixel_buffer_conf{
-      .ByteWidth = sizeof(pcb),
-      .Usage = D3D11_USAGE_DYNAMIC,
-      .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
-      .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-      .MiscFlags = kNoMisc};
-  
-  debugger_.StartTraceInDebugMode();
-  const_buffer.pSysMem = &pcb;
-  if (HRESULT const operation_status = device_->CreateBuffer(
-          &const_pixel_buffer_conf, &const_buffer, &const_buffers);
-      FAILED(operation_status)) {
-    throw exception::DirectXError::Create(operation_status, 
-                                          "Buffer was not created", 
-                                          "Buffer was not created",
-                                          __FILEW__, __LINE__);
-  }
-  
-  debugger_.StartTraceInDebugMode();
-  device_context_->PSSetConstantBuffers(0u, 1u, const_buffers.GetAddressOf());
-
   device_context_->DrawIndexed(indices_count, 0u, 0u);
   if (auto expected_trace = debugger_.debug_info_.GetTraceLog();
       expected_trace && !expected_trace->empty()) {

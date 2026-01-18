@@ -5,6 +5,7 @@
 #include "FrameTimer.hpp"
 #include "InputLayout.hpp"
 #include "IndexBuffer.hpp"
+#include "ConstBuffer.hpp"
 
 namespace gpu_renderer {
 class Application final {
@@ -49,6 +50,22 @@ class Application final {
       4u, 6u, 5u, 7u, 4u, 7u, 5u, 1u, 5u, 2u, 6u, 2u, 5u, 4u, 0u, 7u, 3u,
       7u, 0u};
   bindable::IndexBuffer triangle_indices_buffer_;
+
+  DirectX::XMMATRIX cube_transformation_{};
+  static constexpr struct {
+    float r;
+    float g;
+    float b;
+    float a;
+  } cube_colors_[6u]{{1.f, 0.f, 0.f},
+                     {0.f, 1.f, 0.f},
+                     {0.f, 0.f, 1.f},
+                     {1.f, 1.f, 0.f},
+                     {0.f, 1.f, 1.f}, 
+                     {1.f, 0.f, 1.f}};
+
+  std::unique_ptr<bindable::ConstBuffer<SupportedShaderType::kVertex>> vertex_const_buffer_{};
+  std::unique_ptr<bindable::ConstBuffer<SupportedShaderType::kPixel>> pixel_const_buffer_{};
 };
 }  // namespace gpu_renderer
 

@@ -208,6 +208,7 @@
     <ClInclude Include="CachedDC.hpp" />
     <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="Console.hpp" />
+    <ClInclude Include="ConstBuffer.hpp" />
     <ClInclude Include="CrtError.hpp" />
     <ClInclude Include="DebugLayerMessage.hpp" />
     <ClInclude Include="DeviceRemovedError.hpp" />

@@ -39,6 +39,6 @@ class IndexBuffer : public Graphics::Bindable {
  private:
   Microsoft::WRL::ComPtr<ID3D11Buffer> indices_buffer_{};
 };
-}
+}  // namespace gpu_renderer::bindable
 
 #endif  // !INDEX_BUFFER
