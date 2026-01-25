@@ -7,6 +7,7 @@
 #include "IndexBuffer.hpp"
 #include "ConstBuffer.hpp"
 #include "VertexBuffer.hpp"
+#include "Topology.hpp"
 
 namespace gpu_renderer {
 class Application final {
@@ -85,6 +86,7 @@ class Application final {
   };
 
   bindable::VertexBuffer cube_vertices_buffer_;
+  bindable::Topology<SupportedTypologyType::TRIANGLE_LIST> aTriangleListTopo_;
 };
 }  // namespace gpu_renderer
 

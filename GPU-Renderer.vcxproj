@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -231,6 +231,8 @@
     <ClInclude Include="ErrorWithCode.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="SupportedShaderType.hpp" />
+    <ClInclude Include="SupportedTopologyType.hpp" />
+    <ClInclude Include="Topology.hpp" />
     <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="WindowClass.hpp" />

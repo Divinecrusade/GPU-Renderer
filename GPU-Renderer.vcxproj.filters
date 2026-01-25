@@ -224,6 +224,12 @@
     <ClInclude Include="VertexBuffer.hpp">
       <Filter>Файлы заголовков\bindable</Filter>
     </ClInclude>
+    <ClInclude Include="SupportedTopologyType.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Topology.hpp">
+      <Filter>Файлы заголовков\bindable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GPU-Renderer.rc">

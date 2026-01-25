@@ -196,8 +196,6 @@ void Graphics::ClearBuffer(Color const& c) {
 
 void Graphics::DrawIndexed(UINT indices_count) {
   debugger_.StartTraceInDebugMode();
-  device_context_->IASetPrimitiveTopology(
-      D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   device_context_->DrawIndexed(indices_count, 0u, 0u);
   if (auto expected_trace = debugger_.debug_info_.GetTraceLog();
       expected_trace && !expected_trace->empty()) {

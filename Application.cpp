@@ -7,7 +7,8 @@ Application::Application(HINSTANCE hInstance, int nCmdShow)
       window_{window_class_, kName,   kLeftTopCornerPosX, kLeftTopCornerPosY,
               kWidth,        kHeight, hInstance},
       triangle_indices_buffer_{window_.gfx, std::span<unsigned short const>{kIndicesForTriangle}},
-      cube_vertices_buffer_{window_.gfx, std::span<Vector3D const>{kCubeVertices}} {
+      cube_vertices_buffer_{window_.gfx, std::span<Vector3D const>{kCubeVertices}},
+      aTriangleListTopo_{window_.gfx} {
   window_.Show(nCmdShow);
 }
 
@@ -19,6 +20,7 @@ window::ExitCode Application::Run() {
   input_layout_.Activate();
   triangle_indices_buffer_.Activate();
   cube_vertices_buffer_.Activate();
+  aTriangleListTopo_.Activate();
 
   for (FrameTimer ft{}; !exit_code; exit_code = Process()) {
     Update(ft.Mark());
