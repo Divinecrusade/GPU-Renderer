@@ -7,6 +7,8 @@ Application::Application(HINSTANCE hInstance, int nCmdShow)
       window_{window_class_, kName,   kLeftTopCornerPosX, kLeftTopCornerPosY,
               kWidth,        kHeight, hInstance},
       triangle_indices_buffer_{window_.gfx, std::span<unsigned short const>{kIndicesForTriangle}},
+      vertex_const_buffer_{window_.gfx},
+      pixel_const_buffer_{window_.gfx, cube_colors_},
       cube_vertices_buffer_{window_.gfx, std::span<Vector3D const>{kCubeVertices}},
       aTriangleListTopo_{window_.gfx} {
   window_.Show(nCmdShow);
@@ -19,6 +21,8 @@ window::ExitCode Application::Run() {
   pixel_shader_.Activate();
   input_layout_.Activate();
   triangle_indices_buffer_.Activate();
+  vertex_const_buffer_.Activate();
+  pixel_const_buffer_.Activate();
   cube_vertices_buffer_.Activate();
   aTriangleListTopo_.Activate();
 
@@ -53,15 +57,12 @@ void Application::Update(FrameTimer::DeltaTime dt) {
       DirectX::XMMatrixTranslation(0.f, 0.f, y_ * 1.5f + 3.f) *
       DirectX::XMMatrixPerspectiveLH(1.f, 3.f / 4.f, 0.2f, 10.f));
 
-  vertex_const_buffer_ = std::make_unique<bindable::VertexConstBuffer>(window_.gfx, cube_transformation_);
-  vertex_const_buffer_->Activate();
-  pixel_const_buffer_ = std::make_unique<bindable::PixelConstBuffer>(window_.gfx, cube_colors_);
-  pixel_const_buffer_->Activate();
+  vertex_const_buffer_.Update(cube_transformation_);
 }
 
-void Application::Render() { 
+void Application::Render() {
   window_.gfx.ClearBuffer({0.f, 0.f, 0.f});
   window_.gfx.DrawIndexed(kIndicesForTriangle.size());
-  window_.gfx.EndFrame(); 
+  window_.gfx.EndFrame();
 }
 }  // namespace gpu_renderer

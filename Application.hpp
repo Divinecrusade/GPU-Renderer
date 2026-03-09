@@ -30,7 +30,7 @@ class Application final {
   ~Application() = default;
 
   window::ExitCode Run();
- 
+
  private:
   std::optional<window::ExitCode> Process();
   void Update(FrameTimer::DeltaTime dt);
@@ -63,11 +63,11 @@ class Application final {
                      {0.f, 1.f, 0.f},
                      {0.f, 0.f, 1.f},
                      {1.f, 1.f, 0.f},
-                     {0.f, 1.f, 1.f}, 
+                     {0.f, 1.f, 1.f},
                      {1.f, 0.f, 1.f}};
 
-  std::unique_ptr<bindable::VertexConstBuffer> vertex_const_buffer_{};
-  std::unique_ptr<bindable::PixelConstBuffer> pixel_const_buffer_{};
+  bindable::VertexConstBuffer<DirectX::XMMATRIX> vertex_const_buffer_;
+  bindable::PixelConstBuffer<decltype(cube_colors_)> pixel_const_buffer_;
 
   struct Vector3D {
     float x = 0.f;
