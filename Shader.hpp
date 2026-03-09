@@ -18,9 +18,9 @@ class Shader : public Graphics::Bindable {
     if (HRESULT const operation_status =
             D3DReadFileToBlob(shader_file.c_str(), &shader_blob_);
         FAILED(operation_status)) {
-      throw GetDebugger().CreateDirectXError(operation_status, 
+      throw GetDebugger().CreateDirectXError(operation_status,
                                              "Failed to read compiled pixel shader into blob",
-                                             "Error during shader loading", 
+                                             "Error during shader loading",
                                              __FILEW__, __LINE__);
     }
 
@@ -34,9 +34,9 @@ class Shader : public Graphics::Bindable {
               shader_blob_->GetBufferPointer(), shader_blob_->GetBufferSize(),
               kNoClassLinkage, &shader_);
           FAILED(operation_status)) {
-        throw GetDebugger().CreateDirectXError(operation_status, 
+        throw GetDebugger().CreateDirectXError(operation_status,
                                                "Failed to create pixel shader from blob",
-                                               "Error during shader loading", 
+                                               "Error during shader loading",
                                                __FILEW__, __LINE__);
       }
     } else if constexpr (T == SupportedShaderType::kVertex) {
@@ -44,9 +44,9 @@ class Shader : public Graphics::Bindable {
               shader_blob_->GetBufferPointer(), shader_blob_->GetBufferSize(),
               kNoClassLinkage, &shader_);
           FAILED(operation_status)) {
-        throw GetDebugger().CreateDirectXError(operation_status, 
+        throw GetDebugger().CreateDirectXError(operation_status,
                                                "Failed to create vertex shader from blob",
-                                               "Error during shader loading", 
+                                               "Error during shader loading",
                                                __FILEW__, __LINE__);
       }
     } else {
@@ -59,7 +59,7 @@ class Shader : public Graphics::Bindable {
   Shader& operator=(Shader const&) = default;
   Shader& operator=(Shader&&) = default;
 
-  ~Shader() = default;
+  virtual ~Shader() = default;
 
   void Activate() override {
 #pragma warning(push)
@@ -67,20 +67,20 @@ class Shader : public Graphics::Bindable {
     constexpr ID3D11ClassInstance* const* kNoInterfaces = nullptr;
 #pragma warning(pop)
     if constexpr(T == SupportedShaderType::kPixel) {
-      GetDeviceContext().PSSetShader(shader_.Get(), 
+      GetDeviceContext().PSSetShader(shader_.Get(),
                                      kNoInterfaces,
                                      0u);
     }
     else if constexpr(T == SupportedShaderType::kVertex) {
-      GetDeviceContext().VSSetShader(shader_.Get(), 
-                                     kNoInterfaces, 
+      GetDeviceContext().VSSetShader(shader_.Get(),
+                                     kNoInterfaces,
                                      0u);
     }
     else {
       std::unreachable();
     }
   }
-  
+
   [[nodiscard]] ID3DBlob& GetByteCode() const noexcept
   requires(T == SupportedShaderType::kVertex)
   {

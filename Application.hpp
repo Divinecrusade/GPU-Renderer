@@ -32,7 +32,7 @@ class Application final {
   window::ExitCode Run();
 
  private:
-  std::optional<window::ExitCode> Process();
+  std::optional<window::ExitCode> Process() noexcept;
   void Update(FrameTimer::DeltaTime dt);
   void Render();
 

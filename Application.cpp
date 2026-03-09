@@ -6,10 +6,10 @@ Application::Application(HINSTANCE hInstance, int nCmdShow)
     : window_class_{hInstance, window::Canvas::GetlpfnWndProc()},
       window_{window_class_, kName,   kLeftTopCornerPosX, kLeftTopCornerPosY,
               kWidth,        kHeight, hInstance},
-      triangle_indices_buffer_{window_.gfx, std::span<unsigned short const>{kIndicesForTriangle}},
+      triangle_indices_buffer_{window_.gfx, gsl::span<unsigned short const>{kIndicesForTriangle}},
       vertex_const_buffer_{window_.gfx},
       pixel_const_buffer_{window_.gfx, cube_colors_},
-      cube_vertices_buffer_{window_.gfx, std::span<Vector3D const>{kCubeVertices}},
+      cube_vertices_buffer_{window_.gfx, gsl::span<Vector3D const>{kCubeVertices}},
       aTriangleListTopo_{window_.gfx} {
   window_.Show(nCmdShow);
 }
@@ -34,7 +34,7 @@ window::ExitCode Application::Run() {
   return *exit_code;
 }
 
-std::optional<window::ExitCode> Application::Process() {
+std::optional<window::ExitCode> Application::Process() noexcept {
   constexpr bool kLockInQueue = false;
   return window_.ProcessMessagesFromQueue<kLockInQueue>();
 }
@@ -62,7 +62,7 @@ void Application::Update(FrameTimer::DeltaTime dt) {
 
 void Application::Render() {
   window_.gfx.ClearBuffer({0.f, 0.f, 0.f});
-  window_.gfx.DrawIndexed(kIndicesForTriangle.size());
+  window_.gfx.DrawIndexed(gsl::narrow_cast<UINT>(kIndicesForTriangle.size()));
   window_.gfx.EndFrame();
 }
 }  // namespace gpu_renderer

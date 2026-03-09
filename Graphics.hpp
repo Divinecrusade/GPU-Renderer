@@ -24,13 +24,13 @@ class Graphics final {
 
    public:
     Color(float r, float g, float b) noexcept;
-    
+
     FLOAT const* operator&() const noexcept;
 
     [[nodiscard]] float GetR() const noexcept;
     [[nodiscard]] float GetG() const noexcept;
     [[nodiscard]] float GetB() const noexcept;
-    
+
     void SetR(float r) noexcept;
     void SetG(float g) noexcept;
     void SetB(float b) noexcept;
@@ -88,10 +88,10 @@ class Graphics final {
 #endif  // _DEBUG
   }
 
-    exception::DeviceRemovedError CreateDeviceRemovedError(ID3D11Device& removed_device, 
+    exception::DeviceRemovedError CreateDeviceRemovedError(ID3D11Device& removed_device,
                                                            [[maybe_unused]] char const* message_debug,
                                                            [[maybe_unused]] char const* message_release,
-                                                           [[maybe_unused]] wchar_t const* file, 
+                                                           [[maybe_unused]] wchar_t const* file,
                                                            [[maybe_unused]] int line) {
 #ifdef _DEBUG
       return {file, line, message_debug, removed_device, debug_info_};
@@ -105,7 +105,7 @@ class Graphics final {
     debug::DXDebugInfoManager debug_info_;
 #endif  // _DEBUG
   };
-  
+
  public:
   class Bindable {
    public:

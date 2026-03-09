@@ -9,7 +9,7 @@ template <SupportedShaderType T, typename Buffer>
 class ConstBuffer : public Graphics::Bindable {
  private:
   static constexpr UINT kNoMisc = 0u;
-  static constexpr D3D11_BUFFER_DESC buffer_desc{
+  static constexpr D3D11_BUFFER_DESC kBufferDesc{
       .ByteWidth = sizeof(Buffer),
       .Usage = D3D11_USAGE_DYNAMIC,
       .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
@@ -20,7 +20,7 @@ class ConstBuffer : public Graphics::Bindable {
   ConstBuffer(Graphics& gfx) : Bindable{gfx} {
     GetDebugger().StartTraceInDebugMode();
     if (HRESULT const operation_status = GetDevice().CreateBuffer(
-            &buffer_desc, nullptr, &const_buffer_);
+            &kBufferDesc, nullptr, &const_buffer_);
         FAILED(operation_status)) {
       throw GetDebugger().CreateDirectXError(
           operation_status, "Const buffer was not created",
@@ -33,7 +33,7 @@ class ConstBuffer : public Graphics::Bindable {
 
     GetDebugger().StartTraceInDebugMode();
     if (HRESULT const operation_status = GetDevice().CreateBuffer(
-            &buffer_desc, &buffer_subres, &const_buffer_);
+            &kBufferDesc, &buffer_subres, &const_buffer_);
         FAILED(operation_status)) {
       throw GetDebugger().CreateDirectXError(
           operation_status, "Const buffer was not created",

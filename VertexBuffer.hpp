@@ -7,7 +7,7 @@ namespace gpu_renderer::bindable {
 class VertexBuffer : public Graphics::Bindable {
  public:
   template <typename T>
-  VertexBuffer(Graphics& gfx, std::span<T const> vertices)
+  VertexBuffer(Graphics& gfx, gsl::span<T const> vertices)
       : Bindable{gfx}, stride_{sizeof(T)} {
     constexpr UINT kNoCpuAccessToBuffer = 0u;
     constexpr UINT kNoMisc = 0u;
