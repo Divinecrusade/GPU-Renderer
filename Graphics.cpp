@@ -10,7 +10,7 @@ namespace gpu_renderer {
 Graphics::Graphics(HWND hwnd) {
   assert(hwnd != NULL);
   __assume(hwnd != NULL);
-  
+
   constexpr UINT kUseWindowDimension = 0u;
   constexpr UINT kUseDoubleBuffer = 1u;
   constexpr UINT kUseDeafultSwapChainBehaviorOptions = 0u;
@@ -43,7 +43,7 @@ Graphics::Graphics(HWND hwnd) {
 #pragma warning(pop)
 
   debugger_.StartTraceInDebugMode();
-  
+
   if (HRESULT const operation_status = D3D11CreateDeviceAndSwapChain(
           kDefaultAdapter, D3D_DRIVER_TYPE_HARDWARE, kNoSoftwareRasterizer,
 #ifdef _DEBUG
@@ -62,16 +62,16 @@ Graphics::Graphics(HWND hwnd) {
   }
   assert(((void)"Device must be allocated at this point", device_));
   __assume(device_);
-  assert(((void)"Device context must be allocated at this point", 
+  assert(((void)"Device context must be allocated at this point",
           device_context_));
   __assume(device_context_);
-  assert(((void)"Swap chain must be allocated at this point", 
+  assert(((void)"Swap chain must be allocated at this point",
           swap_chain_));
   __assume(swap_chain_);
 
   static constexpr UINT kBackBufferId = 0u;
   Microsoft::WRL::ComPtr<ID3D11Resource> back_buffer{};
-  
+
   debugger_.StartTraceInDebugMode();
 
 #pragma warning(push)
@@ -81,12 +81,12 @@ Graphics::Graphics(HWND hwnd) {
                                  &back_buffer);
 #pragma warning(pop)
       FAILED(operation_status)) {
-    throw debugger_.CreateDirectXError(operation_status, 
+    throw debugger_.CreateDirectXError(operation_status,
                                        "Backbuffer wasn't created",
                                        "Resource for Graphics was not allocated",
                                        __FILEW__, __LINE__);
   }
-  assert(((void)"Back buffer context must be allocated at this point", 
+  assert(((void)"Back buffer context must be allocated at this point",
           back_buffer));
   __assume(back_buffer);
 
@@ -98,12 +98,12 @@ Graphics::Graphics(HWND hwnd) {
   if (HRESULT const operation_status = device_->CreateRenderTargetView(
           back_buffer.Get(), kGiveAccessToAllMipmapLevels, &render_target_);
       FAILED(operation_status)) {
-    throw debugger_.CreateDirectXError(operation_status, 
+    throw debugger_.CreateDirectXError(operation_status,
                                        "Target view wasn't created",
-                                       "Resource for Graphics was not allocated", 
+                                       "Resource for Graphics was not allocated",
                                        __FILEW__, __LINE__);
   }
-  assert(((void)"Render target view must be allocated at this point", 
+  assert(((void)"Render target view must be allocated at this point",
           render_target_));
 
   constexpr D3D11_VIEWPORT kViewPortSettings{
@@ -143,12 +143,12 @@ Graphics::Graphics(HWND hwnd) {
   if (HRESULT const operation_status = device_->CreateTexture2D(
           &depth_texture_desc, nullptr, &depth_texture);
       FAILED(operation_status)) {
-    throw debugger_.CreateDirectXError(operation_status, 
+    throw debugger_.CreateDirectXError(operation_status,
                                        "Texture for depth buffer wasn't created",
                                        "Resource for Graphics was not allocated",
                                        __FILEW__, __LINE__);
   }
-  
+
 
   D3D11_DEPTH_STENCIL_VIEW_DESC const depth_buf_view_desc{
     .Format = DXGI_FORMAT_D32_FLOAT,
@@ -157,11 +157,11 @@ Graphics::Graphics(HWND hwnd) {
   };
 
   debugger_.StartTraceInDebugMode();
-  device_->CreateDepthStencilView(depth_texture.Get(), 
-                                  &depth_buf_view_desc, 
+  device_->CreateDepthStencilView(depth_texture.Get(),
+                                  &depth_buf_view_desc,
                                   &depth_buf_view_);
   debugger_.StartTraceInDebugMode();
-  device_context_->OMSetRenderTargets(1u, render_target_.GetAddressOf(), 
+  device_context_->OMSetRenderTargets(1u, render_target_.GetAddressOf(),
                                       depth_buf_view_.Get());
 }
 
@@ -170,18 +170,18 @@ void Graphics::EndFrame() {
   static constexpr UINT kDefaultSwapChainPresention = 0u;
 
   debugger_.StartTraceInDebugMode();
-  if (HRESULT const operation_status = 
+  if (HRESULT const operation_status =
       swap_chain_->Present(kNoSwapChainSync, kDefaultSwapChainPresention);
       FAILED(operation_status)) {
       if (exception::DeviceRemovedError::IsDeviceRemovedErrorHappened(operation_status)) {
-        throw debugger_.CreateDeviceRemovedError(*device_.Get(), 
+        throw debugger_.CreateDeviceRemovedError(*device_.Get(),
                                                  "Device removed unexpectly and frame wasn't present",
-                                                 "Render failed", 
-                                                 __FILEW__, __LINE__);  
+                                                 "Render failed",
+                                                 __FILEW__, __LINE__);
       }
       else {
         throw debugger_.CreateDirectXError(operation_status,
-                                           "Back buffer wasn't present (swapped with front buffer)", 
+                                           "Back buffer wasn't present (swapped with front buffer)",
                                            "Render failed",
                                            __FILEW__, __LINE__);
       }
@@ -190,7 +190,7 @@ void Graphics::EndFrame() {
 
 void Graphics::ClearBuffer(Color const& c) {
   device_context_->ClearRenderTargetView(render_target_.Get(), &c);
-  device_context_->ClearDepthStencilView(depth_buf_view_.Get(), 
+  device_context_->ClearDepthStencilView(depth_buf_view_.Get(),
                                          D3D11_CLEAR_DEPTH, 1.f, 0u);
 }
 
@@ -203,6 +203,14 @@ void Graphics::DrawIndexed(UINT indices_count) {
                                        "Vertex buffer setting failed",
                                        std::move(expected_trace.value())};
   }
+}
+
+void Graphics::SetProjection(DirectX::XMMATRIX new_projection) noexcept {
+  projection_ = std::move(new_projection);
+}
+
+const DirectX::XMMATRIX& Graphics::GetProjection() const noexcept {
+  return projection_;
 }
 
 Graphics::Color::Color(float r, float g, float b) noexcept

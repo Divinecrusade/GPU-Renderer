@@ -12,6 +12,7 @@ Application::Application(HINSTANCE hInstance, int nCmdShow)
       cube_vertices_buffer_{window_.gfx, gsl::span<Vector3D const>{kCubeVertices}},
       aTriangleListTopo_{window_.gfx} {
   window_.Show(nCmdShow);
+  window_.gfx.SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 3.f / 4.f, 0.2f, 10.f));
 }
 
 window::ExitCode Application::Run() {
@@ -55,7 +56,7 @@ void Application::Update(FrameTimer::DeltaTime dt) {
       DirectX::XMMatrixRotationZ(cur_angle_) *
       DirectX::XMMatrixRotationX(cur_angle_) *
       DirectX::XMMatrixTranslation(0.f, 0.f, y_ * 1.5f + 3.f) *
-      DirectX::XMMatrixPerspectiveLH(1.f, 3.f / 4.f, 0.2f, 10.f));
+      window_.gfx.GetProjection());
 
   vertex_const_buffer_.Update(cube_transformation_);
 }

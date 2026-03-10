@@ -56,6 +56,9 @@ class Graphics final {
 
   void DrawIndexed(UINT indices_count);
 
+  void SetProjection(DirectX::XMMATRIX new_projection) noexcept;
+  const DirectX::XMMATRIX& GetProjection() const noexcept;
+
  private:
   class ProtectiveLayer {
    private:
@@ -130,6 +133,7 @@ class Graphics final {
   Microsoft::WRL::ComPtr<ID3D11DeviceContext> device_context_{};
   Microsoft::WRL::ComPtr<ID3D11RenderTargetView> render_target_{};
   Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depth_buf_view_{};
+  DirectX::XMMATRIX projection_ = DirectX::XMMatrixIdentity();
   mutable ProtectiveLayer debugger_{};
 };
 }  // namespace gpu_renderer
