@@ -1,5 +1,6 @@
 #include "InputLayout.hpp"
 
+#include "OptimisedGslheader.hpp"
 #include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::bindable {
@@ -15,13 +16,13 @@ InputLayout::InputLayout(VertexShader const& vertex_shader)
                                .InstanceDataStepRate = 0u},
   };
   GetDebugger().StartTraceInDebugMode();
-  if (HRESULT const operation_status = 
+  if (HRESULT const operation_status =
         GetDevice().CreateInputLayout(
-          input_element_descriptor.data(), input_element_descriptor.size(),
+          input_element_descriptor.data(), gsl::narrow_cast<UINT>(input_element_descriptor.size()),
           vertex_shader.GetByteCode().GetBufferPointer(),
           vertex_shader.GetByteCode().GetBufferSize(), &input_layout_);
       FAILED(operation_status)) {
-    throw GetDebugger().CreateDirectXError(operation_status, 
+    throw GetDebugger().CreateDirectXError(operation_status,
                                            "Failed to create input layout",
                                            "Resource for Graphics was not allocated",
                                            __FILEW__, __LINE__);
