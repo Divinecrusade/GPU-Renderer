@@ -8,17 +8,9 @@
 namespace gpu_renderer::window {
 class Canvas : public Window {
  public:
-  Canvas() = delete;
-  Canvas(CachedDC& window_class, LPCWSTR lpszWindowName, 
-         int left_top_pos_x, int left_top_pos_y, 
+  Canvas(CachedDC& window_class, LPCWSTR lpszWindowName,
+         int left_top_pos_x, int left_top_pos_y,
          int width, int height, HINSTANCE hInstance);
-  Canvas(Canvas const&) = delete;
-  Canvas(Canvas&&) = delete;
-
-  Canvas& operator=(Canvas const&) = delete;
-  Canvas& operator=(Canvas&&) = delete;
-
-  ~Canvas() = default;
 
  protected:
   LRESULT HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept override;
@@ -27,7 +19,7 @@ class Canvas : public Window {
   Graphics gfx;
 
  private:
-  static constexpr DWORD kFrameWithMinimize= WS_MINIMIZEBOX | 
+  static constexpr DWORD kFrameWithMinimize= WS_MINIMIZEBOX |
                                              WS_CAPTION |
                                              WS_SYSMENU;
 };

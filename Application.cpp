@@ -4,28 +4,29 @@
 namespace gpu_renderer {
 Application::Application(HINSTANCE hInstance, int nCmdShow)
     : window_class_{hInstance, window::Canvas::GetlpfnWndProc()},
-      window_{window_class_, kName,   kLeftTopCornerPosX, kLeftTopCornerPosY,
+      wnd_{window_class_, kName,   kLeftTopCornerPosX, kLeftTopCornerPosY,
               kWidth,        kHeight, hInstance},
-      triangle_indices_buffer_{window_.gfx, gsl::span<unsigned short const>{kIndicesForTriangle}},
-      vertex_const_buffer_{window_.gfx},
-      pixel_const_buffer_{window_.gfx, cube_colors_},
-      cube_vertices_buffer_{window_.gfx, gsl::span<Vector3D const>{kCubeVertices}},
-      aTriangleListTopo_{window_.gfx} {
-  window_.Show(nCmdShow);
-  window_.gfx.SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 3.f / 4.f, 0.2f, 10.f));
+      triangle_indices_buffer_{gsl::span<unsigned short const>{kIndicesForTriangle}},
+      vertex_const_buffer_{wnd_.gfx},
+      pixel_const_buffer_{wnd_.gfx},
+      cube_vertices_buffer_{gsl::span<Vector3D const>{kCubeVertices}},
+      aTriangleListTopo_{} {
+  wnd_.Show(nCmdShow);
+  wnd_.gfx.SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 3.f / 4.f, 0.2f, 10.f));
 }
 
 window::ExitCode Application::Run() {
   std::optional<window::ExitCode> exit_code = Process();
 
-  vertex_shader_.Activate();
-  pixel_shader_.Activate();
-  input_layout_.Activate();
-  triangle_indices_buffer_.Activate();
-  vertex_const_buffer_.Activate();
-  pixel_const_buffer_.Activate();
-  cube_vertices_buffer_.Activate();
-  aTriangleListTopo_.Activate();
+  vertex_shader_.Bind(wnd_.gfx);
+  pixel_shader_.Bind(wnd_.gfx);
+  input_layout_.Bind(wnd_.gfx);
+  triangle_indices_buffer_.Bind(wnd_.gfx);
+  vertex_const_buffer_.Bind(wnd_.gfx);
+  pixel_const_buffer_.Bind(wnd_.gfx);
+  pixel_const_buffer_.Update(wnd_.gfx, cube_colors_);
+  cube_vertices_buffer_.Bind(wnd_.gfx);
+  aTriangleListTopo_.Bind(wnd_.gfx);
 
   for (FrameTimer ft{}; !exit_code; exit_code = Process()) {
     Update(ft.Mark());
@@ -37,7 +38,7 @@ window::ExitCode Application::Run() {
 
 std::optional<window::ExitCode> Application::Process() noexcept {
   constexpr bool kLockInQueue = false;
-  return window_.ProcessMessagesFromQueue<kLockInQueue>();
+  return wnd_.ProcessMessagesFromQueue<kLockInQueue>();
 }
 
 void Application::Update(FrameTimer::DeltaTime dt) {
@@ -45,8 +46,8 @@ void Application::Update(FrameTimer::DeltaTime dt) {
   while (cur_angle_ > 2.f * std::numbers::pi_v<float>)
     cur_angle_ -= 2.f * std::numbers::pi_v<float>;
 
-  for (auto event = window_.GetMouse().GetOldestEvent(); event.has_value();
-       event = window_.GetMouse().GetOldestEvent()) {
+  for (auto event = wnd_.GetMouse().GetOldestEvent(); event.has_value();
+       event = wnd_.GetMouse().GetOldestEvent()) {
     if (event->second == input::Mouse::EventType::kMove) {
       y_ = event->first.y * (-2.f / kHeight) + 1.f;
     }
@@ -56,14 +57,14 @@ void Application::Update(FrameTimer::DeltaTime dt) {
       DirectX::XMMatrixRotationZ(cur_angle_) *
       DirectX::XMMatrixRotationX(cur_angle_) *
       DirectX::XMMatrixTranslation(0.f, 0.f, y_ * 1.5f + 3.f) *
-      window_.gfx.GetProjection());
+      wnd_.gfx.GetProjection());
 
-  vertex_const_buffer_.Update(cube_transformation_);
+  vertex_const_buffer_.Update(wnd_.gfx, cube_transformation_);
 }
 
 void Application::Render() {
-  window_.gfx.ClearBuffer({0.f, 0.f, 0.f});
-  window_.gfx.DrawIndexed(gsl::narrow_cast<UINT>(kIndicesForTriangle.size()));
-  window_.gfx.EndFrame();
+  wnd_.gfx.ClearBuffer({0.f, 0.f, 0.f});
+  wnd_.gfx.DrawIndexed(gsl::narrow_cast<UINT>(kIndicesForTriangle.size()));
+  wnd_.gfx.EndFrame();
 }
 }  // namespace gpu_renderer

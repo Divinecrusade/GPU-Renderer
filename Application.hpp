@@ -19,15 +19,7 @@ class Application final {
   static constexpr LPCWSTR kName = L"GPU-Renderer";
 
  public:
-  Application() = delete;
   Application(HINSTANCE hInstance, int nCmdShow);
-  Application(Application const&) = delete;
-  Application(Application&&) = delete;
-
-  Application& operator=(Application const&) = delete;
-  Application& operator=(Application&&) = delete;
-
-  ~Application() = default;
 
   window::ExitCode Run();
 
@@ -38,13 +30,13 @@ class Application final {
 
  private:
   window::CachedDC window_class_;
-  window::Canvas window_;
+  window::Canvas wnd_;
 
   float cur_angle_ = 0.f;
   float y_ = 1.f;
 
-  bindable::VertexShader vertex_shader_{L"VertexShader.cso", window_.gfx};
-  bindable::PixelShader pixel_shader_{L"PixelShader.cso", window_.gfx};
+  bindable::VertexShader vertex_shader_{L"VertexShader.cso"};
+  bindable::PixelShader pixel_shader_{L"PixelShader.cso"};
   bindable::InputLayout input_layout_{vertex_shader_};
 
   static constexpr std::array<unsigned short, 36u> kIndicesForTriangle {

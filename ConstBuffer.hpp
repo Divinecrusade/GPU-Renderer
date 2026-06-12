@@ -7,7 +7,6 @@
 namespace gpu_renderer::bindable {
 template <SupportedShaderType T, typename Buffer>
 class ConstBuffer : public Graphics::Bindable {
- private:
   static constexpr UINT kNoMisc = 0u;
   static constexpr D3D11_BUFFER_DESC kBufferDesc{
       .ByteWidth = sizeof(Buffer),
@@ -17,50 +16,42 @@ class ConstBuffer : public Graphics::Bindable {
       .MiscFlags = kNoMisc};
 
  public:
-  ConstBuffer(Graphics& gfx) : Bindable{gfx} {
-    GetDebugger().StartTraceInDebugMode();
-    if (HRESULT const operation_status = GetDevice().CreateBuffer(
-            &kBufferDesc, nullptr, &const_buffer_);
+  ConstBuffer(Graphics& gfx) : Bindable{} {
+    GetDebugger(gfx).StartTraceInDebugMode();
+    if (HRESULT const operation_status =
+            GetDevice(gfx).CreateBuffer(&kBufferDesc, nullptr, &const_buffer_);
         FAILED(operation_status)) {
-      throw GetDebugger().CreateDirectXError(
+      throw GetDebugger(gfx).CreateDirectXError(
           operation_status, "Const buffer was not created",
           "Graphical buffer was not created", __FILEW__, __LINE__);
     }
   }
 
-  ConstBuffer(Graphics& gfx, Buffer const& buffer_content) : Bindable{gfx} {
-    D3D11_SUBRESOURCE_DATA const buffer_subres{.pSysMem = &buffer_content};
-
-    GetDebugger().StartTraceInDebugMode();
-    if (HRESULT const operation_status = GetDevice().CreateBuffer(
-            &kBufferDesc, &buffer_subres, &const_buffer_);
-        FAILED(operation_status)) {
-      throw GetDebugger().CreateDirectXError(
-          operation_status, "Const buffer was not created",
-          "Graphical buffer was not created", __FILEW__, __LINE__);
-    }
-  }
-
-  void Update(Buffer const& buffer_content) {
+  void Update(Graphics& gfx, Buffer const& buffer_content) {
     D3D11_MAPPED_SUBRESOURCE mapped_subres{};
 
-    GetDebugger().StartTraceInDebugMode();
-    if (HRESULT const operation_status = GetDeviceContext().Map(const_buffer_.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &mapped_subres);
+    GetDebugger(gfx).StartTraceInDebugMode();
+    if (HRESULT const operation_status = GetDeviceContext(gfx).Map(
+            const_buffer_.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u,
+            &mapped_subres);
         FAILED(operation_status)) {
-      throw GetDebugger().CreateDirectXError(
-          operation_status, "DeviceContext Map method failed, const buffer is not updated",
+      throw GetDebugger(gfx).CreateDirectXError(
+          operation_status,
+          "DeviceContext Map method failed, const buffer is not updated",
           "Failed to update buffer", __FILEW__, __LINE__);
     }
     std::memcpy(mapped_subres.pData, &buffer_content, sizeof(buffer_content));
-    GetDeviceContext().Unmap(const_buffer_.Get(), 0u);
+    GetDeviceContext(gfx).Unmap(const_buffer_.Get(), 0u);
   }
 
-  void Activate() override {
-    GetDebugger().StartTraceInDebugMode();
+  void Bind(Graphics& gfx) override {
+    GetDebugger(gfx).StartTraceInDebugMode();
     if constexpr (T == SupportedShaderType::kVertex) {
-      GetDeviceContext().VSSetConstantBuffers(0u, 1u, const_buffer_.GetAddressOf());
+      GetDeviceContext(gfx).VSSetConstantBuffers(0u, 1u,
+                                                 const_buffer_.GetAddressOf());
     } else if constexpr (T == SupportedShaderType::kPixel) {
-      GetDeviceContext().PSSetConstantBuffers(0u, 1u, const_buffer_.GetAddressOf());
+      GetDeviceContext(gfx).PSSetConstantBuffers(0u, 1u,
+                                                 const_buffer_.GetAddressOf());
     }
   }
 

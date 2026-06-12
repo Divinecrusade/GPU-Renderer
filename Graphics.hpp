@@ -15,6 +15,7 @@
 namespace gpu_renderer {
 class Graphics final {
  public:
+  // TODO: Separate it
   class Color final {
    private:
     static constexpr std::size_t kNumberOfColorComponents = 4u;
@@ -112,18 +113,13 @@ class Graphics final {
  public:
   class Bindable {
    public:
-    Bindable(Graphics& gfx) noexcept;
+    virtual void Bind(Graphics& gfx) = 0;
     virtual ~Bindable() = default;
 
-    virtual void Activate() = 0;
-
    protected:
-    ID3D11DeviceContext& GetDeviceContext() noexcept;
-    ID3D11Device& GetDevice() noexcept;
-    Graphics::ProtectiveLayer& GetDebugger() noexcept;
-
-   private:
-    Graphics const& gfx_;
+    ID3D11DeviceContext& GetDeviceContext(Graphics const& gfx) noexcept;
+    ID3D11Device& GetDevice(Graphics const& gfx) noexcept;
+    Graphics::ProtectiveLayer& GetDebugger(Graphics const& gfx) noexcept;
   };
   friend class Bindable;
 

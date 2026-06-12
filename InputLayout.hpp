@@ -8,9 +8,10 @@ class InputLayout : public Graphics::Bindable {
  public:
   InputLayout(VertexShader const& vertex_shader);
 
-  void Activate() override;
+  void Bind(Graphics& gfx) override;
 
  private:
+  VertexShader const& vertex_shader_;
   Microsoft::WRL::ComPtr<ID3D11InputLayout> input_layout_{};
 };
 }  // namespace gpu_renderer::bindable

@@ -4,7 +4,7 @@
 #include "OptimisedDirect3dHeader.hpp"
 
 namespace gpu_renderer {
-enum class SupportedTypologyType {
+enum class SupportedTypologyType  {
   TRIANGLE_LIST = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 };
 }  // namespace gpu_renderer
