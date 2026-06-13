@@ -111,6 +111,9 @@
     <ClCompile Include="InputLayout.cpp">
       <Filter>Исходные файлы\bindable</Filter>
     </ClCompile>
+    <ClCompile Include="Bindable.cpp">
+      <Filter>Исходные файлы\bindable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />
@@ -228,6 +231,9 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Topology.hpp">
+      <Filter>Файлы заголовков\bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable.hpp">
       <Filter>Файлы заголовков\bindable</Filter>
     </ClInclude>
   </ItemGroup>

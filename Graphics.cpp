@@ -262,18 +262,4 @@ void Graphics::Color::SetB(float b) noexcept {
   __assume((0.f <= b && b <= 1.f));
   encoded_[kIndexComponentB] = b;
 }
-
-ID3D11DeviceContext& Graphics::Bindable::GetDeviceContext(
-    Graphics const& gfx) noexcept {
-  return *(gfx.device_context_.Get());
-}
-
-ID3D11Device& Graphics::Bindable::GetDevice(Graphics const& gfx) noexcept {
-  return *(gfx.device_.Get());
-}
-
-Graphics::ProtectiveLayer& Graphics::Bindable::GetDebugger(
-    Graphics const& gfx) noexcept {
-  return gfx.debugger_;
-}
 }  // namespace gpu_renderer

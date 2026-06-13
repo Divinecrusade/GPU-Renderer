@@ -1,10 +1,11 @@
 #ifndef INPUT_LAYOUT_HPP
 #define INPUT_LAYOUT_HPP
 
+#include "Bindable.hpp"
 #include "Shader.hpp"
 
 namespace gpu_renderer::bindable {
-class InputLayout : public Graphics::Bindable {
+class InputLayout : public Bindable {
  public:
   InputLayout(Graphics& gfx, VertexShader const& vertex_shader);
 

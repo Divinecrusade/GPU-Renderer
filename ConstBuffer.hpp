@@ -1,12 +1,12 @@
 #ifndef CONST_BUFFER_HPP
 #define CONST_BUFFER_HPP
 
-#include "Graphics.hpp"
+#include "Bindable.hpp"
 #include "SupportedShaderType.hpp"
 
 namespace gpu_renderer::bindable {
 template <SupportedShaderType T, typename Buffer>
-class ConstBuffer : public Graphics::Bindable {
+class ConstBuffer : public Bindable {
   static constexpr UINT kNoMisc = 0u;
   static constexpr D3D11_BUFFER_DESC kBufferDesc{
       .ByteWidth = sizeof(Buffer),

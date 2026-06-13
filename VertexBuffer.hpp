@@ -1,10 +1,10 @@
 #ifndef VERTEX_BUFFER_HPP
 #define VERTEX_BUFFER_HPP
 
-#include "Graphics.hpp"
+#include "Bindable.hpp"
 
 namespace gpu_renderer::bindable {
-class VertexBuffer : public Graphics::Bindable {
+class VertexBuffer : public Bindable {
   static constexpr UINT kNoCpuAccessToBuffer = 0u;
   static constexpr UINT kNoMisc = 0u;
 

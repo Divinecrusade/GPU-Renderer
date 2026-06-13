@@ -14,6 +14,8 @@
 
 namespace gpu_renderer {
 class Graphics final {
+ friend class Bindable;
+
  public:
   // TODO: Separate it
   class Color final {
@@ -109,19 +111,6 @@ class Graphics final {
     debug::DXDebugInfoManager debug_info_;
 #endif  // _DEBUG
   };
-
- public:
-  class Bindable {
-   public:
-    virtual void Bind(Graphics& gfx) = 0;
-    virtual ~Bindable() = default;
-
-   protected:
-    ID3D11DeviceContext& GetDeviceContext(Graphics const& gfx) noexcept;
-    ID3D11Device& GetDevice(Graphics const& gfx) noexcept;
-    Graphics::ProtectiveLayer& GetDebugger(Graphics const& gfx) noexcept;
-  };
-  friend class Bindable;
 
  private:
   Microsoft::WRL::ComPtr<IDXGISwapChain> swap_chain_{};

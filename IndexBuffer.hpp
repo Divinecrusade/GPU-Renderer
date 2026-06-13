@@ -1,10 +1,10 @@
 #ifndef INDEX_BUFFER
 #define INDEX_BUFFER
 
-#include "Graphics.hpp"
+#include "Bindable.hpp"
 
 namespace gpu_renderer::bindable {
-class IndexBuffer : public Graphics::Bindable {
+class IndexBuffer : public Bindable {
   static constexpr UINT kNoMisc = 0u;
   static constexpr UINT kNoCpuAccessToBuffer = 0u;
 

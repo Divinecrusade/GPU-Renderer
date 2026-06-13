@@ -1,12 +1,12 @@
 #ifndef TOPOLOGY_HPP
 #define TOPOLOGY_HPP
 
-#include "Graphics.hpp"
+#include "Bindable.hpp"
 #include "SupportedTopologyType.hpp"
 
 namespace gpu_renderer::bindable {
 template <SupportedTypologyType T>
-class Topology : public Graphics::Bindable {
+class Topology : public Bindable {
  public:
   void Bind(Graphics& gfx) override {
     GetDeviceContext(gfx).IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(T));

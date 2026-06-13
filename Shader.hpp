@@ -1,13 +1,13 @@
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
-#include "Graphics.hpp"
+#include "Bindable.hpp"
 #include "OptimisedStlHeader.hpp"
 #include "SupportedShaderType.hpp"
 
 namespace gpu_renderer::bindable {
 template <SupportedShaderType T>
-class Shader : public Graphics::Bindable {
+class Shader : public Bindable {
  public:
   Shader(Graphics& gfx, std::filesystem::path const& shader_file) {
     assert(shader_file.extension() == L".cso");
