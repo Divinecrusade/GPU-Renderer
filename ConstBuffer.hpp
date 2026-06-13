@@ -27,6 +27,19 @@ class ConstBuffer : public Graphics::Bindable {
     }
   }
 
+  ConstBuffer(Graphics& gfx, Buffer const& buffer_content) {
+    D3D11_SUBRESOURCE_DATA const buffer_subres{.pSysMem = &buffer_content};
+
+    GetDebugger(gfx).StartTraceInDebugMode();
+    if (HRESULT const operation_status = GetDevice(gfx).CreateBuffer(
+            &kBufferDesc, &buffer_subres, &const_buffer_);
+        FAILED(operation_status)) {
+      throw GetDebugger(gfx).CreateDirectXError(
+          operation_status, "Const buffer was not created",
+          "Graphical buffer was not created", __FILEW__, __LINE__);
+    }
+  }
+
   void Update(Graphics& gfx, Buffer const& buffer_content) {
     D3D11_MAPPED_SUBRESOURCE mapped_subres{};
 

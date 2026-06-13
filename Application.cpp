@@ -11,7 +11,7 @@ Application::Application(HINSTANCE hInstance, int nCmdShow)
       input_layout_{wnd_.gfx, vertex_shader_},
       triangle_indices_buffer_{wnd_.gfx, gsl::span<unsigned short const>{kIndicesForTriangle}},
       vertex_const_buffer_{wnd_.gfx},
-      pixel_const_buffer_{wnd_.gfx},
+      pixel_const_buffer_{wnd_.gfx, cube_colors_},
       cube_vertices_buffer_{wnd_.gfx, gsl::span<Vector3D const>{kCubeVertices}},
       aTriangleListTopo_{} {
   wnd_.Show(nCmdShow);
@@ -27,7 +27,6 @@ window::ExitCode Application::Run() {
   triangle_indices_buffer_.Bind(wnd_.gfx);
   vertex_const_buffer_.Bind(wnd_.gfx);
   pixel_const_buffer_.Bind(wnd_.gfx);
-  pixel_const_buffer_.Update(wnd_.gfx, cube_colors_);
   cube_vertices_buffer_.Bind(wnd_.gfx);
   aTriangleListTopo_.Bind(wnd_.gfx);
 
