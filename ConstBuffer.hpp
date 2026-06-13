@@ -16,7 +16,7 @@ class ConstBuffer : public Graphics::Bindable {
       .MiscFlags = kNoMisc};
 
  public:
-  ConstBuffer(Graphics& gfx) : Bindable{} {
+  ConstBuffer(Graphics& gfx) {
     GetDebugger(gfx).StartTraceInDebugMode();
     if (HRESULT const operation_status =
             GetDevice(gfx).CreateBuffer(&kBufferDesc, nullptr, &const_buffer_);

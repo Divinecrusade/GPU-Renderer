@@ -9,7 +9,7 @@ namespace gpu_renderer::bindable {
 template <SupportedShaderType T>
 class Shader : public Graphics::Bindable {
  public:
-  Shader(std::filesystem::path const& shader_file) : Bindable{} {
+  Shader(Graphics& gfx, std::filesystem::path const& shader_file) {
     assert(shader_file.extension() == L".cso");
     if (HRESULT const operation_status =
             D3DReadFileToBlob(shader_file.c_str(), &shader_blob_);
@@ -18,9 +18,7 @@ class Shader : public Graphics::Bindable {
           operation_status, "Failed to read compiled shader into blob",
           "Error during shader loading", __FILEW__, __LINE__);
     }
-  }
 
-  void Bind(Graphics& gfx) override {
 #pragma warning(push)
 #pragma warning(disable : 26462)
     constexpr ID3D11ClassLinkage* kNoClassLinkage = nullptr;
@@ -48,7 +46,9 @@ class Shader : public Graphics::Bindable {
     } else {
       std::unreachable();
     }
+  }
 
+  void Bind(Graphics& gfx) override {
 #pragma warning(push)
 #pragma warning(disable : 26462)
     constexpr ID3D11ClassInstance* const* kNoInterfaces = nullptr;

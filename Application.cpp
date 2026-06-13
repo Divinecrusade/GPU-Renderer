@@ -6,10 +6,13 @@ Application::Application(HINSTANCE hInstance, int nCmdShow)
     : window_class_{hInstance, window::Canvas::GetlpfnWndProc()},
       wnd_{window_class_, kName,   kLeftTopCornerPosX, kLeftTopCornerPosY,
               kWidth,        kHeight, hInstance},
-      triangle_indices_buffer_{gsl::span<unsigned short const>{kIndicesForTriangle}},
+      vertex_shader_{wnd_.gfx, L"VertexShader.cso"},
+      pixel_shader_{wnd_.gfx, L"PixelShader.cso"},
+      input_layout_{wnd_.gfx, vertex_shader_},
+      triangle_indices_buffer_{wnd_.gfx, gsl::span<unsigned short const>{kIndicesForTriangle}},
       vertex_const_buffer_{wnd_.gfx},
       pixel_const_buffer_{wnd_.gfx},
-      cube_vertices_buffer_{gsl::span<Vector3D const>{kCubeVertices}},
+      cube_vertices_buffer_{wnd_.gfx, gsl::span<Vector3D const>{kCubeVertices}},
       aTriangleListTopo_{} {
   wnd_.Show(nCmdShow);
   wnd_.gfx.SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 3.f / 4.f, 0.2f, 10.f));

@@ -8,8 +8,6 @@ namespace gpu_renderer::bindable {
 template <SupportedTypologyType T>
 class Topology : public Graphics::Bindable {
  public:
-  Topology() noexcept : Bindable{} {}
-
   void Bind(Graphics& gfx) override {
     GetDeviceContext(gfx).IASetPrimitiveTopology(static_cast<D3D11_PRIMITIVE_TOPOLOGY>(T));
   }

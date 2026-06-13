@@ -35,9 +35,9 @@ class Application final {
   float cur_angle_ = 0.f;
   float y_ = 1.f;
 
-  bindable::VertexShader vertex_shader_{L"VertexShader.cso"};
-  bindable::PixelShader pixel_shader_{L"PixelShader.cso"};
-  bindable::InputLayout input_layout_{vertex_shader_};
+  bindable::VertexShader vertex_shader_;
+  bindable::PixelShader pixel_shader_;
+  bindable::InputLayout input_layout_;
 
   static constexpr std::array<unsigned short, 36u> kIndicesForTriangle {
       {0u, 1u, 3u, 2u, 3u, 1u, 3u, 2u, 7u, 6u, 7u, 2u, 0u, 4u, 1u, 5u, 1u,

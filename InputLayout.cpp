@@ -16,22 +16,22 @@ constexpr std::array<D3D11_INPUT_ELEMENT_DESC, 1u> kInputElementDescriptor{
 };
 }
 
-InputLayout::InputLayout(VertexShader const& vertex_shader)
-    : Bindable{}, vertex_shader_{vertex_shader} {
-}
-
-void InputLayout::Bind(Graphics& gfx) {
+InputLayout::InputLayout(Graphics& gfx, VertexShader const& vertex_shader) {
   GetDebugger(gfx).StartTraceInDebugMode();
   if (HRESULT const operation_status = GetDevice(gfx).CreateInputLayout(
           kInputElementDescriptor.data(),
           gsl::narrow_cast<UINT>(kInputElementDescriptor.size()),
-          vertex_shader_.GetByteCode().GetBufferPointer(),
-          vertex_shader_.GetByteCode().GetBufferSize(), &input_layout_);
+          vertex_shader.GetByteCode().GetBufferPointer(),
+          vertex_shader.GetByteCode().GetBufferSize(), &input_layout_);
       FAILED(operation_status)) {
     throw GetDebugger(gfx).CreateDirectXError(
         operation_status, "Failed to create input layout",
         "Resource for Graphics was not allocated", __FILEW__, __LINE__);
   }
+}
+
+void InputLayout::Bind(Graphics& gfx) {
+  GetDebugger(gfx).StartTraceInDebugMode();
   GetDeviceContext(gfx).IASetInputLayout(input_layout_.Get());
 }
 }  // namespace gpu_renderer::bindable
