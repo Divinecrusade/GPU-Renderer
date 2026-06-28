@@ -40,7 +40,7 @@ Console::Console(std::wstring_view console_window_title) {
   }
   assert(((void)"Cout stream must be initialised", cout_stream != nullptr));
   __assume(cout_stream != nullptr);
-  
+
   FILE* cerr_stream = nullptr;
   if (errno_t const operation_code_result = freopen_s(&cerr_stream, "CONOUT$", "w", stderr);
       exception::CrtError::OperationFailed(operation_code_result)) [[unlikely]] {
@@ -81,7 +81,7 @@ Console::Console(std::wstring_view console_window_title) {
     return op_status < 0;
   };
   if (SetModeFailed(_setmode(_fileno(stdout), _O_U8TEXT))) [[unlikely]] {
-    throw exception::CrtError::Create(errno, 
+    throw exception::CrtError::Create(errno,
                                       "stdout setmode failed",
                                       "Console code page is not set correctly",
                                       __FILEW__, __LINE__);
@@ -101,7 +101,7 @@ Console::Console(std::wstring_view console_window_title) {
 
   if (!SetConsoleTitleW(console_window_title.data())) [[unlikely]] {
     OutputDebugStringW(L"Console title was not set");
-    std::wcerr << L"Console title was not set, error code: " 
+    std::wcerr << L"Console title was not set, error code: "
                << GetLastError()
                << "\n";
   }

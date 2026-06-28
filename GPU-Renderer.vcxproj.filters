@@ -49,6 +49,12 @@
     <Filter Include="Исходные файлы\bindable">
       <UniqueIdentifier>{fdf03dd0-b010-4483-acd7-4617538b0b71}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы заголовков\drawable">
+      <UniqueIdentifier>{ee05aaff-5501-4fa0-8e37-d56d49da4636}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\drawable">
+      <UniqueIdentifier>{43144997-ff0e-49e0-b632-aed0b1cba0d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -113,6 +119,15 @@
     </ClCompile>
     <ClCompile Include="Bindable.cpp">
       <Filter>Исходные файлы\bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawable.cpp">
+      <Filter>Исходные файлы\drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformationBuffer.cpp">
+      <Filter>Исходные файлы\bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="Box.cpp">
+      <Filter>Исходные файлы\drawable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,6 +250,15 @@
     </ClInclude>
     <ClInclude Include="Bindable.hpp">
       <Filter>Файлы заголовков\bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawable.hpp">
+      <Filter>Файлы заголовков\drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformationBuffer.hpp">
+      <Filter>Файлы заголовков\bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Box.hpp">
+      <Filter>Файлы заголовков\drawable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

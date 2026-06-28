@@ -45,7 +45,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <EnableUnitySupport>true</EnableUnitySupport>
+    <EnableUnitySupport>false</EnableUnitySupport>
     <EnableASAN>false</EnableASAN>
     <EnableFuzzer>false</EnableFuzzer>
     <SpectreMitigation>false</SpectreMitigation>
@@ -171,6 +171,7 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Bindable.cpp" />
+    <ClCompile Include="Box.cpp" />
     <ClCompile Include="CachedDC.cpp" />
     <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Console.cpp" />
@@ -180,6 +181,7 @@
     <ClCompile Include="DebugLayerMessage.cpp" />
     <ClCompile Include="DeviceRemovedError.cpp" />
     <ClCompile Include="DirectXError.cpp" />
+    <ClCompile Include="Drawable.cpp" />
     <ClCompile Include="DXDebugInfoManager.cpp" />
     <ClCompile Include="dxerr.cpp" />
     <ClCompile Include="Error.cpp" />
@@ -188,6 +190,7 @@
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="ErrorWithCode.cpp" />
+    <ClCompile Include="TransformationBuffer.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WindowClass.cpp" />
     <ClCompile Include="WinError.cpp">
@@ -207,6 +210,7 @@
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="Bindable.hpp" />
+    <ClInclude Include="Box.hpp" />
     <ClInclude Include="CachedDC.hpp" />
     <ClInclude Include="Canvas.hpp" />
     <ClInclude Include="Console.hpp" />
@@ -215,6 +219,7 @@
     <ClInclude Include="DebugLayerMessage.hpp" />
     <ClInclude Include="DeviceRemovedError.hpp" />
     <ClInclude Include="DirectXError.hpp" />
+    <ClInclude Include="Drawable.hpp" />
     <ClInclude Include="dxerr.h" />
     <ClInclude Include="DXDebugInfoManager.hpp" />
     <ClInclude Include="Error.hpp" />
@@ -235,6 +240,7 @@
     <ClInclude Include="SupportedShaderType.hpp" />
     <ClInclude Include="SupportedTopologyType.hpp" />
     <ClInclude Include="Topology.hpp" />
+    <ClInclude Include="TransformationBuffer.hpp" />
     <ClInclude Include="VertexBuffer.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="WindowClass.hpp" />

@@ -2,24 +2,36 @@
 #define BOX_HPP
 
 #include "Drawable.hpp"
-#include "ConstBuffer.hpp"
+#include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::drawable {
 class Box : public Drawable {
  public:
-  Box(Graphics& gfx);
+  Box(Graphics& gfx, std::mt19937& rng, std::uniform_real_distribution<float>& angle_dist,
+  std::uniform_real_distribution<float>& delta_pos_dist,
+  std::uniform_real_distribution<float>& delta_angle_dist,
+  std::uniform_real_distribution<float>& radius_dist);
 
-  void Update(FrameTimer::DeltaTime dt, DirectX::XMMATRIX const& projection);
+  void Update(FrameTimer::DeltaTime dt) override;
+  DirectX::XMMATRIX GetTransformation() const override;
 
  private:
-  static constexpr std::array<unsigned short, 36u> kIndicesForTriangle{
-      {0u, 1u, 3u, 2u, 3u, 1u, 3u, 2u, 7u, 6u, 7u, 2u, 0u, 4u, 1u, 5u, 1u, 4u,
-       6u, 5u, 7u, 4u, 7u, 5u, 1u, 5u, 2u, 6u, 2u, 5u, 4u, 0u, 7u, 3u, 7u, 0u}};
-
-  float cur_angle_ = 0.f;
-  DirectX::XMMATRIX transformation_;
+  // positional
+  float r;
+  float roll = 0.0f;
+  float pitch = 0.0f;
+  float yaw = 0.0f;
+  float theta;
+  float phi;
+  float chi;
+  // speed (delta/s)
+  float droll;
+  float dpitch;
+  float dyaw;
+  float dtheta;
+  float dphi;
+  float dchi;
 };
-}  // namespace gpu_renderer::drawable
+}  // namespace gpu_renderer
 
-
-#endif  // BOX_HPP
+#endif  // !BOX_HPP

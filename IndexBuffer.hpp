@@ -2,6 +2,7 @@
 #define INDEX_BUFFER
 
 #include "Bindable.hpp"
+#include "OptimisedGslheader.hpp"
 
 namespace gpu_renderer::bindable {
 class IndexBuffer : public Bindable {
@@ -10,7 +11,8 @@ class IndexBuffer : public Bindable {
 
  public:
   template <std::unsigned_integral T>
-  IndexBuffer(Graphics& gfx, gsl::span<T const> indices) {
+  IndexBuffer(Graphics& gfx, gsl::span<T const> indices) :
+  indices_count_{gsl::narrow<UINT> (indices.size())} {
     D3D11_BUFFER_DESC const indices_buffer_conf{
         .ByteWidth = gsl::narrow<UINT>(indices.size() * sizeof(T)),
         .Usage = D3D11_USAGE_DEFAULT,
@@ -37,7 +39,13 @@ class IndexBuffer : public Bindable {
                                            DXGI_FORMAT_R16_UINT, 0u);
   }
 
+  UINT Count() const noexcept
+  {
+    return indices_count_;
+  }
+
  private:
+  UINT indices_count_;
   Microsoft::WRL::ComPtr<ID3D11Buffer> indices_buffer_{};
 };
 }  // namespace gpu_renderer::bindable
