@@ -1,11 +1,11 @@
 #ifndef BOX_HPP
 #define BOX_HPP
 
-#include "Drawable.hpp"
+#include "DrawableBase.hpp"
 #include "OptimisedStlHeader.hpp"
 
 namespace gpu_renderer::drawable {
-class Box : public Drawable {
+class Box : public DrawableBase<Box> {
  public:
   Box(Graphics& gfx, std::mt19937& rng, std::uniform_real_distribution<float>& angle_dist,
   std::uniform_real_distribution<float>& delta_pos_dist,

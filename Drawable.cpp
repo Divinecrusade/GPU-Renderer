@@ -7,6 +7,9 @@ void Drawable::Draw(Graphics& gfx) {
   for (auto const& gfx_comp : gfx_comps_) {
     gfx_comp->Bind(gfx);
   }
+  for (auto const& common_gfx_comp : GetCommonBindables()) {
+    common_gfx_comp->Bind(gfx);
+  }
   gfx.DrawIndexed(indecies_buff_->Count());
 }
 
@@ -17,7 +20,7 @@ void Drawable::AddBindable(std::shared_ptr<Bindable> gfx_comp) {
   gfx_comps_.push_back(std::move(gfx_comp));
 }
 
-void Drawable::AddIndexBuffer(
+void Drawable::AddBindable(
     std::shared_ptr<bindable::IndexBuffer> indecies_buff) {
   assert(((void)"Multiple IndexBuffers are not supported",
           !indecies_buff_));
@@ -25,4 +28,15 @@ void Drawable::AddIndexBuffer(
   gfx_comps_.push_back(std::move(indecies_buff));
 }
 
+void Drawable::UseCommonIndexBuffer() {
+  for (auto const& common_gfx_comp : GetCommonBindables()) {
+    if (indecies_buff_ =
+            dynamic_cast<bindable::IndexBuffer*>(common_gfx_comp.get());
+        indecies_buff_) {
+      break;
+    }
+  }
+  assert(((void)"There's in common must be at least 1 index buffer",
+          indecies_buff_ != nullptr));
+  }
 }  // namespace gpu_renderer

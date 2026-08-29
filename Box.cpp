@@ -25,54 +25,58 @@ Box::Box(Graphics& gfx, std::mt19937& rng,
       chi{angle_dist(rng)},
       theta{angle_dist(rng)},
       phi{angle_dist(rng)} {
-  struct Vertex {
-    float x;
-    float y;
-    float z;
-  };
+  if (!IsCommonInitialized()) {
+    struct Vertex {
+      float x;
+      float y;
+      float z;
+    };
 
-  // TODO: Make it static.
-  static constexpr std::array kVertices{
-      Vertex{.x = -1.f, .y = -1.f, .z = -1.f},
-      Vertex{.x = -1.f, .y = 1.f, .z = -1.f},
-      Vertex{.x = 1.f, .y = 1.f, .z = -1.f},
-      Vertex{.x = 1.f, .y = -1.f, .z = -1.f},
-      Vertex{.x = -1.f, .y = -1.f, .z = 1.f},
-      Vertex{.x = -1.f, .y = 1.f, .z = 1.f},
-      Vertex{.x = 1.f, .y = 1.f, .z = 1.f},
-      Vertex{.x = 1.f, .y = -1.f, .z = 1.f},
-  };
-  AddBindable(
-      std::make_shared<bindable::VertexBuffer>(gfx, gsl::make_span(kVertices)));
+    static constexpr std::array kVertices{
+        Vertex{.x = -1.f, .y = -1.f, .z = -1.f},
+        Vertex{.x = -1.f, .y = 1.f, .z = -1.f},
+        Vertex{.x = 1.f, .y = 1.f, .z = -1.f},
+        Vertex{.x = 1.f, .y = -1.f, .z = -1.f},
+        Vertex{.x = -1.f, .y = -1.f, .z = 1.f},
+        Vertex{.x = -1.f, .y = 1.f, .z = 1.f},
+        Vertex{.x = 1.f, .y = 1.f, .z = 1.f},
+        Vertex{.x = 1.f, .y = -1.f, .z = 1.f},
+    };
+    AddCommonBindable(std::make_shared<bindable::VertexBuffer>(
+        gfx, gsl::make_span(kVertices)));
 
-  // TODO: Make it static.
-  {
-    auto vertex_shader =
-        std::make_shared<bindable::VertexShader>(gfx, L"VertexShader.cso");
-    AddBindable(std::make_shared<bindable::InputLayout>(gfx, *vertex_shader));
-    AddBindable(std::move(vertex_shader));
+    {
+      auto vertex_shader =
+          std::make_shared<bindable::VertexShader>(gfx, L"VertexShader.cso");
+      AddCommonBindable(std::make_shared<bindable::InputLayout>(gfx, *vertex_shader));
+      AddCommonBindable(std::move(vertex_shader));
+    }
+    AddCommonBindable(
+        std::make_shared<bindable::PixelShader>(gfx, L"PixelShader.cso"));
+
+    static constexpr std::array<unsigned short, 36u> kIndicesForTriangle{
+        {0u, 1u, 3u, 2u, 3u, 1u, 3u, 2u, 7u, 6u, 7u, 2u,
+         0u, 4u, 1u, 5u, 1u, 4u, 6u, 5u, 7u, 4u, 7u, 5u,
+         1u, 5u, 2u, 6u, 2u, 5u, 4u, 0u, 7u, 3u, 7u, 0u}};
+    AddCommonBindable(std::make_shared<bindable::IndexBuffer>(
+        gfx, gsl::span<unsigned short const>{kIndicesForTriangle}));
+
+    static constexpr struct {
+      float r;
+      float g;
+      float b;
+      float a;
+    } kColors[6u]{{1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f},
+                  {1.f, 1.f, 0.f}, {0.f, 1.f, 1.f}, {1.f, 0.f, 1.f}};
+    AddCommonBindable(
+        std::make_shared<bindable::PixelConstBuffer<decltype(kColors)>>(
+        gfx, kColors));
+    AddCommonBindable(
+        std::make_shared<
+                bindable::Topology<SupportedTypologyType::TRIANGLE_LIST>>());
   }
-  AddBindable(std::make_shared<bindable::PixelShader>(gfx, L"PixelShader.cso"));
+  UseCommonIndexBuffer();
 
-  // TODO: Make it static.
-  static constexpr std::array<unsigned short, 36u> kIndicesForTriangle{
-      {0u, 1u, 3u, 2u, 3u, 1u, 3u, 2u, 7u, 6u, 7u, 2u, 0u, 4u, 1u, 5u, 1u, 4u,
-       6u, 5u, 7u, 4u, 7u, 5u, 1u, 5u, 2u, 6u, 2u, 5u, 4u, 0u, 7u, 3u, 7u, 0u}};
-  AddIndexBuffer(std::make_shared<bindable::IndexBuffer>(
-      gfx, gsl::span<unsigned short const>{kIndicesForTriangle}));
-
-  // TODO: Make it static.
-  static constexpr struct {
-    float r;
-    float g;
-    float b;
-    float a;
-  } kColors[6u]{{1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f},
-                {1.f, 1.f, 0.f}, {0.f, 1.f, 1.f}, {1.f, 0.f, 1.f}};
-  AddBindable(std::make_shared<bindable::PixelConstBuffer<decltype(kColors)>>(
-      gfx, kColors));
-  AddBindable(std::make_shared<
-              bindable::Topology<SupportedTypologyType::TRIANGLE_LIST>>());
   AddBindable(std::make_shared<bindable::TransformationBuffer>(gfx, *this));
 }
 

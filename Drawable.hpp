@@ -43,7 +43,10 @@ class Drawable {
 
  protected:
   void AddBindable (std::shared_ptr<Bindable> gfx_comp);
-  void AddIndexBuffer(std::shared_ptr<bindable::IndexBuffer> indecies_buff);
+  void AddBindable(std::shared_ptr<bindable::IndexBuffer> indecies_buff);
+  void UseCommonIndexBuffer();
+
+  virtual gsl::span<std::shared_ptr<Bindable> const> GetCommonBindables() const = 0;
 
  private:
   bindable::IndexBuffer const* indecies_buff_ = nullptr;
