@@ -5,10 +5,11 @@
 #include "OptimisedGslHeader.hpp"
 #include "OptimisedWindowsHeader.hpp"
 #include "ErrorWithCode.hpp"
+#include "VoxelExperiment/ExperimentApplication.hpp"
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                     [[maybe_unused]] _In_opt_ HINSTANCE,
-                    [[maybe_unused]] _In_ LPWSTR, 
+                    _In_ LPWSTR lpCmdLine,
                     _In_ int nCmdShow) {
 #ifdef _DEBUG
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF |
@@ -43,10 +44,17 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 
   using gpu_renderer::Application;
   int exit_code{};
+  std::wstring_view const command_line = lpCmdLine != nullptr ? lpCmdLine : L"";
   try {
-    Application app{hInstance, nCmdShow};
-    exit_code = app.Run();
-  } 
+    if (gpu_renderer::voxel::IsExperimentRequested(command_line)) {
+      gpu_renderer::voxel::ExperimentApplication app{
+          hInstance, nCmdShow, gpu_renderer::voxel::ParseExperimentConfig(command_line)};
+      exit_code = app.Run();
+    } else {
+      Application app{hInstance, nCmdShow};
+      exit_code = app.Run();
+    }
+  }
   catch (ErrorWithCode const& e) {
     MessageBoxW(NULL, e.WhatHappened().c_str(), e.GetTypeOfException().data(),
                 MB_OK | MB_ICONERROR);

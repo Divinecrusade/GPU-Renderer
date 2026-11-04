@@ -55,6 +55,12 @@
     <Filter Include="Исходные файлы\drawable">
       <UniqueIdentifier>{43144997-ff0e-49e0-b632-aed0b1cba0d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\voxel">
+      <UniqueIdentifier>{e26bbb4e-5778-4873-bca9-8a056f26519f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\voxel">
+      <UniqueIdentifier>{bfc96145-c5b0-44ec-add9-0b3529e7975e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -278,5 +284,79 @@
     <FxCompile Include="PixelShader.hlsl">
       <Filter>Шейдеры</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="VoxelExperiment\ExperimentApplication.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="VoxelExperiment\ExperimentConfig.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="VoxelExperiment\ExperimentReport.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="VoxelExperiment\ExperimentRunner.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="VoxelExperiment\GpuTimer.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="VoxelExperiment\RayTraversal.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="VoxelExperiment\SceneGenerators.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="VoxelExperiment\VoxelGrid.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="VoxelExperiment\VoxelVolume.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
+    <ClInclude Include="VoxelExperiment\ExperimentApplication.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\ExperimentConfig.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\ExperimentReport.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\ExperimentRunner.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\GpuTimer.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\Morton.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\RayTraversal.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\SceneGenerators.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\StructuredBuffer.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\VoxelGrid.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\VoxelVolume.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <FxCompile Include="VoxelExperiment\VoxelTraceVS.hlsl">
+      <Filter>Шейдеры</Filter>
+    </FxCompile>
+    <FxCompile Include="VoxelExperiment\VoxelTracePS.hlsl">
+      <Filter>Шейдеры</Filter>
+    </FxCompile>
+    <None Include="VoxelExperiment\README.md">
+      <Filter>Исходные файлы\voxel</Filter>
+    </None>
+    <None Include="VoxelExperiment\Tests\VoxelCoreTests.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </None>
   </ItemGroup>
 </Project>

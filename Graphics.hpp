@@ -13,8 +13,13 @@
 #include "DebugLayerMessage.hpp"
 
 namespace gpu_renderer {
+namespace profiling {
+class GpuTimer;
+}  // namespace profiling
+
 class Graphics final {
  friend class Bindable;
+ friend class profiling::GpuTimer;
 
  public:
   // TODO: Separate it

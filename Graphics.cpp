@@ -197,12 +197,15 @@ void Graphics::ClearBuffer(Color const& c) {
 void Graphics::DrawIndexed(UINT indices_count) {
   debugger_.StartTraceInDebugMode();
   device_context_->DrawIndexed(indices_count, 0u, 0u);
+#ifdef _DEBUG
+  // debug_info_ существует только в отладочной сборке (см. ProtectiveLayer)
   if (auto expected_trace = debugger_.debug_info_.GetTraceLog();
       expected_trace && !expected_trace->empty()) {
     throw exception::DebugLayerMessage{__FILEW__, __LINE__,
                                        "Vertex buffer setting failed",
                                        std::move(expected_trace.value())};
   }
+#endif  // _DEBUG
 }
 
 void Graphics::SetProjection(DirectX::XMMATRIX new_projection) noexcept {
