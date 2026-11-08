@@ -23,18 +23,18 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 
   try {
     Console::InitStdStreams(L"GPU-Renderer Debug Console");
-  } 
+  }
   catch (ErrorWithCode const& e) {
     MessageBoxW(NULL, e.WhatHappened().c_str(), e.GetTypeOfException().data(),
                 MB_OK | MB_ICONERROR);
     return e.GetErrorCode();
-  } 
+  }
   catch (std::exception const& e) {
     std::string const narrow = e.what();
     MessageBoxW(NULL, std::wstring{narrow.begin(), narrow.end()}.c_str(),
                 L"C++ standard exception", MB_OK | MB_ICONERROR);
     return EXIT_FAILURE;
-  } 
+  }
   catch (...) {
     MessageBoxW(NULL, L"Something unexpected happened", L"Unknown error",
                 MB_OK | MB_ICONERROR);
@@ -59,12 +59,12 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     MessageBoxW(NULL, e.WhatHappened().c_str(), e.GetTypeOfException().data(),
                 MB_OK | MB_ICONERROR);
     exit_code = e.GetErrorCode();
-  } 
+  }
   catch (Error const& e) {
     MessageBoxW(NULL, e.WhatHappened().c_str(), e.GetTypeOfException().data(),
                 MB_OK | MB_ICONERROR);
     exit_code = EXIT_FAILURE;
-  } 
+  }
   catch (std::exception const& e) {
     std::string const narrow = e.what();
     MessageBoxW(NULL, std::wstring{narrow.begin(), narrow.end()}.c_str(),
