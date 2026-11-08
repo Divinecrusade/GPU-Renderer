@@ -13,8 +13,8 @@ namespace gpu_renderer::voxel {
 class ExperimentApplication final {
  private:
   // Graphics задаёт область вывода 640x480 — размеры должны совпадать.
-  static constexpr int kWidth = 640;
-  static constexpr int kHeight = 480;
+  static constexpr int kWidth = 1920;
+  static constexpr int kHeight = 1080;
   static constexpr int kLeftTopCornerPosX = 15;
   static constexpr int kLeftTopCornerPosY = 30;
   static constexpr LPCWSTR kName = L"GPU-Renderer: voxel experiment";

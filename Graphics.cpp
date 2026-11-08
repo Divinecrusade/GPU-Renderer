@@ -7,7 +7,7 @@
 #pragma comment(lib, "D3DCompiler")
 
 namespace gpu_renderer {
-Graphics::Graphics(HWND hwnd) {
+Graphics::Graphics(HWND hwnd, FLOAT render_width, FLOAT render_height) {
   assert(hwnd != NULL);
   __assume(hwnd != NULL);
 
@@ -106,11 +106,11 @@ Graphics::Graphics(HWND hwnd) {
   assert(((void)"Render target view must be allocated at this point",
           render_target_));
 
-  constexpr D3D11_VIEWPORT kViewPortSettings{
+  D3D11_VIEWPORT const kViewPortSettings{
     .TopLeftX = 0.f,
     .TopLeftY = 0.f,
-    .Width = 640.f,
-    .Height = 480.f,
+    .Width = render_width,
+    .Height = render_height,
     .MinDepth = 0.f,
     .MaxDepth = 1.f
   };
@@ -129,8 +129,8 @@ Graphics::Graphics(HWND hwnd) {
   debugger_.StartTraceInDebugMode();
   device_context_->OMSetDepthStencilState(depth_buf.Get(), 1u);
   D3D11_TEXTURE2D_DESC const depth_texture_desc{
-    .Width = 640,
-    .Height = 480,
+    .Width = static_cast<UINT>(render_width),
+    .Height = static_cast<UINT>(render_height),
     .MipLevels = 1,
     .ArraySize = 1,
     .Format = DXGI_FORMAT_D32_FLOAT,

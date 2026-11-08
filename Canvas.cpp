@@ -16,7 +16,7 @@ Canvas::Canvas(CachedDC& window_class, LPCWSTR lpszWindowName,
              height,
              hInstance,
              Window::kNoExtraStyle},
-      gfx{Window::GetHWND()}
+      gfx{Window::GetHWND(), gsl::narrow_cast<FLOAT>(width), gsl::narrow_cast<FLOAT>(height)}
 {}
 
 LRESULT Canvas::HandleMessage(UINT Msg, WPARAM wParam, LPARAM lParam) noexcept {

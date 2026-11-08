@@ -49,7 +49,7 @@ class Graphics final {
 
  public:
   Graphics() = delete;
-  Graphics(HWND hwnd);
+  Graphics(HWND hwnd, FLOAT render_width = 640.f, FLOAT render_height = 480.f);
   Graphics(Graphics const&) = delete;
   Graphics(Graphics&&) = delete;
 

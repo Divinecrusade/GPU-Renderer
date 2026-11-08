@@ -8,7 +8,7 @@ Application::Application(HINSTANCE hInstance, int nCmdShow)
       wnd_{window_class_, kName,   kLeftTopCornerPosX, kLeftTopCornerPosY,
               kWidth,        kHeight, hInstance} {
   wnd_.Show(nCmdShow);
-  wnd_.gfx.SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 3.f / 4.f, 0.2f, 40.f));
+  wnd_.gfx.SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 1080.f / 1920.f, 0.2f, 40.f));
 
   std::mt19937 rng{std::random_device{}()};
   std::uniform_real_distribution<float> angle_dist{0.f, std::numbers::pi_v<float> * 2.f};
