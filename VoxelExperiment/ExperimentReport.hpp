@@ -20,6 +20,7 @@ struct MeasurementRow {
   double generation_ms = 0.0;
   double build_ms = 0.0;
   std::size_t memory_bytes = 0u;
+  std::size_t cpu_rays = 0u;  // число лучей CPU-обхода (зависит от --voxel-cpu-stride)
   double cpu_mean_steps = 0.0;
   double hit_rate = 0.0;
   std::string gpu_status;  // "ok", "skipped: ...", "failed: ..."

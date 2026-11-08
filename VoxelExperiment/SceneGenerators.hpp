@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <span>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -48,6 +49,26 @@ struct VoxelModel {
 // Запись занятых вокселей в binvox (для тестов и обмена с внешними инструментами).
 void SaveBinvox(std::filesystem::path const& path, std::uint32_t resolution,
                 std::span<std::uint64_t const> sorted_codes);
+
+// Одна сцена эксперимента: процедурная (kind + resolution) или модель (kind = kModel + путь).
+struct SceneCase {
+  SceneKind kind = SceneKind::kSphere;
+  std::uint32_t resolution = 0u;  // 0 для модели — берётся из файла
+  std::filesystem::path model_path{};
+};
+
+struct LoadedScene {
+  std::uint32_t resolution = 0u;
+  std::vector<std::uint64_t> shell_codes;
+  double generation_ms = 0.0;
+};
+
+// Генерация или загрузка сцены; бросает исключение, если модель не читается.
+// Сфера: радиус N/2 - 1; ландшафт: параметры TerrainParams по умолчанию.
+[[nodiscard]] LoadedScene LoadSceneCase(SceneCase const& scene);
+
+// Имя сцены для отчёта: "sphere", "terrain", "model:<имя файла>".
+[[nodiscard]] std::string SceneCaseName(SceneCase const& scene);
 }  // namespace gpu_renderer::voxel
 
 #endif  // !VOXEL_SCENE_GENERATORS_HPP

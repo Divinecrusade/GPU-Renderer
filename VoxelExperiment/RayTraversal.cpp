@@ -129,8 +129,12 @@ struct Int3 {
     if (t >= t1) {
       return result;
     }
+    // Луч движется монотонно, поэтому координата ячейки по каждой оси не может откатиться назад.
+    // Без этого ограничения на ребре, где две границы пересекаются при одном t (с точностью float),
+    // floor по второй оси возвращает луч в предыдущую ячейку, и обход зацикливается.
     for (int a = 0; a < 3; ++a) {
-      c.v[a] = static_cast<int>(std::floor(Component(o, a) + Component(d, a) * t));
+      int const next = static_cast<int>(std::floor(Component(o, a) + Component(d, a) * t));
+      c.v[a] = Component(d, a) > 0.f ? std::max(next, c.v[a]) : std::min(next, c.v[a]);
     }
     c.v[axis] = Component(d, axis) > 0.f ? bound[axis] : bound[axis] - 1;
     if (Outside(c, n)) {
@@ -186,17 +190,24 @@ RayHit TraceRay(IVoxelGrid const& grid, Float3 origin, Float3 direction) {
 }
 
 ImageTraceStats TraceImage(IVoxelGrid const& grid, CameraBasis const& basis, std::uint32_t width,
-                           std::uint32_t height) {
+                           std::uint32_t height, std::uint32_t stride) {
+  stride = std::max(1u, stride);
   double steps = 0.0;
   double hits = 0.0;
-  for (std::uint32_t py = 0u; py < height; ++py) {
-    for (std::uint32_t px = 0u; px < width; ++px) {
+  std::size_t rays = 0u;
+  std::uint32_t max_steps = 0u;
+  for (std::uint32_t py = stride / 2u; py < height; py += stride) {
+    for (std::uint32_t px = stride / 2u; px < width; px += stride) {
       RayHit const hit = TraceRay(grid, basis.position, PrimaryRayDirection(basis, px, py, width, height));
       steps += hit.steps;
       hits += hit.hit ? 1.0 : 0.0;
+      max_steps = std::max(max_steps, hit.steps);
+      ++rays;
     }
   }
-  double const rays = static_cast<double>(width) * height;
-  return {steps / rays, hits / rays};
+  if (rays == 0u) {
+    return {};
+  }
+  return {steps / static_cast<double>(rays), hits / static_cast<double>(rays), rays, max_steps};
 }
 }  // namespace gpu_renderer::voxel

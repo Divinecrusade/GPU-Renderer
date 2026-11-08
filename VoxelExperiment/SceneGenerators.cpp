@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <bit>
+#include <chrono>
 #include <cmath>
 #include <fstream>
 #include <sstream>
@@ -291,6 +292,42 @@ VoxelModel LoadBinvox(std::filesystem::path const& path) {
   }
   std::sort(model.shell_codes.begin(), model.shell_codes.end());
   return model;
+}
+
+LoadedScene LoadSceneCase(SceneCase const& scene) {
+  auto const start = std::chrono::steady_clock::now();
+  LoadedScene loaded;
+  switch (scene.kind) {
+    case SceneKind::kSphere:
+      loaded.resolution = scene.resolution;
+      loaded.shell_codes = GenerateSphereShell(scene.resolution, scene.resolution / 2.0 - 1.0);
+      break;
+    case SceneKind::kTerrain:
+      loaded.resolution = scene.resolution;
+      loaded.shell_codes = GenerateTerrainShell(scene.resolution);
+      break;
+    case SceneKind::kModel: {
+      VoxelModel model = LoadBinvox(scene.model_path);
+      loaded.resolution = model.resolution;
+      loaded.shell_codes = std::move(model.shell_codes);
+      break;
+    }
+  }
+  loaded.generation_ms =
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+  return loaded;
+}
+
+std::string SceneCaseName(SceneCase const& scene) {
+  std::string name{ToString(scene.kind)};
+  if (scene.kind == SceneKind::kModel) {
+    name.push_back(':');
+    // только ASCII: имя идёт в CSV, где ';' — разделитель
+    for (char32_t const ch : scene.model_path.filename().u32string()) {
+      name.push_back(ch < 128 && ch != ';' ? static_cast<char>(ch) : '?');
+    }
+  }
+  return name;
 }
 
 void SaveBinvox(std::filesystem::path const& path, std::uint32_t resolution,

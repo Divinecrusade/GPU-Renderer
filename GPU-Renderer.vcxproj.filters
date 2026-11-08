@@ -307,6 +307,9 @@
     <ClCompile Include="VoxelExperiment\SceneGenerators.cpp">
       <Filter>Исходные файлы\voxel</Filter>
     </ClCompile>
+    <ClCompile Include="VoxelExperiment\SceneViewer.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
     <ClCompile Include="VoxelExperiment\VoxelGrid.cpp">
       <Filter>Исходные файлы\voxel</Filter>
     </ClCompile>
@@ -335,6 +338,9 @@
       <Filter>Файлы заголовков\voxel</Filter>
     </ClInclude>
     <ClInclude Include="VoxelExperiment\SceneGenerators.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\SceneViewer.hpp">
       <Filter>Файлы заголовков\voxel</Filter>
     </ClInclude>
     <ClInclude Include="VoxelExperiment\StructuredBuffer.hpp">

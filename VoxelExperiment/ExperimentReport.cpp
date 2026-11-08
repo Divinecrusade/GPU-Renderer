@@ -11,13 +11,13 @@ CsvReport::CsvReport(std::filesystem::path const& path) : file_{path, std::ios::
     throw std::runtime_error{"Cannot create report file: " + path.string()};
   }
   file_ << "scene;N;representation;view;boundary_voxels;generation_ms;build_ms;memory_bytes;"
-           "cpu_mean_steps;hit_rate;gpu_status;gpu_ms_mean;gpu_ms_std;mrays_per_s\n";
+           "cpu_rays;cpu_mean_steps;hit_rate;gpu_status;gpu_ms_mean;gpu_ms_std;mrays_per_s\n";
 }
 
 void CsvReport::Append(MeasurementRow const& row) {
   file_ << std::fixed << std::setprecision(4) << row.scene << ';' << row.resolution << ';' << row.representation
         << ';' << row.view << ';' << row.boundary_voxels << ';' << row.generation_ms << ';' << row.build_ms << ';'
-        << row.memory_bytes << ';' << row.cpu_mean_steps << ';' << row.hit_rate << ';' << row.gpu_status << ';'
+        << row.memory_bytes << ';' << row.cpu_rays << ';' << row.cpu_mean_steps << ';' << row.hit_rate << ';' << row.gpu_status << ';'
         << row.gpu_ms_mean << ';' << row.gpu_ms_std << ';' << row.mrays_per_second << '\n';
   file_.flush();  // результаты не теряются, если прогон прервётся
 }

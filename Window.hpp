@@ -47,6 +47,8 @@ class Window {
   [[nodiscard]] bool IsEnabled() const noexcept;
   [[nodiscard]] bool IsShown() const noexcept;
 
+  void SetTitle(std::wstring const& title) const noexcept;
+
   [[nodiscard]] Keyboard::View GetKeyboard() noexcept;
   [[nodiscard]] Mouse::View GetMouse() noexcept;
 

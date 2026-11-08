@@ -18,7 +18,9 @@
 //     --voxel-representations=dense,block,svo,svdag
 //     --voxel-views=3                        число фиксированных ракурсов
 //     --voxel-warmup=30 --voxel-series=10 --voxel-frames=20
+//     --voxel-cpu-stride=4                   шаг выборки пикселей для CPU-подсчёта шагов на луч
 //     --voxel-report=voxel_experiment.csv
+//     --voxel-view-only                      без замеров: сразу просмотр сцен
 // Пути с пробелами заключаются в кавычки: --voxel-model="C:\models\my model.binvox".
 namespace gpu_renderer::voxel {
 struct ExperimentConfig {
@@ -31,8 +33,16 @@ struct ExperimentConfig {
   std::uint32_t warmup_frames = 30u;
   std::uint32_t series = 10u;
   std::uint32_t frames_per_series = 20u;
+  // CPU-обход выполняется для каждого cpu_stride-го пикселя по обеим осям:
+  // среднее число шагов на луч от этого практически не меняется, а время подготовки
+  // при 1920x1080 сокращается в cpu_stride^2 раз.
+  std::uint32_t cpu_stride = 4u;
   std::filesystem::path report_path{"voxel_experiment.csv"};
+  bool view_only = false;
 };
+
+// Сцены эксперимента в порядке прогона: процедурные сцены x разрешения, затем модели.
+[[nodiscard]] std::vector<SceneCase> BuildSceneCases(ExperimentConfig const& config);
 
 [[nodiscard]] bool IsExperimentRequested(std::wstring_view command_line);
 

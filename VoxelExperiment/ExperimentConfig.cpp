@@ -68,6 +68,19 @@ constexpr std::wstring_view kExperimentFlag = L"--voxel-experiment";
 }
 }  // namespace
 
+std::vector<SceneCase> BuildSceneCases(ExperimentConfig const& config) {
+  std::vector<SceneCase> cases;
+  for (SceneKind const scene : config.scenes) {
+    for (std::uint32_t const n : config.resolutions) {
+      cases.push_back({scene, n, {}});
+    }
+  }
+  for (auto const& model : config.models) {
+    cases.push_back({SceneKind::kModel, 0u, model});
+  }
+  return cases;
+}
+
 bool IsExperimentRequested(std::wstring_view command_line) {
   for (std::wstring const& token : Tokenize(command_line)) {
     if (token == kExperimentFlag) {
@@ -137,6 +150,13 @@ ExperimentConfig ParseExperimentConfig(std::wstring_view command_line) {
       config.series = ParseUnsigned(value, option);
     } else if (option == L"--voxel-frames") {
       config.frames_per_series = ParseUnsigned(value, option);
+    } else if (option == L"--voxel-cpu-stride") {
+      config.cpu_stride = ParseUnsigned(value, option);
+    } else if (option == L"--voxel-view-only") {
+      if (eq != std::wstring::npos) {
+        throw std::invalid_argument{"Option --voxel-view-only takes no value"};
+      }
+      config.view_only = true;
     } else if (option == L"--voxel-report") {
       if (value.empty()) {
         throw std::invalid_argument{"Option --voxel-report expects a path"};

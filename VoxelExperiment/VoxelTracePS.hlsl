@@ -171,7 +171,11 @@ bool TraceHierarchical(float3 o, float3 d, out uint steps, out float tHit)
         t = max(t, axis == 0 ? tb.x : (axis == 1 ? tb.y : tb.z));
         if (t >= t1)
             return false;
-        c = int3(floor(o + d * t));
+        // Луч движется монотонно: координата ячейки по каждой оси не может откатиться назад.
+        // Без этого на ребре, где две границы пересекаются при одном t, обход зацикливается.
+        int3 next = int3(floor(o + d * t));
+        int3 forward = int3(d > 0.0f);
+        c = forward * max(next, c) + (1 - forward) * min(next, c);
         // явные ветви вместо c[axis] = ...: FXC не всегда допускает запись по динамическому индексу
         if (axis == 0)      c.x = (d.x > 0.0f) ? bound.x : bound.x - 1;
         else if (axis == 1) c.y = (d.y > 0.0f) ? bound.y : bound.y - 1;

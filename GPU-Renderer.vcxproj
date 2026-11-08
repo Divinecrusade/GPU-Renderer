@@ -204,6 +204,7 @@
     <ClCompile Include="VoxelExperiment\GpuTimer.cpp" />
     <ClCompile Include="VoxelExperiment\RayTraversal.cpp" />
     <ClCompile Include="VoxelExperiment\SceneGenerators.cpp" />
+    <ClCompile Include="VoxelExperiment\SceneViewer.cpp" />
     <ClCompile Include="VoxelExperiment\VoxelGrid.cpp" />
     <ClCompile Include="VoxelExperiment\VoxelVolume.cpp" />
   </ItemGroup>
@@ -265,6 +266,7 @@
     <ClInclude Include="VoxelExperiment\Morton.hpp" />
     <ClInclude Include="VoxelExperiment\RayTraversal.hpp" />
     <ClInclude Include="VoxelExperiment\SceneGenerators.hpp" />
+    <ClInclude Include="VoxelExperiment\SceneViewer.hpp" />
     <ClInclude Include="VoxelExperiment\StructuredBuffer.hpp" />
     <ClInclude Include="VoxelExperiment\VoxelGrid.hpp" />
     <ClInclude Include="VoxelExperiment\VoxelVolume.hpp" />

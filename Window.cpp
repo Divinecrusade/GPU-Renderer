@@ -126,6 +126,12 @@ bool Window::IsShown() const noexcept {
   return IsWindowVisible(hwnd_);
 }
 
+void Window::SetTitle(std::wstring const& title) const noexcept {
+  assert(((void)"HWND cannot be null", hwnd_ != NULL));
+  __assume(hwnd_ != NULL);
+  std::ignore = SetWindowTextW(hwnd_, title.c_str());
+}
+
 Keyboard::View Window::GetKeyboard() noexcept {
   return kbd_;
 }

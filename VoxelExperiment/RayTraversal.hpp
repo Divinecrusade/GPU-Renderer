@@ -58,11 +58,16 @@ struct RayHit {
 struct ImageTraceStats {
   double mean_steps = 0.0;
   double hit_rate = 0.0;
+  std::size_t rays = 0u;
+  std::uint32_t max_steps = 0u;  // для проверки оценки худшего случая: 3N + 1 (DDA), 6N + D + 1 (иерархия)
 };
 
-// Обход всех пикселей кадра width x height; результат — среднее число шагов и доля попаданий.
+// Обход пикселей кадра width x height с шагом stride по обеим осям (в каждом блоке
+// stride x stride берётся центральный пиксель); результат — среднее число шагов
+// на луч, доля попаданий и число лучей. stride = 1 — все пиксели.
 [[nodiscard]] ImageTraceStats TraceImage(IVoxelGrid const& grid, CameraBasis const& basis,
-                                         std::uint32_t width, std::uint32_t height);
+                                         std::uint32_t width, std::uint32_t height,
+                                         std::uint32_t stride = 1u);
 }  // namespace gpu_renderer::voxel
 
 #endif  // !VOXEL_RAY_TRAVERSAL_HPP

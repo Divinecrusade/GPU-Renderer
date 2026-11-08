@@ -34,20 +34,30 @@ using Clock = std::chrono::steady_clock;
   return result;
 }
 
-void Log(std::string const& message) { std::wclog << std::wstring(message.begin(), message.end()) << L'\n'; }
+[[nodiscard]] std::wstring Widen(std::string_view text) {
+  std::wstring result;
+  for (char const ch : text) {
+    result.push_back(static_cast<unsigned char>(ch) < 128u ? static_cast<wchar_t>(ch) : L'?');
+  }
+  return result;
+}
+
+void Log(std::string const& message) { std::wclog << Widen(message) << L'\n'; }
 }  // namespace
 
 ExperimentRunner::ExperimentRunner(Graphics& gfx, ExperimentConfig config, std::uint32_t width,
                                    std::uint32_t height)
-    : config_{std::move(config)}, width_{width}, height_{height}, report_{config_.report_path}, timer_{gfx} {
-  for (SceneKind const scene : config_.scenes) {
-    for (std::uint32_t const n : config_.resolutions) {
-      cases_.push_back({scene, n, {}});
-    }
+    : config_{std::move(config)},
+      width_{width},
+      height_{height},
+      timer_{gfx},
+      cases_{BuildSceneCases(config_)},
+      cache_(cases_.size()) {
+  if (config_.view_only) {
+    StartViewer();
+    return;
   }
-  for (auto const& model : config_.models) {
-    cases_.push_back({SceneKind::kModel, 0u, model});
-  }
+  report_.emplace(config_.report_path);
   if (cases_.empty()) {
     phase_ = Phase::kFinished;
   }
@@ -58,9 +68,56 @@ ExperimentRunner::ExperimentRunner(Graphics& gfx, ExperimentConfig config, std::
 
 bool ExperimentRunner::IsFinished() const noexcept { return phase_ == Phase::kFinished; }
 
+void ExperimentRunner::OnKeyPressed(std::uint8_t key) noexcept {
+  if (viewer_) {
+    viewer_->OnKeyPressed(key);
+  }
+}
+
+std::optional<std::wstring> ExperimentRunner::TakeStatusChange() {
+  std::wstring status = viewer_ ? viewer_->Status() : ProgressText();
+  if (status == shown_status_) {
+    return std::nullopt;
+  }
+  shown_status_ = status;
+  return status;
+}
+
+std::wstring ExperimentRunner::ProgressText() const {
+  if (cases_.empty()) {
+    return L"Эксперимент: нет сцен";
+  }
+  std::wstring text = L"Эксперимент: сцена " + std::to_wstring(case_index_ + 1u) + L"/" +
+                      std::to_wstring(cases_.size()) + L" (" + Widen(SceneCaseName(cases_[case_index_]));
+  std::uint32_t const n = scene_loaded_ ? scene_.resolution : cases_[case_index_].resolution;
+  if (n != 0u) {
+    text += L" N=" + std::to_wstring(n);
+  }
+  text += L"), " + Widen(ToString(config_.representations[representation_index_]));
+  switch (phase_) {
+    case Phase::kPrepare:
+      text += L", подготовка…";
+      break;
+    case Phase::kWarmup:
+    case Phase::kMeasure:
+      text += L", ракурс " + std::to_wstring(view_index_ + 1u) + L"/" + std::to_wstring(config_.views) +
+              (phase_ == Phase::kWarmup ? L", прогрев" : L", серия " + std::to_wstring(series_done_ + 1u) +
+                                                             L"/" + std::to_wstring(config_.series));
+      break;
+    case Phase::kFinished:
+      break;
+  }
+  return text;
+}
+
 void ExperimentRunner::RenderFrame(Graphics& gfx, FrameTimer::DeltaTime dt) {
-  if (phase_ == Phase::kFinished) {
-    RenderIdle(gfx, dt);
+  if (viewer_) {
+    viewer_->RenderFrame(gfx, dt);
+    return;
+  }
+  if (phase_ == Phase::kFinished) {  // просматривать нечего: нет сцен
+    gfx.ClearBuffer({0.f, 0.f, 0.f});
+    gfx.EndFrame();
     return;
   }
   if (phase_ == Phase::kPrepare) {
@@ -103,35 +160,18 @@ void ExperimentRunner::RenderFrame(Graphics& gfx, FrameTimer::DeltaTime dt) {
 
 bool ExperimentRunner::LoadScene() {
   SceneCase const& scene = cases_[case_index_];
-  auto const start = Clock::now();
   try {
-    switch (scene.kind) {
-      case SceneKind::kSphere:
-        resolution_ = scene.resolution;
-        codes_ = GenerateSphereShell(resolution_, resolution_ / 2.0 - 1.0);
-        break;
-      case SceneKind::kTerrain:
-        resolution_ = scene.resolution;
-        codes_ = GenerateTerrainShell(resolution_);
-        break;
-      case SceneKind::kModel: {
-        VoxelModel model = LoadBinvox(scene.model_path);
-        resolution_ = model.resolution;
-        codes_ = std::move(model.shell_codes);
-        break;
-      }
-    }
+    scene_ = LoadSceneCase(scene);
   } catch (std::exception const& e) {
     Log(std::string{"Scene loading failed: "} + e.what());
-    resolution_ = scene.resolution;
-    codes_.clear();
-    generation_ms_ = MillisecondsSince(start);
+    scene_ = LoadedScene{};
+    scene_.resolution = scene.resolution;
     return false;
   }
-  generation_ms_ = MillisecondsSince(start);
   scene_loaded_ = true;
-  Log("Scene " + std::string{ToString(scene.kind)} + " N=" + std::to_string(resolution_) + ": " +
-      std::to_string(codes_.size()) + " boundary voxels, " + std::to_string(generation_ms_) + " ms");
+  Log("Scene " + SceneCaseName(scene) + " N=" + std::to_string(scene_.resolution) + ": " +
+      std::to_string(scene_.shell_codes.size()) + " boundary voxels, " + std::to_string(scene_.generation_ms) +
+      " ms");
   return true;
 }
 
@@ -140,28 +180,28 @@ void ExperimentRunner::PrepareRepresentation(Graphics& gfx) {
     grid_.reset();
     WriteCpuOnlyRows("failed: scene loading");
     representation_index_ = config_.representations.size() - 1u;  // пропустить сцену целиком
-    AdvanceRepresentation(gfx);
+    AdvanceRepresentation();
     return;
   }
 
   Representation const representation = config_.representations[representation_index_];
   auto const start = Clock::now();
   try {
-    grid_ = BuildGrid(representation, resolution_, codes_);
+    grid_ = BuildGrid(representation, scene_.resolution, scene_.shell_codes);
   } catch (std::exception const& e) {
     grid_.reset();
     build_ms_ = MillisecondsSince(start);
     WriteCpuOnlyRows("failed: build: " + ToCsvText(e.what()));
-    AdvanceRepresentation(gfx);
+    AdvanceRepresentation();
     return;
   }
   build_ms_ = MillisecondsSince(start);
   Log("  " + std::string{ToString(representation)} + ": " + std::to_string(grid_->MemoryBytes()) + " bytes, built in " +
       std::to_string(build_ms_) + " ms");
 
-  if (representation == Representation::kDense && resolution_ > drawable::VoxelVolume::kMaxDenseResolution) {
+  if (representation == Representation::kDense && scene_.resolution > drawable::VoxelVolume::kMaxDenseResolution) {
     WriteCpuOnlyRows("skipped: dense index is 32-bit (N > 1024)");
-    AdvanceRepresentation(gfx);
+    AdvanceRepresentation();
     return;
   }
   try {
@@ -169,12 +209,12 @@ void ExperimentRunner::PrepareRepresentation(Graphics& gfx) {
   } catch (exception::Error const& e) {
     volume_.reset();
     WriteCpuOnlyRows("failed: GPU upload: " + ToCsvText(e.GetTypeOfException()));
-    AdvanceRepresentation(gfx);
+    AdvanceRepresentation();
     return;
   } catch (std::exception const& e) {
     volume_.reset();
     WriteCpuOnlyRows("failed: GPU upload: " + ToCsvText(e.what()));
-    AdvanceRepresentation(gfx);
+    AdvanceRepresentation();
     return;
   }
   view_index_ = 0u;
@@ -182,14 +222,14 @@ void ExperimentRunner::PrepareRepresentation(Graphics& gfx) {
 }
 
 CameraBasis ExperimentRunner::ViewBasis(std::size_t view) const noexcept {
-  return MakeCameraBasis(MakeOrbitCamera(resolution_, view, config_.views),
+  return MakeCameraBasis(MakeOrbitCamera(scene_.resolution, view, config_.views),
                          static_cast<float>(width_) / static_cast<float>(height_));
 }
 
 void ExperimentRunner::PrepareView(Graphics& gfx) {
   CameraBasis const basis = ViewBasis(view_index_);
   volume_->SetView(gfx, basis, false);
-  cpu_stats_ = TraceImage(*grid_, basis, width_, height_);
+  cpu_stats_ = TraceImage(*grid_, basis, width_, height_, config_.cpu_stride);
   phase_ = Phase::kWarmup;
   frame_in_phase_ = 0u;
   series_done_ = 0u;
@@ -199,17 +239,15 @@ void ExperimentRunner::PrepareView(Graphics& gfx) {
 
 MeasurementRow ExperimentRunner::MakeRow(std::size_t view) const {
   MeasurementRow row;
-  row.scene = std::string{ToString(cases_[case_index_].kind)};
-  if (cases_[case_index_].kind == SceneKind::kModel) {
-    row.scene += ":" + ToCsvText(cases_[case_index_].model_path.filename().string());
-  }
-  row.resolution = resolution_;
+  row.scene = SceneCaseName(cases_[case_index_]);
+  row.resolution = scene_.resolution;
   row.representation = std::string{ToString(config_.representations[representation_index_])};
   row.view = view;
-  row.boundary_voxels = codes_.size();
-  row.generation_ms = generation_ms_;
+  row.boundary_voxels = scene_.shell_codes.size();
+  row.generation_ms = scene_.generation_ms;
   row.build_ms = build_ms_;
   row.memory_bytes = grid_ ? grid_->MemoryBytes() : 0u;
+  row.cpu_rays = cpu_stats_.rays;
   row.cpu_mean_steps = cpu_stats_.mean_steps;
   row.hit_rate = cpu_stats_.hit_rate;
   return row;
@@ -223,7 +261,7 @@ void ExperimentRunner::FinishView(Graphics& gfx) {
   if (row.gpu_ms_mean > 0.0) {
     row.mrays_per_second = static_cast<double>(width_) * height_ / (row.gpu_ms_mean * 1e-3) / 1e6;
   }
-  report_.Append(row);
+  report_->Append(row);
   Log("    view " + std::to_string(view_index_) + ": " + std::to_string(row.gpu_ms_mean) + " +- " +
       std::to_string(row.gpu_ms_std) + " ms, " + std::to_string(row.mrays_per_second) + " Mrays/s, " +
       std::to_string(row.cpu_mean_steps) + " steps/ray");
@@ -231,65 +269,63 @@ void ExperimentRunner::FinishView(Graphics& gfx) {
   if (++view_index_ < config_.views) {
     PrepareView(gfx);
   } else {
-    AdvanceRepresentation(gfx);
+    AdvanceRepresentation();
   }
 }
 
 void ExperimentRunner::WriteCpuOnlyRows(std::string const& gpu_status) {
   Log("  " + gpu_status);
   for (std::size_t view = 0u; view < config_.views; ++view) {
-    cpu_stats_ = grid_ ? TraceImage(*grid_, ViewBasis(view), width_, height_) : ImageTraceStats{};
+    cpu_stats_ = grid_ ? TraceImage(*grid_, ViewBasis(view), width_, height_, config_.cpu_stride) : ImageTraceStats{};
     MeasurementRow row = MakeRow(view);
     row.gpu_status = gpu_status;
-    report_.Append(row);
+    report_->Append(row);
   }
 }
 
-void ExperimentRunner::AdvanceRepresentation(Graphics& gfx) {
+void ExperimentRunner::AdvanceRepresentation() {
+  volume_.reset();
+  grid_.reset();
   bool const last_representation = representation_index_ + 1u >= config_.representations.size();
-  bool const last_case = case_index_ + 1u >= cases_.size();
-  if (last_representation && last_case) {
-    // Последнюю сцену оставляем на экране; если её нельзя было загрузить на GPU — показываем SVO.
-    if (!volume_ && !codes_.empty()) {
-      try {
-        grid_ = std::make_unique<SparseVoxelOctree>(resolution_, codes_);
-        volume_ = std::make_unique<drawable::VoxelVolume>(gfx, *grid_, width_, height_);
-      } catch (std::exception const&) {
-        volume_.reset();
-      }
-    }
-    phase_ = Phase::kFinished;
-    Log("Voxel experiment finished, results: " + config_.report_path.string());
+  if (!last_representation) {
+    ++representation_index_;
+    phase_ = Phase::kPrepare;
     return;
   }
 
-  volume_.reset();
-  grid_.reset();
-  if (last_representation) {
-    representation_index_ = 0u;
-    ++case_index_;
-    scene_loaded_ = false;
-    codes_.clear();
-    codes_.shrink_to_fit();
-  } else {
-    ++representation_index_;
+  // Сцена измерена во всех представлениях: в кэш для просмотра, если не слишком велика.
+  if (scene_loaded_ && scene_.shell_codes.size() <= SceneViewer::kMaxCachedVoxels) {
+    cache_[case_index_] = std::move(scene_);
   }
+  scene_ = LoadedScene{};
+  scene_loaded_ = false;
+  representation_index_ = 0u;
+
+  if (case_index_ + 1u >= cases_.size()) {
+    phase_ = Phase::kFinished;
+    Log("Voxel experiment finished, results: " + config_.report_path.string());
+    StartViewer();
+    return;
+  }
+  ++case_index_;
   phase_ = Phase::kPrepare;
 }
 
-void ExperimentRunner::RenderIdle(Graphics& gfx, FrameTimer::DeltaTime dt) {
-  idle_time_ += dt;
-  gfx.ClearBuffer({0.f, 0.f, 0.f});
-  if (volume_) {
-    constexpr float kAngularSpeed = 0.3f;     // рад/с
-    constexpr float kHeatmapPeriod = 4.f;     // с
-    bool const show_steps = static_cast<int>(idle_time_ / kHeatmapPeriod) % 2 == 1;
-    volume_->SetView(gfx,
-                     MakeCameraBasis(MakeOrbitCameraAt(resolution_, 0.6f + kAngularSpeed * idle_time_),
-                                     static_cast<float>(width_) / static_cast<float>(height_)),
-                     show_steps);
-    volume_->Draw(gfx);
+void ExperimentRunner::StartViewer() {
+  phase_ = Phase::kFinished;
+  if (cases_.empty() || config_.representations.empty()) {
+    return;
   }
-  gfx.EndFrame();
+  // Начинаем с последней измеренной сцены и SVO (если оно есть в списке).
+  std::size_t start_representation = 0u;
+  for (std::size_t i = 0u; i < config_.representations.size(); ++i) {
+    if (config_.representations[i] == Representation::kSvo) {
+      start_representation = i;
+    }
+  }
+  std::size_t const start_case = config_.view_only ? 0u : cases_.size() - 1u;
+  viewer_ = std::make_unique<SceneViewer>(cases_, std::move(cache_), config_.representations, width_, height_,
+                                          start_case, start_representation);
+  cache_.clear();
 }
 }  // namespace gpu_renderer::voxel

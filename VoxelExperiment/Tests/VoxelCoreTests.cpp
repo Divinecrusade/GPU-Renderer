@@ -121,9 +121,55 @@ int main() {
                 dag.UniqueNodesPerLevel().back());
     Check(dag.UniqueNodesPerLevel().back() <= 255u, (scene + ": SVDAG, уровень D-1 <= 255 узлов").c_str());
     Check(dag.MemoryBytes() < grids[2]->MemoryBytes(), (scene + ": SVDAG меньше SVO").c_str());
+    bool bounded = true;
+    std::uint32_t const depth = Log2Ceil(n);
+    for (auto const& grid : grids) {
+      for (std::size_t view = 0u; view < 3u; ++view) {
+        ImageTraceStats const stats =
+            TraceImage(*grid, MakeCameraBasis(MakeOrbitCamera(n, view, 3u), 16.f / 9.f), 320u, 180u);
+        std::uint32_t const limit =
+            grid->GetRepresentation() == Representation::kDense ? 3u * n + 1u : 6u * n + depth + 1u;
+        bounded = bounded && stats.max_steps <= limit;
+      }
+    }
+    Check(bounded, (scene + ": шагов на луч не больше оценки худшего случая (нет зацикливания)").c_str());
     double const mismatch = RayMismatchRate(grids, n);
     std::printf("      %s: доля расхождений точек попадания с DDA: %.4f%%\n", scene.c_str(), 100.0 * mismatch);
     Check(mismatch < 0.005, (scene + ": обход лучей согласован с DDA (< 0.5% касательных лучей)").c_str());
+  }
+
+  {  // Выборка пикселей для CPU-обхода: среднее почти не меняется, лучей в stride^2 меньше
+    std::uint32_t const n = 256u;
+    auto const codes = GenerateTerrainShell(n);
+    SparseVoxelOctree const svo{n, codes};
+    CameraBasis const basis = MakeCameraBasis(MakeOrbitCamera(n, 0u, 3u), 16.f / 9.f);
+    ImageTraceStats const full = TraceImage(svo, basis, 480u, 270u, 1u);
+    ImageTraceStats const sampled = TraceImage(svo, basis, 480u, 270u, 4u);
+    double const deviation = std::fabs(sampled.mean_steps / full.mean_steps - 1.0);
+    std::printf("      шагов на луч: все пиксели %.3f (%zu лучей), шаг 4: %.3f (%zu лучей), отклонение %.2f%%\n",
+                full.mean_steps, full.rays, sampled.mean_steps, sampled.rays, 100.0 * deviation);
+    Check(full.rays == 480u * 270u && sampled.rays == 120u * 67u, "TraceImage: число лучей при выборке");
+    Check(deviation < 0.03, "TraceImage: выборка с шагом 4 меняет среднее меньше чем на 3%");
+  }
+
+  {  // Сцены эксперимента
+    ExperimentConfig config;
+    config.scenes = {SceneKind::kSphere};
+    config.resolutions = {64u, 128u};
+    config.models = {std::filesystem::path{"a.binvox"}};
+    auto const cases = BuildSceneCases(config);
+    Check(cases.size() == 3u && cases[1].resolution == 128u && cases[2].kind == SceneKind::kModel &&
+              SceneCaseName(cases[2]) == "model:a.binvox" && SceneCaseName(cases[0]) == "sphere",
+          "Сцены: порядок и имена");
+    LoadedScene const sphere = LoadSceneCase(cases[0]);
+    Check(sphere.resolution == 64u && sphere.shell_codes == GenerateSphereShell(64u, 31.0), "Сцены: загрузка сферы");
+    bool thrown = false;
+    try {
+      static_cast<void>(LoadSceneCase(cases[2]));
+    } catch (std::exception const&) {
+      thrown = true;
+    }
+    Check(thrown, "Сцены: отсутствующая модель — исключение");
   }
 
   {  // Ландшафт: многопоточная генерация детерминирована
@@ -170,14 +216,15 @@ int main() {
   {  // Командная строка
     std::wstring_view const line =
         L"--voxel-experiment --voxel-scenes=terrain --voxel-resolutions=128,512 "
-        L"--voxel-model=\"C:\\models\\my model.binvox\" --voxel-representations=svo,svdag --voxel-views=2";
+        L"--voxel-model=\"C:\\models\\my model.binvox\" --voxel-representations=svo,svdag --voxel-views=2 "
+        L"--voxel-cpu-stride=8 --voxel-view-only";
     ExperimentConfig const config = ParseExperimentConfig(line);
     Check(IsExperimentRequested(line) && !IsExperimentRequested(L"--other"), "Конфигурация: флаг эксперимента");
     Check(config.scenes.size() == 1u && config.scenes[0] == SceneKind::kTerrain && config.resolutions.size() == 2u &&
               config.resolutions[1] == 512u && config.models.size() == 1u &&
               config.models[0] == std::filesystem::path{L"C:\\models\\my model.binvox"} &&
               config.representations.size() == 2u && config.representations[1] == Representation::kSvdag &&
-              config.views == 2u,
+              config.views == 2u && config.cpu_stride == 8u && config.view_only,
           "Конфигурация: опции и путь в кавычках");
     bool rejected = false;
     try {

@@ -3,6 +3,8 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
+#include <string>
 #include <vector>
 
 #include "../FrameTimer.hpp"
@@ -11,50 +13,55 @@
 #include "ExperimentReport.hpp"
 #include "GpuTimer.hpp"
 #include "RayTraversal.hpp"
+#include "SceneViewer.hpp"
 #include "VoxelGrid.hpp"
 #include "VoxelVolume.hpp"
 
 namespace gpu_renderer::voxel {
 // Автомат эксперимента, выполняемый по одному кадру за вызов RenderFrame.
-// Для каждой пары (сцена, N) и каждого представления:
+// Для каждой сцены (сцена x N или модель) и каждого представления:
 //   1) построение структуры на CPU (время, объём памяти);
-//   2) для каждого ракурса — CPU-обход того же кадра (среднее число шагов на луч, доля попаданий),
-//      затем на GPU warmup кадров и series x frames кадров с замером времени по timestamp-запросам;
+//   2) для каждого ракурса — CPU-обход того же кадра с шагом cpu_stride (среднее число шагов
+//      на луч, доля попаданий), затем на GPU warmup кадров и series x frames кадров с замером
+//      времени по timestamp-запросам;
 //   3) строка в CSV: среднее и СКО времени по сериям, млн лучей/с.
-// После завершения сцена продолжает вращаться; каждые 4 с переключается тепловая карта шагов.
+// После завершения (или сразу, при view_only) управление передаётся SceneViewer:
+// сцены переключаются клавишами, сгенерированные сцены берутся из кэша.
 class ExperimentRunner final {
  public:
   ExperimentRunner(Graphics& gfx, ExperimentConfig config, std::uint32_t width, std::uint32_t height);
 
   void RenderFrame(Graphics& gfx, FrameTimer::DeltaTime dt);
 
+  // Нажатия клавиш; во время замеров игнорируются, чтобы не влиять на результаты.
+  void OnKeyPressed(std::uint8_t key) noexcept;
+
   [[nodiscard]] bool IsFinished() const noexcept;
 
- private:
-  struct SceneCase {
-    SceneKind kind;
-    std::uint32_t resolution;         // 0 для модели — берётся из файла
-    std::filesystem::path model_path;
-  };
+  // Текст для заголовка окна, если он изменился с прошлого вызова.
+  [[nodiscard]] std::optional<std::wstring> TakeStatusChange();
 
+ private:
   enum class Phase { kPrepare, kWarmup, kMeasure, kFinished };
 
   [[nodiscard]] bool LoadScene();
   void PrepareRepresentation(Graphics& gfx);
   void PrepareView(Graphics& gfx);
   void FinishView(Graphics& gfx);
-  void AdvanceRepresentation(Graphics& gfx);
+  void AdvanceRepresentation();
+  void StartViewer();
   void WriteCpuOnlyRows(std::string const& gpu_status);
-  void RenderIdle(Graphics& gfx, FrameTimer::DeltaTime dt);
   [[nodiscard]] MeasurementRow MakeRow(std::size_t view) const;
   [[nodiscard]] CameraBasis ViewBasis(std::size_t view) const noexcept;
+  [[nodiscard]] std::wstring ProgressText() const;
 
   ExperimentConfig config_;
   std::uint32_t width_;
   std::uint32_t height_;
-  CsvReport report_;
+  std::optional<CsvReport> report_;  // не создаётся при view_only, чтобы не затереть прошлый отчёт
   profiling::GpuTimer timer_;
   std::vector<SceneCase> cases_;
+  std::vector<std::optional<LoadedScene>> cache_;  // сцены для просмотра после замеров
 
   Phase phase_ = Phase::kPrepare;
   std::size_t case_index_ = 0u;
@@ -62,9 +69,7 @@ class ExperimentRunner final {
   std::size_t view_index_ = 0u;
 
   bool scene_loaded_ = false;
-  std::uint32_t resolution_ = 0u;
-  std::vector<std::uint64_t> codes_;
-  double generation_ms_ = 0.0;
+  LoadedScene scene_{};
 
   std::unique_ptr<IVoxelGrid> grid_;
   std::unique_ptr<drawable::VoxelVolume> volume_;
@@ -76,7 +81,8 @@ class ExperimentRunner final {
   std::vector<double> frame_ms_;
   std::vector<double> series_ms_;
 
-  float idle_time_ = 0.f;
+  std::unique_ptr<SceneViewer> viewer_;
+  std::wstring shown_status_;
 };
 }  // namespace gpu_renderer::voxel
 

@@ -12,7 +12,15 @@ window::ExitCode ExperimentApplication::Run() {
   std::optional<window::ExitCode> exit_code = Process();
 
   for (FrameTimer ft{}; !exit_code; exit_code = Process()) {
+    for (auto keyboard = wnd_.GetKeyboard(); auto const key_event = keyboard.GetOldestEvent();) {
+      if (key_event->second == input::Keyboard::EventType::kPressed) {
+        runner_.OnKeyPressed(key_event->first);
+      }
+    }
     runner_.RenderFrame(wnd_.gfx, ft.Mark());
+    if (auto const status = runner_.TakeStatusChange()) {
+      wnd_.SetTitle(std::wstring{kName} + L" — " + *status);
+    }
   }
 
   return *exit_code;
