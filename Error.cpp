@@ -24,7 +24,7 @@ std::wstring Error::FormatErrorMessage(std::wstring_view error_description) cons
   return std::format(L"[What] {}\n[Description]\n {}\n[File] {}\n[Line] {}",
                      wide_what, error_description, file_, line_);
 #else
-  return std::format(L"[What] {}\n[Description]\n {}", 
+  return std::format(L"[What] {}\n[Description]\n {}",
                      wide_what, error_description);
 #endif  // _DEBUG
 }
