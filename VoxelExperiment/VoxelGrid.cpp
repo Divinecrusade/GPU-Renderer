@@ -1,8 +1,9 @@
 ﻿#include "VoxelGrid.hpp"
 
+#include <algorithm>
 #include <bit>
 #include <cassert>
-#include <map>
+#include <cstring>
 #include <stdexcept>
 
 #include "Morton.hpp"
@@ -23,6 +24,82 @@ void RequirePowerOfTwo(std::uint32_t resolution) {
     throw std::invalid_argument{"Voxel grid resolution must be a power of two (>= 2)"};
   }
 }
+
+// Уровень, с которого начинается спуск, и запоминание текущей ячейки как предыдущей.
+// Узел уровня l покрывает куб со стороной 2^(D-l); ячейки лежат в одном узле уровня l,
+// если их координаты совпадают в битах с номерами >= D - l. Поэтому общий предок —
+// уровень D - bit_width(diff), где diff — объединение отличающихся битов по трём осям.
+[[nodiscard]] std::uint32_t StartLevel(std::uint32_t x, std::uint32_t y, std::uint32_t z, std::uint32_t depth,
+                                       TraversalState& state) noexcept {
+  std::uint32_t level = 0u;
+  if (state.traversal == Traversal::kStack) {
+    std::uint32_t const diff = (x ^ state.prev_x) | (y ^ state.prev_y) | (z ^ state.prev_z);
+    std::uint32_t const shared = diff == 0u ? state.valid_level : depth - static_cast<std::uint32_t>(std::bit_width(diff));
+    level = std::min(state.valid_level, shared);
+  }
+  state.prev_x = x;
+  state.prev_y = y;
+  state.prev_z = z;
+  return level;
+}
+
+// Хеш-таблица уникальных узлов одного уровня SVDAG: содержимое узлов лежит подряд в flat,
+// таблица хранит номер узла + 1 (0 — пустая ячейка). Открытая адресация, линейное пробирование.
+class UniqueNodeTable {
+ public:
+  explicit UniqueNodeTable(std::size_t expected_nodes) {
+    std::size_t capacity = 16u;
+    while (capacity < 2u * expected_nodes) {
+      capacity <<= 1u;
+    }
+    slots_.assign(capacity, 0u);
+    offsets_.reserve(expected_nodes + 1u);
+    offsets_.push_back(0u);
+  }
+
+  // Номер узла с таким содержимым; новый узел добавляется.
+  [[nodiscard]] std::uint32_t Insert(std::span<std::uint32_t const> content) {
+    std::size_t const mask = slots_.size() - 1u;
+    for (std::size_t slot = Hash(content) & mask;; slot = (slot + 1u) & mask) {
+      std::uint32_t const entry = slots_[slot];
+      if (entry == 0u) {
+        std::uint32_t const id = static_cast<std::uint32_t>(Count());
+        flat_.insert(flat_.end(), content.begin(), content.end());
+        offsets_.push_back(flat_.size());
+        slots_[slot] = id + 1u;
+        return id;
+      }
+      std::span<std::uint32_t const> const existing = Node(entry - 1u);
+      if (existing.size() == content.size() &&
+          std::memcmp(existing.data(), content.data(), content.size() * sizeof(std::uint32_t)) == 0) {
+        return entry - 1u;
+      }
+    }
+  }
+
+  [[nodiscard]] std::size_t Count() const noexcept { return offsets_.size() - 1u; }
+  [[nodiscard]] std::size_t Words() const noexcept { return flat_.size(); }
+  [[nodiscard]] std::span<std::uint32_t const> Node(std::size_t id) const noexcept {
+    return std::span<std::uint32_t const>{flat_}.subspan(offsets_[id], offsets_[id + 1u] - offsets_[id]);
+  }
+
+  void ReleaseTable() noexcept { std::vector<std::uint32_t>{}.swap(slots_); }
+
+ private:
+  [[nodiscard]] static std::size_t Hash(std::span<std::uint32_t const> content) noexcept {
+    std::uint64_t h = 0x9e3779b97f4a7c15ULL ^ content.size();
+    for (std::uint32_t const word : content) {
+      h ^= word;
+      h *= 0xbf58476d1ce4e5b9ULL;
+      h ^= h >> 31u;
+    }
+    return static_cast<std::size_t>(h ^ (h >> 29u));
+  }
+
+  std::vector<std::uint32_t> flat_;
+  std::vector<std::size_t> offsets_;
+  std::vector<std::uint32_t> slots_;
+};
 }  // namespace
 
 std::string_view ToString(Representation representation) noexcept {
@@ -35,8 +112,25 @@ std::string_view ToString(Representation representation) noexcept {
       return "svo";
     case Representation::kSvdag:
       return "svdag";
+    case Representation::kDenseBrick:
+      return "dense-brick";
   }
   return "unknown";
+}
+
+std::string_view ToString(Traversal traversal) noexcept {
+  return traversal == Traversal::kStack ? "stack" : "restart";
+}
+
+std::size_t DenseMemoryBytes(std::uint32_t resolution) noexcept {
+  std::size_t const words = (static_cast<std::size_t>(resolution) * resolution * resolution + 31u) / 32u;
+  return (words + 3u) / 4u * 4u * sizeof(std::uint32_t);
+}
+
+std::uint32_t IVoxelGrid::EmptyCellTraced(std::uint32_t x, std::uint32_t y, std::uint32_t z,
+                                          TraversalState& state) const {
+  ++state.fetches;  // плотная сетка: одно слово на шаг
+  return EmptyCell(x, y, z);
 }
 
 std::uint32_t Log2Ceil(std::uint32_t value) noexcept {
@@ -48,21 +142,34 @@ std::uint32_t Log2Ceil(std::uint32_t value) noexcept {
 }
 
 // ───────────── DenseGrid ─────────────
-DenseGrid::DenseGrid(std::uint32_t resolution, std::span<std::uint64_t const> sorted_codes)
-    : resolution_{resolution},
-      bits_((static_cast<std::size_t>(resolution) * resolution * resolution + 31u) / 32u, 0u) {
+DenseGrid::DenseGrid(std::uint32_t resolution, std::span<std::uint64_t const> sorted_codes, Layout layout)
+    : resolution_{resolution}, layout_{layout}, bits_(DenseMemoryBytes(resolution) / sizeof(std::uint32_t), 0u) {
   RequirePowerOfTwo(resolution);
+  if (layout_ == Layout::kBrick && resolution < kBrickSide) {
+    throw std::invalid_argument{"Brick layout requires N >= 8"};
+  }
   for (std::uint64_t const code : sorted_codes) {
     VoxelCoord const c = DecodeMorton(code);
     Set(c.x, c.y, c.z, true);
   }
 }
 
-Representation DenseGrid::GetRepresentation() const noexcept { return Representation::kDense; }
+Representation DenseGrid::GetRepresentation() const noexcept {
+  return layout_ == Layout::kBrick ? Representation::kDenseBrick : Representation::kDense;
+}
 std::uint32_t DenseGrid::Resolution() const noexcept { return resolution_; }
 
 std::size_t DenseGrid::Index(std::uint32_t x, std::uint32_t y, std::uint32_t z) const noexcept {
-  return x + static_cast<std::size_t>(resolution_) * (y + static_cast<std::size_t>(resolution_) * z);
+  std::size_t const n = resolution_;
+  if (layout_ == Layout::kLinear) {
+    return x + n * (y + n * z);
+  }
+  constexpr std::uint32_t kLog = 3u;
+  constexpr std::uint32_t kMask = kBrickSide - 1u;
+  std::size_t const bricks = n >> kLog;
+  std::size_t const brick = (x >> kLog) + bricks * ((y >> kLog) + bricks * (z >> kLog));
+  std::size_t const local = (x & kMask) + kBrickSide * ((y & kMask) + kBrickSide * (z & kMask));
+  return brick * (kBrickSide * kBrickSide * kBrickSide) + local;
 }
 
 bool DenseGrid::Get(std::uint32_t x, std::uint32_t y, std::uint32_t z) const {
@@ -86,6 +193,7 @@ std::uint32_t DenseGrid::EmptyCell(std::uint32_t x, std::uint32_t y, std::uint32
 
 std::size_t DenseGrid::MemoryBytes() const noexcept { return bits_.size() * sizeof(std::uint32_t); }
 std::span<std::uint32_t const> DenseGrid::GpuData() const noexcept { return bits_; }
+std::uint32_t DenseGrid::GpuElementWords() const noexcept { return 4u; }
 
 // ───────────── BlockGrid ─────────────
 BlockGrid::BlockGrid(std::uint32_t resolution, std::span<std::uint64_t const> sorted_codes)
@@ -154,6 +262,13 @@ std::uint32_t BlockGrid::EmptyCell(std::uint32_t x, std::uint32_t y, std::uint32
     return kBlockSide;
   }
   return Get(x, y, z) ? 0u : 1u;
+}
+
+std::uint32_t BlockGrid::EmptyCellTraced(std::uint32_t x, std::uint32_t y, std::uint32_t z,
+                                         TraversalState& state) const {
+  bool const empty_block = data_[DirectoryIndex(x, y, z)] == 0u;
+  state.fetches += empty_block ? 1u : 2u;  // каталог, затем слово блока
+  return empty_block ? kBlockSide : (Get(x, y, z) ? 0u : 1u);
 }
 
 std::size_t BlockGrid::MemoryBytes() const noexcept { return data_.size() * sizeof(std::uint32_t); }
@@ -238,6 +353,35 @@ std::uint32_t SparseVoxelOctree::EmptyCell(std::uint32_t x, std::uint32_t y, std
   return 0u;
 }
 
+std::uint32_t SparseVoxelOctree::EmptyCellTraced(std::uint32_t x, std::uint32_t y, std::uint32_t z,
+                                                 TraversalState& state) const {
+  if (nodes_.empty()) {
+    ++state.fetches;
+    return resolution_;
+  }
+  bool const use_stack = state.traversal == Traversal::kStack;
+  std::uint32_t level = StartLevel(x, y, z, depth_, state);
+  std::uint32_t node = use_stack ? state.stack[level] : 0u;
+  for (; level < depth_; ++level) {
+    if (use_stack) {
+      state.stack[level] = node;
+      state.valid_level = level;
+    }
+    std::uint32_t const octant = Octant(x, y, z, depth_ - 1u - level);
+    std::uint32_t const mask = nodes_[2u * node];
+    ++state.fetches;
+    if (((mask >> octant) & 1u) == 0u) {
+      return resolution_ >> (level + 1u);
+    }
+    if (level + 1u == depth_) {
+      return 0u;
+    }
+    node = nodes_[2u * node + 1u] + ChildRank(mask, octant);
+    ++state.fetches;
+  }
+  return 0u;
+}
+
 bool SparseVoxelOctree::Get(std::uint32_t x, std::uint32_t y, std::uint32_t z) const {
   return EmptyCell(x, y, z) == 0u;
 }
@@ -263,50 +407,58 @@ SparseVoxelDag::SparseVoxelDag(SparseVoxelOctree const& octree)
     return;
   }
 
-  // Проход 1: уникальные узлы каждого уровня; дети — локальные индексы уровня ниже.
-  using NodeContent = std::vector<std::uint32_t>;
-  std::vector<std::vector<NodeContent>> unique(depth_);
+  // Проход 1 (снизу вверх): уникальные узлы каждого уровня; дети — локальные номера уровня ниже.
+  std::vector<UniqueNodeTable> unique;
+  unique.reserve(depth_);
+  for (std::uint32_t i = 0u; i < depth_; ++i) {
+    unique.emplace_back(0u);
+  }
   std::vector<std::uint32_t> child_ids;
   std::vector<std::uint32_t> current_ids;
+  std::vector<std::uint32_t> content;
+  content.reserve(9u);
   for (std::uint32_t level = depth_; level-- > 0u;) {
-    std::map<NodeContent, std::uint32_t> table;
+    UniqueNodeTable table{keys[level].size()};
     current_ids.assign(keys[level].size(), 0u);
     std::size_t child = 0u;
     for (std::size_t i = 0u; i < keys[level].size(); ++i) {
-      NodeContent content{masks[level][i]};
+      content.assign(1u, masks[level][i]);
       if (level + 1u < depth_) {
         for (int k = std::popcount(masks[level][i]); k > 0; --k) {
           content.push_back(child_ids[child++]);
         }
       }
-      auto [it, inserted] = table.try_emplace(content, static_cast<std::uint32_t>(unique[level].size()));
-      if (inserted) {
-        unique[level].push_back(std::move(content));
-      }
-      current_ids[i] = it->second;
+      current_ids[i] = table.Insert(content);
     }
+    table.ReleaseTable();
     child_ids.swap(current_ids);
-    unique_per_level_[level] = unique[level].size();
+    unique_per_level_[level] = table.Count();
+    unique[level] = std::move(table);
   }
 
-  // Проход 2: раскладка уровней 0..D-1, локальные индексы детей заменяются смещениями.
+  // Проход 2: раскладка уровней 0..D-1, локальные номера детей заменяются смещениями.
   std::vector<std::vector<std::uint32_t>> position(depth_);
   std::size_t total = 0u;
   for (std::uint32_t level = 0u; level < depth_; ++level) {
-    position[level].resize(unique[level].size());
-    for (std::size_t i = 0u; i < unique[level].size(); ++i) {
+    position[level].resize(unique[level].Count());
+    for (std::size_t i = 0u; i < unique[level].Count(); ++i) {
       position[level][i] = static_cast<std::uint32_t>(total);
-      total += unique[level][i].size();
+      total += unique[level].Node(i).size();
     }
+  }
+  if (total > 0xffffffffu) {
+    throw std::length_error{"SVDAG does not fit 32-bit pointers"};
   }
   data_.reserve(total);
   for (std::uint32_t level = 0u; level < depth_; ++level) {
-    for (NodeContent const& node : unique[level]) {
+    for (std::size_t i = 0u; i < unique[level].Count(); ++i) {
+      std::span<std::uint32_t const> const node = unique[level].Node(i);
       data_.push_back(node[0]);
       for (std::size_t c = 1u; c < node.size(); ++c) {
         data_.push_back(position[level + 1u][node[c]]);
       }
     }
+    position[level].clear();
   }
 }
 
@@ -332,6 +484,35 @@ std::uint32_t SparseVoxelDag::EmptyCell(std::uint32_t x, std::uint32_t y, std::u
   return 0u;
 }
 
+std::uint32_t SparseVoxelDag::EmptyCellTraced(std::uint32_t x, std::uint32_t y, std::uint32_t z,
+                                              TraversalState& state) const {
+  if (data_.empty()) {
+    ++state.fetches;
+    return resolution_;
+  }
+  bool const use_stack = state.traversal == Traversal::kStack;
+  std::uint32_t level = StartLevel(x, y, z, depth_, state);
+  std::uint32_t pointer = use_stack ? state.stack[level] : 0u;  // корень — первый узел уровня 0
+  for (; level < depth_; ++level) {
+    if (use_stack) {
+      state.stack[level] = pointer;
+      state.valid_level = level;
+    }
+    std::uint32_t const octant = Octant(x, y, z, depth_ - 1u - level);
+    std::uint32_t const mask = data_[pointer];
+    ++state.fetches;
+    if (((mask >> octant) & 1u) == 0u) {
+      return resolution_ >> (level + 1u);
+    }
+    if (level + 1u == depth_) {
+      return 0u;
+    }
+    pointer = data_[pointer + 1u + ChildRank(mask, octant)];
+    ++state.fetches;
+  }
+  return 0u;
+}
+
 bool SparseVoxelDag::Get(std::uint32_t x, std::uint32_t y, std::uint32_t z) const {
   return EmptyCell(x, y, z) == 0u;
 }
@@ -347,6 +528,8 @@ std::unique_ptr<IVoxelGrid> BuildGrid(Representation representation, std::uint32
   switch (representation) {
     case Representation::kDense:
       return std::make_unique<DenseGrid>(resolution, sorted_codes);
+    case Representation::kDenseBrick:
+      return std::make_unique<DenseGrid>(resolution, sorted_codes, DenseGrid::Layout::kBrick);
     case Representation::kBlock:
       return std::make_unique<BlockGrid>(resolution, sorted_codes);
     case Representation::kSvo:

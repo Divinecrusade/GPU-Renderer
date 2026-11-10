@@ -15,7 +15,8 @@
 //     --voxel-scenes=sphere,terrain          процедурные сцены (none — только модели)
 //     --voxel-resolutions=256,512,1024       разрешения N для процедурных сцен
 //     --voxel-model=path.binvox              модель (можно повторять; N берётся из файла)
-//     --voxel-representations=dense,block,svo,svdag
+//     --voxel-representations=dense,block,svo,svdag   (также dense-brick — плотная сетка кирпичами 8^3)
+//     --voxel-traversal=stack                спуск по SVO/SVDAG: stack, restart или оба через запятую
 //     --voxel-views=3                        число фиксированных ракурсов
 //     --voxel-warmup=30 --voxel-series=10 --voxel-frames=20
 //     --voxel-cpu-stride=4                   шаг выборки пикселей для CPU-подсчёта шагов на луч
@@ -29,6 +30,7 @@ struct ExperimentConfig {
   std::vector<std::filesystem::path> models{};
   std::vector<Representation> representations{Representation::kDense, Representation::kBlock,
                                                Representation::kSvo, Representation::kSvdag};
+  std::vector<Traversal> traversals{Traversal::kStack};
   std::size_t views = 3u;
   std::uint32_t warmup_frames = 30u;
   std::uint32_t series = 10u;
@@ -43,6 +45,17 @@ struct ExperimentConfig {
 
 // Сцены эксперимента в порядке прогона: процедурные сцены x разрешения, затем модели.
 [[nodiscard]] std::vector<SceneCase> BuildSceneCases(ExperimentConfig const& config);
+
+// Измеряемый вариант: представление и способ спуска. Способ спуска перебирается только
+// для SVO и SVDAG; у остальных представлений один вариант (hierarchical = false).
+struct MeasuredVariant {
+  Representation representation;
+  Traversal traversal;
+  bool hierarchical;
+};
+
+// Варианты в порядке прогона: представления из config, для SVO и SVDAG — каждый способ спуска.
+[[nodiscard]] std::vector<MeasuredVariant> BuildVariants(ExperimentConfig const& config);
 
 [[nodiscard]] bool IsExperimentRequested(std::wstring_view command_line);
 

@@ -81,6 +81,21 @@ std::vector<SceneCase> BuildSceneCases(ExperimentConfig const& config) {
   return cases;
 }
 
+std::vector<MeasuredVariant> BuildVariants(ExperimentConfig const& config) {
+  std::vector<MeasuredVariant> variants;
+  for (Representation const r : config.representations) {
+    bool const hierarchical = r == Representation::kSvo || r == Representation::kSvdag;
+    if (!hierarchical) {
+      variants.push_back({r, Traversal::kStack, false});
+      continue;
+    }
+    for (Traversal const t : config.traversals) {
+      variants.push_back({r, t, true});
+    }
+  }
+  return variants;
+}
+
 bool IsExperimentRequested(std::wstring_view command_line) {
   for (std::wstring const& token : Tokenize(command_line)) {
     if (token == kExperimentFlag) {
@@ -132,7 +147,7 @@ ExperimentConfig ParseExperimentConfig(std::wstring_view command_line) {
       for (std::wstring const& item : SplitList(value)) {
         bool found = false;
         for (Representation const r : {Representation::kDense, Representation::kBlock, Representation::kSvo,
-                                       Representation::kSvdag}) {
+                                       Representation::kSvdag, Representation::kDenseBrick}) {
           if (Narrow(item) == ToString(r)) {
             config.representations.push_back(r);
             found = true;
@@ -141,6 +156,20 @@ ExperimentConfig ParseExperimentConfig(std::wstring_view command_line) {
         if (!found) {
           throw std::invalid_argument{"Unknown representation '" + Narrow(item) + "'"};
         }
+      }
+    } else if (option == L"--voxel-traversal") {
+      config.traversals.clear();
+      for (std::wstring const& item : SplitList(value)) {
+        if (item == L"stack") {
+          config.traversals.push_back(Traversal::kStack);
+        } else if (item == L"restart") {
+          config.traversals.push_back(Traversal::kRestart);
+        } else {
+          throw std::invalid_argument{"Unknown traversal '" + Narrow(item) + "' (expected stack or restart)"};
+        }
+      }
+      if (config.traversals.empty()) {
+        throw std::invalid_argument{"Option --voxel-traversal expects stack and/or restart"};
       }
     } else if (option == L"--voxel-views") {
       config.views = ParseUnsigned(value, option);

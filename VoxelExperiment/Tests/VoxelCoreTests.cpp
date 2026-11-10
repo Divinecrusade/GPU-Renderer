@@ -36,7 +36,34 @@ void Check(bool condition, char const* what) {
 using namespace gpu_renderer::voxel;
 
 constexpr Representation kAll[] = {Representation::kDense, Representation::kBlock, Representation::kSvo,
-                                   Representation::kSvdag};
+                                   Representation::kSvdag, Representation::kDenseBrick};
+
+// Спуск со стеком не меняет ни точек попадания, ни числа шагов — только число чтений.
+struct TraversalComparison {
+  bool identical = true;
+  double restart_fetches = 0.0;
+  double stack_fetches = 0.0;
+};
+
+TraversalComparison CompareTraversals(IVoxelGrid const& grid, std::uint32_t n) {
+  TraversalComparison result;
+  for (std::size_t view = 0u; view < 3u; ++view) {
+    CameraBasis const basis = MakeCameraBasis(MakeOrbitCamera(n, view, 3u), 16.f / 9.f);
+    for (std::uint32_t py = 0u; py < 90u; ++py) {
+      for (std::uint32_t px = 0u; px < 160u; ++px) {
+        Float3 const dir = PrimaryRayDirection(basis, px, py, 160u, 90u);
+        RayHit const restart = TraceRay(grid, basis.position, dir, Traversal::kRestart);
+        RayHit const stack = TraceRay(grid, basis.position, dir, Traversal::kStack);
+        result.identical = result.identical && restart.hit == stack.hit && restart.steps == stack.steps &&
+                           restart.x == stack.x && restart.y == stack.y && restart.z == stack.z &&
+                           stack.fetches <= restart.fetches;
+        result.restart_fetches += static_cast<double>(restart.fetches);
+        result.stack_fetches += static_cast<double>(stack.fetches);
+      }
+    }
+  }
+  return result;
+}
 
 std::vector<std::unique_ptr<IVoxelGrid>> BuildAll(std::uint32_t n, std::vector<std::uint64_t> const& codes) {
   std::vector<std::unique_ptr<IVoxelGrid>> grids;
@@ -136,6 +163,50 @@ int main() {
     double const mismatch = RayMismatchRate(grids, n);
     std::printf("      %s: доля расхождений точек попадания с DDA: %.4f%%\n", scene.c_str(), 100.0 * mismatch);
     Check(mismatch < 0.005, (scene + ": обход лучей согласован с DDA (< 0.5% касательных лучей)").c_str());
+
+    bool same_dense = true;
+    for (std::size_t view = 0u; view < 3u && same_dense; ++view) {
+      CameraBasis const basis = MakeCameraBasis(MakeOrbitCamera(n, view, 3u), 16.f / 9.f);
+      ImageTraceStats const linear = TraceImage(*grids[0], basis, 160u, 90u);
+      ImageTraceStats const brick = TraceImage(*grids[4], basis, 160u, 90u);
+      same_dense = linear.mean_steps == brick.mean_steps && linear.hit_rate == brick.hit_rate &&
+                   linear.mean_fetches == linear.mean_steps;
+    }
+    Check(same_dense && grids[4]->MemoryBytes() == grids[0]->MemoryBytes(),
+          (scene + ": кирпичи 8^3 — те же лучи и объём, что у линейной плотной сетки").c_str());
+
+    for (std::size_t g : {2u, 3u}) {
+      TraversalComparison const cmp = CompareTraversals(*grids[g], n);
+      std::printf("      %s, %s: чтений на луч от корня %.2f, со стеком %.2f (в %.2f раза меньше)\n", scene.c_str(),
+                  g == 2u ? "SVO" : "SVDAG", cmp.restart_fetches / (3.0 * 160.0 * 90.0),
+                  cmp.stack_fetches / (3.0 * 160.0 * 90.0), cmp.restart_fetches / cmp.stack_fetches);
+      Check(cmp.identical && cmp.stack_fetches < cmp.restart_fetches,
+            (scene + (g == 2u ? ", SVO" : ", SVDAG") +
+             ": стек не меняет попаданий и шагов, а чтений становится меньше")
+                .c_str());
+    }
+  }
+
+  {  // Раскладка кирпичами: сектор 32 байта (8 слов) = блок 8 x 8 x 4 вокселей
+    std::uint32_t const n = 64u;
+    DenseGrid grid{n, {}, DenseGrid::Layout::kBrick};
+    bool layout_ok = true;
+    for (std::uint32_t z = 0u; z < 4u; ++z) {
+      for (std::uint32_t y = 0u; y < 8u; ++y) {
+        for (std::uint32_t x = 0u; x < 8u; ++x) {
+          grid.Set(x + 8u, y, z, true);  // второй кирпич вдоль x
+        }
+      }
+    }
+    auto const data = grid.GpuData();
+    for (std::size_t w = 0u; w < data.size(); ++w) {
+      bool const expected = w >= 16u && w < 24u;  // слова 16..23 — первые 32 байта кирпича 1
+      layout_ok = layout_ok && ((data[w] == 0xffffffffu) == expected) && (expected || data[w] == 0u);
+    }
+    Check(layout_ok && grid.GpuElementWords() == 4u && data.size() % 4u == 0u,
+          "Кирпичи: блок 8x8x4 занимает ровно один 32-байтный сектор");
+    Check(DenseMemoryBytes(2048u) == (1ull << 30u) && DenseMemoryBytes(16u) == 512u,
+          "Плотная сетка: объём N^3/8 с выравниванием до uint4");
   }
 
   {  // Выборка пикселей для CPU-обхода: среднее почти не меняется, лучей в stride^2 меньше
@@ -217,7 +288,7 @@ int main() {
     std::wstring_view const line =
         L"--voxel-experiment --voxel-scenes=terrain --voxel-resolutions=128,512 "
         L"--voxel-model=\"C:\\models\\my model.binvox\" --voxel-representations=svo,svdag --voxel-views=2 "
-        L"--voxel-cpu-stride=8 --voxel-view-only";
+        L"--voxel-cpu-stride=8 --voxel-view-only --voxel-traversal=restart,stack";
     ExperimentConfig const config = ParseExperimentConfig(line);
     Check(IsExperimentRequested(line) && !IsExperimentRequested(L"--other"), "Конфигурация: флаг эксперимента");
     Check(config.scenes.size() == 1u && config.scenes[0] == SceneKind::kTerrain && config.resolutions.size() == 2u &&
@@ -226,6 +297,18 @@ int main() {
               config.representations.size() == 2u && config.representations[1] == Representation::kSvdag &&
               config.views == 2u && config.cpu_stride == 8u && config.view_only,
           "Конфигурация: опции и путь в кавычках");
+    auto const variants = BuildVariants(config);
+    Check(config.traversals.size() == 2u && variants.size() == 4u && variants[0].traversal == Traversal::kRestart &&
+              variants[3].representation == Representation::kSvdag && variants[3].traversal == Traversal::kStack,
+          "Конфигурация: варианты спуска для SVO и SVDAG");
+    ExperimentConfig defaults;
+    defaults.representations = {Representation::kDense, Representation::kDenseBrick, Representation::kSvo};
+    defaults.traversals = {Traversal::kStack, Traversal::kRestart};
+    auto const mixed = BuildVariants(defaults);
+    Check(mixed.size() == 4u && !mixed[0].hierarchical && !mixed[1].hierarchical && mixed[2].hierarchical &&
+              ParseExperimentConfig(L"--voxel-experiment --voxel-representations=dense-brick").representations[0] ==
+                  Representation::kDenseBrick,
+          "Конфигурация: dense-brick и один вариант для неиерархических представлений");
     bool rejected = false;
     try {
       static_cast<void>(ParseExperimentConfig(L"--voxel-experiment --voxel-resolutions=300"));

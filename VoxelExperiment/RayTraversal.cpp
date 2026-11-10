@@ -6,7 +6,7 @@
 
 namespace gpu_renderer::voxel {
 namespace {
-constexpr std::uint32_t kMaxSteps = 16384u;  // совпадает с MAX_STEPS в шейдере
+constexpr std::uint32_t kMaxSteps = 65536u;  // совпадает с MAX_STEPS в шейдере; > 6N + D + 1 при N = 8192
 
 [[nodiscard]] Float3 operator+(Float3 a, Float3 b) noexcept { return {a.x + b.x, a.y + b.y, a.z + b.z}; }
 [[nodiscard]] Float3 operator-(Float3 a, Float3 b) noexcept { return {a.x - b.x, a.y - b.y, a.z - b.z}; }
@@ -71,6 +71,7 @@ struct Int3 {
   }
   for (std::uint32_t i = 0u; i < kMaxSteps; ++i) {
     ++result.steps;
+    ++result.fetches;
     if (grid.Get(static_cast<std::uint32_t>(c.v[0]), static_cast<std::uint32_t>(c.v[1]),
                  static_cast<std::uint32_t>(c.v[2]))) {
       result.hit = true;
@@ -95,8 +96,10 @@ struct Int3 {
 }
 
 // Выход из наибольшего пустого куба за один шаг; ячейка на оси выхода вычисляется целочисленно.
-[[nodiscard]] RayHit TraceHierarchical(IVoxelGrid const& grid, Float3 o, Float3 d) {
+[[nodiscard]] RayHit TraceHierarchical(IVoxelGrid const& grid, Float3 o, Float3 d, Traversal traversal) {
   RayHit result;
+  TraversalState state;
+  state.traversal = traversal;
   int const n = static_cast<int>(grid.Resolution());
   Float3 const inv{1.f / d.x, 1.f / d.y, 1.f / d.z};
   float t0 = 0.f;
@@ -106,16 +109,24 @@ struct Int3 {
   }
   float t = t0;
   Int3 c = StartCell(o, d, t, n);
+  state.prev_x = static_cast<std::uint32_t>(c.v[0]);
+  state.prev_y = static_cast<std::uint32_t>(c.v[1]);
+  state.prev_z = static_cast<std::uint32_t>(c.v[2]);
+  auto const finish = [&result, &state] {
+    result.fetches = state.fetches;
+    return result;
+  };
   for (std::uint32_t i = 0u; i < kMaxSteps; ++i) {
-    std::uint32_t const size = grid.EmptyCell(static_cast<std::uint32_t>(c.v[0]), static_cast<std::uint32_t>(c.v[1]),
-                                              static_cast<std::uint32_t>(c.v[2]));
+    std::uint32_t const size = grid.EmptyCellTraced(static_cast<std::uint32_t>(c.v[0]),
+                                                    static_cast<std::uint32_t>(c.v[1]),
+                                                    static_cast<std::uint32_t>(c.v[2]), state);
     ++result.steps;
     if (size == 0u) {
       result.hit = true;
       result.x = static_cast<std::uint32_t>(c.v[0]);
       result.y = static_cast<std::uint32_t>(c.v[1]);
       result.z = static_cast<std::uint32_t>(c.v[2]);
-      return result;
+      return finish();
     }
     int const s = static_cast<int>(size);
     int bound[3];
@@ -127,7 +138,7 @@ struct Int3 {
     int const axis = (tb[0] < tb[1]) ? ((tb[0] < tb[2]) ? 0 : 2) : ((tb[1] < tb[2]) ? 1 : 2);
     t = std::max(t, tb[axis]);
     if (t >= t1) {
-      return result;
+      return finish();
     }
     // Луч движется монотонно, поэтому координата ячейки по каждой оси не может откатиться назад.
     // Без этого ограничения на ребре, где две границы пересекаются при одном t (с точностью float),
@@ -138,10 +149,10 @@ struct Int3 {
     }
     c.v[axis] = Component(d, axis) > 0.f ? bound[axis] : bound[axis] - 1;
     if (Outside(c, n)) {
-      return result;
+      return finish();
     }
   }
-  return result;
+  return finish();
 }
 }  // namespace
 
@@ -182,24 +193,27 @@ Camera MakeOrbitCameraAt(std::uint32_t resolution, float azimuth) noexcept {
   return {eye, target, 1.0f};  // ~57 градусов по вертикали
 }
 
-RayHit TraceRay(IVoxelGrid const& grid, Float3 origin, Float3 direction) {
-  if (grid.GetRepresentation() == Representation::kDense) {
+RayHit TraceRay(IVoxelGrid const& grid, Float3 origin, Float3 direction, Traversal traversal) {
+  if (IsDense(grid.GetRepresentation())) {
     return TraceDda(grid, origin, direction);
   }
-  return TraceHierarchical(grid, origin, direction);
+  return TraceHierarchical(grid, origin, direction, traversal);
 }
 
 ImageTraceStats TraceImage(IVoxelGrid const& grid, CameraBasis const& basis, std::uint32_t width,
-                           std::uint32_t height, std::uint32_t stride) {
+                           std::uint32_t height, std::uint32_t stride, Traversal traversal) {
   stride = std::max(1u, stride);
   double steps = 0.0;
+  double fetches = 0.0;
   double hits = 0.0;
   std::size_t rays = 0u;
   std::uint32_t max_steps = 0u;
   for (std::uint32_t py = stride / 2u; py < height; py += stride) {
     for (std::uint32_t px = stride / 2u; px < width; px += stride) {
-      RayHit const hit = TraceRay(grid, basis.position, PrimaryRayDirection(basis, px, py, width, height));
+      RayHit const hit =
+          TraceRay(grid, basis.position, PrimaryRayDirection(basis, px, py, width, height), traversal);
       steps += hit.steps;
+      fetches += static_cast<double>(hit.fetches);
       hits += hit.hit ? 1.0 : 0.0;
       max_steps = std::max(max_steps, hit.steps);
       ++rays;
@@ -208,6 +222,11 @@ ImageTraceStats TraceImage(IVoxelGrid const& grid, CameraBasis const& basis, std
   if (rays == 0u) {
     return {};
   }
-  return {steps / static_cast<double>(rays), hits / static_cast<double>(rays), rays, max_steps};
+  double const count = static_cast<double>(rays);
+  return {.mean_steps = steps / count,
+          .mean_fetches = fetches / count,
+          .hit_rate = hits / count,
+          .rays = rays,
+          .max_steps = max_steps};
 }
 }  // namespace gpu_renderer::voxel

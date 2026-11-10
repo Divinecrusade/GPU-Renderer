@@ -19,6 +19,7 @@ namespace gpu_renderer::voxel {
 //   Влево / Вправо — предыдущая / следующая сцена;
 //   Вверх / Вниз   — следующее / предыдущее представление;
 //   H              — тепловая карта числа шагов на луч;
+//   T              — спуск по SVO/SVDAG: со стеком или от корня (без перестройки структуры);
 //   Пробел         — пауза вращения камеры.
 // Сцена, которой нет в кэше, генерируется (или читается) при переключении;
 // структура строится заново. И то и другое блокирует окно на время работы.
@@ -29,7 +30,8 @@ class SceneViewer final {
 
   SceneViewer(std::vector<SceneCase> cases, std::vector<std::optional<LoadedScene>> cache,
               std::vector<Representation> representations, std::uint32_t width, std::uint32_t height,
-              std::size_t start_case = 0u, std::size_t start_representation = 0u);
+              std::size_t start_case = 0u, std::size_t start_representation = 0u,
+              Traversal traversal = Traversal::kStack);
 
   void OnKeyPressed(std::uint8_t key) noexcept;
   void RenderFrame(Graphics& gfx, FrameTimer::DeltaTime dt);
@@ -59,10 +61,13 @@ class SceneViewer final {
   std::unique_ptr<IVoxelGrid> grid_;
   std::unique_ptr<drawable::VoxelVolume> volume_;
 
+  Traversal traversal_ = Traversal::kStack;
+  bool traversal_changed_ = false;
   bool show_steps_ = false;
   bool paused_ = false;
   float azimuth_ = 0.6f;
   std::wstring status_;
+  std::wstring details_;  // память и число вокселей текущей структуры (для обновления заголовка)
 };
 }  // namespace gpu_renderer::voxel
 

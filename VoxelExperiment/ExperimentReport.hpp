@@ -15,6 +15,7 @@ struct MeasurementRow {
   std::string scene;
   std::uint32_t resolution = 0u;
   std::string representation;
+  std::string traversal = "-";  // stack / restart для SVO и SVDAG, "-" для остальных
   std::size_t view = 0u;
   std::size_t boundary_voxels = 0u;
   double generation_ms = 0.0;
@@ -22,6 +23,7 @@ struct MeasurementRow {
   std::size_t memory_bytes = 0u;
   std::size_t cpu_rays = 0u;  // число лучей CPU-обхода (зависит от --voxel-cpu-stride)
   double cpu_mean_steps = 0.0;
+  double cpu_mean_fetches = 0.0;  // чтений 32-битных слов буфера на луч
   double hit_rate = 0.0;
   std::string gpu_status;  // "ok", "skipped: ...", "failed: ..."
   double gpu_ms_mean = 0.0;

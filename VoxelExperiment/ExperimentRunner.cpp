@@ -48,6 +48,7 @@ void Log(std::string const& message) { std::wclog << Widen(message) << L'\n'; }
 ExperimentRunner::ExperimentRunner(Graphics& gfx, ExperimentConfig config, std::uint32_t width,
                                    std::uint32_t height)
     : config_{std::move(config)},
+      variants_{BuildVariants(config_)},
       width_{width},
       height_{height},
       timer_{gfx},
@@ -58,11 +59,11 @@ ExperimentRunner::ExperimentRunner(Graphics& gfx, ExperimentConfig config, std::
     return;
   }
   report_.emplace(config_.report_path);
-  if (cases_.empty()) {
+  if (cases_.empty() || variants_.empty()) {
     phase_ = Phase::kFinished;
   }
   Log("Voxel experiment: " + std::to_string(cases_.size()) + " scene cases x " +
-      std::to_string(config_.representations.size()) + " representations x " + std::to_string(config_.views) +
+      std::to_string(variants_.size()) + " variants x " + std::to_string(config_.views) +
       " views, report: " + config_.report_path.string());
 }
 
@@ -93,7 +94,11 @@ std::wstring ExperimentRunner::ProgressText() const {
   if (n != 0u) {
     text += L" N=" + std::to_wstring(n);
   }
-  text += L"), " + Widen(ToString(config_.representations[representation_index_]));
+  MeasuredVariant const& variant = variants_[representation_index_];
+  text += L"), " + Widen(ToString(variant.representation));
+  if (variant.hierarchical) {
+    text += L" (" + Widen(ToString(variant.traversal)) + L")";
+  }
   switch (phase_) {
     case Phase::kPrepare:
       text += L", подготовка…";
@@ -179,12 +184,30 @@ void ExperimentRunner::PrepareRepresentation(Graphics& gfx) {
   if (!scene_loaded_ && !LoadScene()) {
     grid_.reset();
     WriteCpuOnlyRows("failed: scene loading");
-    representation_index_ = config_.representations.size() - 1u;  // пропустить сцену целиком
+    representation_index_ = variants_.size() - 1u;  // пропустить сцену целиком
     AdvanceRepresentation();
     return;
   }
 
-  Representation const representation = config_.representations[representation_index_];
+  MeasuredVariant const& variant = variants_[representation_index_];
+  Representation const representation = variant.representation;
+  if (reuse_grid_ && grid_ && volume_) {  // та же структура, другой способ спуска
+    reuse_grid_ = false;
+    volume_->SetTraversal(gfx, variant.traversal);
+    view_index_ = 0u;
+    PrepareView(gfx);
+    return;
+  }
+  reuse_grid_ = false;
+  if (IsDense(representation) && scene_.resolution > kMaxDenseResolution) {
+    grid_.reset();
+    build_ms_ = 0.0;
+    skipped_memory_bytes_ = DenseMemoryBytes(scene_.resolution);
+    WriteCpuOnlyRows("skipped: dense grid N^3/8 bytes is not allocated (N > " +
+                     std::to_string(kMaxDenseResolution) + "), memory_bytes is computed");
+    AdvanceRepresentation();
+    return;
+  }
   auto const start = Clock::now();
   try {
     grid_ = BuildGrid(representation, scene_.resolution, scene_.shell_codes);
@@ -199,13 +222,9 @@ void ExperimentRunner::PrepareRepresentation(Graphics& gfx) {
   Log("  " + std::string{ToString(representation)} + ": " + std::to_string(grid_->MemoryBytes()) + " bytes, built in " +
       std::to_string(build_ms_) + " ms");
 
-  if (representation == Representation::kDense && scene_.resolution > drawable::VoxelVolume::kMaxDenseResolution) {
-    WriteCpuOnlyRows("skipped: dense index is 32-bit (N > 1024)");
-    AdvanceRepresentation();
-    return;
-  }
   try {
     volume_ = std::make_unique<drawable::VoxelVolume>(gfx, *grid_, width_, height_);
+    volume_->SetTraversal(gfx, variant.traversal);
   } catch (exception::Error const& e) {
     volume_.reset();
     WriteCpuOnlyRows("failed: GPU upload: " + ToCsvText(e.GetTypeOfException()));
@@ -229,7 +248,7 @@ CameraBasis ExperimentRunner::ViewBasis(std::size_t view) const noexcept {
 void ExperimentRunner::PrepareView(Graphics& gfx) {
   CameraBasis const basis = ViewBasis(view_index_);
   volume_->SetView(gfx, basis, false);
-  cpu_stats_ = TraceImage(*grid_, basis, width_, height_, config_.cpu_stride);
+  cpu_stats_ = TraceImage(*grid_, basis, width_, height_, config_.cpu_stride, variants_[representation_index_].traversal);
   phase_ = Phase::kWarmup;
   frame_in_phase_ = 0u;
   series_done_ = 0u;
@@ -241,14 +260,17 @@ MeasurementRow ExperimentRunner::MakeRow(std::size_t view) const {
   MeasurementRow row;
   row.scene = SceneCaseName(cases_[case_index_]);
   row.resolution = scene_.resolution;
-  row.representation = std::string{ToString(config_.representations[representation_index_])};
+  MeasuredVariant const& variant = variants_[representation_index_];
+  row.representation = std::string{ToString(variant.representation)};
+  row.traversal = variant.hierarchical ? std::string{ToString(variant.traversal)} : std::string{"-"};
   row.view = view;
   row.boundary_voxels = scene_.shell_codes.size();
   row.generation_ms = scene_.generation_ms;
   row.build_ms = build_ms_;
-  row.memory_bytes = grid_ ? grid_->MemoryBytes() : 0u;
+  row.memory_bytes = grid_ ? grid_->MemoryBytes() : skipped_memory_bytes_;
   row.cpu_rays = cpu_stats_.rays;
   row.cpu_mean_steps = cpu_stats_.mean_steps;
+  row.cpu_mean_fetches = cpu_stats_.mean_fetches;
   row.hit_rate = cpu_stats_.hit_rate;
   return row;
 }
@@ -276,7 +298,9 @@ void ExperimentRunner::FinishView(Graphics& gfx) {
 void ExperimentRunner::WriteCpuOnlyRows(std::string const& gpu_status) {
   Log("  " + gpu_status);
   for (std::size_t view = 0u; view < config_.views; ++view) {
-    cpu_stats_ = grid_ ? TraceImage(*grid_, ViewBasis(view), width_, height_, config_.cpu_stride) : ImageTraceStats{};
+    cpu_stats_ = grid_ ? TraceImage(*grid_, ViewBasis(view), width_, height_, config_.cpu_stride,
+                                    variants_[representation_index_].traversal)
+                       : ImageTraceStats{};
     MeasurementRow row = MakeRow(view);
     row.gpu_status = gpu_status;
     report_->Append(row);
@@ -284,14 +308,22 @@ void ExperimentRunner::WriteCpuOnlyRows(std::string const& gpu_status) {
 }
 
 void ExperimentRunner::AdvanceRepresentation() {
-  volume_.reset();
-  grid_.reset();
-  bool const last_representation = representation_index_ + 1u >= config_.representations.size();
+  skipped_memory_bytes_ = 0u;
+  bool const last_representation = representation_index_ + 1u >= variants_.size();
   if (!last_representation) {
+    // Структура не перестраивается, если меняется только способ спуска (build_ms_ сохраняется).
+    reuse_grid_ = variants_[representation_index_ + 1u].representation == variants_[representation_index_].representation;
+    if (!reuse_grid_) {
+      volume_.reset();
+      grid_.reset();
+    }
     ++representation_index_;
     phase_ = Phase::kPrepare;
     return;
   }
+  volume_.reset();
+  grid_.reset();
+  reuse_grid_ = false;
 
   // Сцена измерена во всех представлениях: в кэш для просмотра, если не слишком велика.
   if (scene_loaded_ && scene_.shell_codes.size() <= SceneViewer::kMaxCachedVoxels) {
@@ -325,7 +357,7 @@ void ExperimentRunner::StartViewer() {
   }
   std::size_t const start_case = config_.view_only ? 0u : cases_.size() - 1u;
   viewer_ = std::make_unique<SceneViewer>(cases_, std::move(cache_), config_.representations, width_, height_,
-                                          start_case, start_representation);
+                                          start_case, start_representation, config_.traversals.front());
   cache_.clear();
 }
 }  // namespace gpu_renderer::voxel

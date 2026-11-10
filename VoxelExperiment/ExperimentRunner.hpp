@@ -19,7 +19,8 @@
 
 namespace gpu_renderer::voxel {
 // Автомат эксперимента, выполняемый по одному кадру за вызов RenderFrame.
-// Для каждой сцены (сцена x N или модель) и каждого представления:
+// Для каждой сцены (сцена x N или модель) и каждого варианта (представление; для SVO и SVDAG —
+// также способ спуска, см. BuildVariants):
 //   1) построение структуры на CPU (время, объём памяти);
 //   2) для каждого ракурса — CPU-обход того же кадра с шагом cpu_stride (среднее число шагов
 //      на луч, доля попаданий), затем на GPU warmup кадров и series x frames кадров с замером
@@ -56,6 +57,7 @@ class ExperimentRunner final {
   [[nodiscard]] std::wstring ProgressText() const;
 
   ExperimentConfig config_;
+  std::vector<MeasuredVariant> variants_;
   std::uint32_t width_;
   std::uint32_t height_;
   std::optional<CsvReport> report_;  // не создаётся при view_only, чтобы не затереть прошлый отчёт
@@ -74,6 +76,8 @@ class ExperimentRunner final {
   std::unique_ptr<IVoxelGrid> grid_;
   std::unique_ptr<drawable::VoxelVolume> volume_;
   double build_ms_ = 0.0;
+  bool reuse_grid_ = false;               // следующий вариант — то же представление с другим спуском
+  std::size_t skipped_memory_bytes_ = 0u;  // объём плотной сетки, не построенной из-за размера
 
   ImageTraceStats cpu_stats_{};
   std::uint32_t frame_in_phase_ = 0u;

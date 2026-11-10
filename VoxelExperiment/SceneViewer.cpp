@@ -15,9 +15,10 @@ constexpr std::uint8_t kKeyUp = 0x26u;     // VK_UP
 constexpr std::uint8_t kKeyRight = 0x27u;  // VK_RIGHT
 constexpr std::uint8_t kKeyDown = 0x28u;   // VK_DOWN
 constexpr std::uint8_t kKeyH = 0x48u;      // 'H'
+constexpr std::uint8_t kKeyT = 0x54u;      // 'T'
 
 constexpr float kAngularSpeed = 0.3f;  // рад/с
-constexpr wchar_t kHelp[] = L"   [←→ сцена, ↑↓ представление, H шаги, Пробел пауза]";
+constexpr wchar_t kHelp[] = L"   [←→ сцена, ↑↓ представление, H шаги, T стек/от корня, Пробел пауза]";
 
 [[nodiscard]] std::wstring Widen(std::string_view text) {
   std::wstring result;
@@ -35,14 +36,15 @@ constexpr wchar_t kHelp[] = L"   [←→ сцена, ↑↓ представле
 
 SceneViewer::SceneViewer(std::vector<SceneCase> cases, std::vector<std::optional<LoadedScene>> cache,
                          std::vector<Representation> representations, std::uint32_t width, std::uint32_t height,
-                         std::size_t start_case, std::size_t start_representation)
+                         std::size_t start_case, std::size_t start_representation, Traversal traversal)
     : cases_{std::move(cases)},
       cache_{std::move(cache)},
       representations_{std::move(representations)},
       width_{width},
       height_{height},
       case_index_{start_case},
-      representation_index_{start_representation} {
+      representation_index_{start_representation},
+      traversal_{traversal} {
   if (cases_.empty() || representations_.empty()) {
     throw std::invalid_argument{"Scene viewer needs at least one scene and one representation"};
   }
@@ -70,8 +72,12 @@ std::wstring SceneViewer::Describe() const {
   if (n != 0u) {
     text += L" N=" + std::to_wstring(n);
   }
+  Representation const representation = representations_[representation_index_];
   text += L" (" + std::to_wstring(case_index_ + 1u) + L"/" + std::to_wstring(cases_.size()) + L") | " +
-          Widen(ToString(representations_[representation_index_]));
+          Widen(ToString(representation));
+  if (representation == Representation::kSvo || representation == Representation::kSvdag) {
+    text += L" (" + Widen(ToString(traversal_)) + L")";
+  }
   return text;
 }
 
@@ -89,6 +95,10 @@ void SceneViewer::OnKeyPressed(std::uint8_t key) noexcept {
       case kKeyH:
         show_steps_ = !show_steps_;
         return;
+      case kKeyT:
+        traversal_ = traversal_ == Traversal::kStack ? Traversal::kRestart : Traversal::kStack;
+        traversal_changed_ = true;
+        return;
       case kKeySpace:
         paused_ = !paused_;
         return;
@@ -105,6 +115,7 @@ void SceneViewer::OnKeyPressed(std::uint8_t key) noexcept {
 void SceneViewer::Rebuild(Graphics& gfx) {
   volume_.reset();
   grid_.reset();
+  details_.clear();
 
   std::optional<LoadedScene>& cached = cache_[case_index_];
   LoadedScene loaded_now;
@@ -127,13 +138,14 @@ void SceneViewer::Rebuild(Graphics& gfx) {
   case_resolutions_[case_index_] = resolution_;
 
   Representation const representation = representations_[representation_index_];
-  if (representation == Representation::kDense && resolution_ > drawable::VoxelVolume::kMaxDenseResolution) {
-    SetStatus(Describe() + L" | недоступно на GPU при N > 1024");
+  if (IsDense(representation) && resolution_ > drawable::VoxelVolume::kMaxDenseResolution) {
+    SetStatus(Describe() + L" | недоступно при N > " + std::to_wstring(drawable::VoxelVolume::kMaxDenseResolution));
     return;
   }
   try {
     grid_ = BuildGrid(representation, resolution_, scene->shell_codes);
     volume_ = std::make_unique<drawable::VoxelVolume>(gfx, *grid_, width_, height_);
+    volume_->SetTraversal(gfx, traversal_);
   } catch (exception::Error const& e) {
     volume_.reset();
     SetStatus(Describe() + L" | ошибка GPU: " + std::wstring{e.GetTypeOfException()});
@@ -146,7 +158,8 @@ void SceneViewer::Rebuild(Graphics& gfx) {
 
   wchar_t memory[32];
   std::swprintf(memory, std::size(memory), L"%.2f МиБ", static_cast<double>(grid_->MemoryBytes()) / 1048576.0);
-  SetStatus(Describe() + L" | " + memory + L" | " + std::to_wstring(scene->shell_codes.size()) + L" вокселей");
+  details_ = L" | " + std::wstring{memory} + L" | " + std::to_wstring(scene->shell_codes.size()) + L" вокселей";
+  SetStatus(Describe() + details_);
 }
 
 void SceneViewer::RenderFrame(Graphics& gfx, FrameTimer::DeltaTime dt) {
@@ -160,6 +173,13 @@ void SceneViewer::RenderFrame(Graphics& gfx, FrameTimer::DeltaTime dt) {
   if (!paused_) {
     constexpr float kMaxStep = 0.1f;  // после долгой перестройки камера не «прыгает»
     azimuth_ += kAngularSpeed * std::min(dt, kMaxStep);
+  }
+  if (traversal_changed_) {
+    traversal_changed_ = false;
+    if (volume_) {
+      volume_->SetTraversal(gfx, traversal_);
+    }
+    SetStatus(Describe() + details_);
   }
   gfx.ClearBuffer({0.f, 0.f, 0.f});
   if (volume_) {

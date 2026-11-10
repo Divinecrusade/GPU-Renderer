@@ -23,9 +23,11 @@ VoxelVolume::VoxelVolume(Graphics& gfx, voxel::IVoxelGrid const& grid, std::uint
               .width = viewport_width,
               .height = viewport_height,
               .blocks_per_side = grid.Resolution() / voxel::BlockGrid::kBlockSide,
-              .directory_size = 0u} {
-  if (grid.GetRepresentation() == voxel::Representation::kDense && grid.Resolution() > kMaxDenseResolution) {
-    throw std::invalid_argument{"Dense grid is limited to N <= 1024 on GPU (32-bit voxel index)"};
+              .directory_size = 0u,
+              .traversal = static_cast<std::uint32_t>(voxel::Traversal::kStack),
+              .padding = {0u, 0u, 0u}} {
+  if (voxel::IsDense(grid.GetRepresentation()) && grid.Resolution() > kMaxDenseResolution) {
+    throw std::invalid_argument{"Dense grid is limited to N <= 2048 on GPU"};
   }
   params_.directory_size = params_.blocks_per_side * params_.blocks_per_side * params_.blocks_per_side;
 
@@ -59,7 +61,11 @@ VoxelVolume::VoxelVolume(Graphics& gfx, voxel::IVoxelGrid const& grid, std::uint
   }
   UseCommonIndexBuffer();
 
-  AddBindable(std::make_shared<bindable::PixelStructuredBuffer<0u>>(gfx, grid.GpuData()));
+  if (grid.GpuElementWords() == 4u) {
+    AddBindable(std::make_shared<bindable::PixelStructuredBuffer<1u>>(gfx, grid.GpuData(), 4u));
+  } else {
+    AddBindable(std::make_shared<bindable::PixelStructuredBuffer<0u>>(gfx, grid.GpuData()));
+  }
   params_buffer_ = std::make_shared<bindable::PixelConstBuffer<TraceParams>>(gfx, params_);
   AddBindable(std::shared_ptr<Bindable>{params_buffer_});
 }
@@ -70,6 +76,11 @@ void VoxelVolume::SetView(Graphics& gfx, voxel::CameraBasis const& basis, bool s
   params_.right = basis.right;
   params_.up = basis.up;
   params_.show_steps = show_steps ? 1u : 0u;
+  params_buffer_->Update(gfx, params_);
+}
+
+void VoxelVolume::SetTraversal(Graphics& gfx, voxel::Traversal traversal) {
+  params_.traversal = static_cast<std::uint32_t>(traversal);
   params_buffer_->Update(gfx, params_);
 }
 

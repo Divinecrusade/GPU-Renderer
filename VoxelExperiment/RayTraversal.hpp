@@ -47,16 +47,20 @@ struct CameraBasis {
 struct RayHit {
   bool hit = false;
   std::uint32_t steps = 0u;
+  std::uint64_t fetches = 0u;  // чтений 32-битных слов буфера (как в шейдере)
   std::uint32_t x = 0u;
   std::uint32_t y = 0u;
   std::uint32_t z = 0u;
 };
 
-// 3D-DDA для плотной сетки, иерархический обход (EmptyCell) — для остальных.
-[[nodiscard]] RayHit TraceRay(IVoxelGrid const& grid, Float3 origin, Float3 direction);
+// 3D-DDA для плотных сеток, иерархический обход (EmptyCellTraced) — для остальных.
+// traversal влияет только на SVO и SVDAG: число шагов то же, меняется число чтений.
+[[nodiscard]] RayHit TraceRay(IVoxelGrid const& grid, Float3 origin, Float3 direction,
+                              Traversal traversal = Traversal::kStack);
 
 struct ImageTraceStats {
   double mean_steps = 0.0;
+  double mean_fetches = 0.0;  // среднее число чтений слов буфера на луч
   double hit_rate = 0.0;
   std::size_t rays = 0u;
   std::uint32_t max_steps = 0u;  // для проверки оценки худшего случая: 3N + 1 (DDA), 6N + D + 1 (иерархия)
@@ -67,7 +71,7 @@ struct ImageTraceStats {
 // на луч, доля попаданий и число лучей. stride = 1 — все пиксели.
 [[nodiscard]] ImageTraceStats TraceImage(IVoxelGrid const& grid, CameraBasis const& basis,
                                          std::uint32_t width, std::uint32_t height,
-                                         std::uint32_t stride = 1u);
+                                         std::uint32_t stride = 1u, Traversal traversal = Traversal::kStack);
 }  // namespace gpu_renderer::voxel
 
 #endif  // !VOXEL_RAY_TRAVERSAL_HPP
