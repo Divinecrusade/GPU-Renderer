@@ -84,6 +84,7 @@ class ExperimentRunner final {
   std::uint32_t series_done_ = 0u;
   std::vector<double> frame_ms_;
   std::vector<double> series_ms_;
+  double min_frame_ms_ = 0.0;  // минимум по всем кадрам ракурса; 0 — кадров ещё нет
 
   std::unique_ptr<SceneViewer> viewer_;
   std::wstring shown_status_;

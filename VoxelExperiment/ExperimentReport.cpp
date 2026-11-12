@@ -11,7 +11,7 @@ CsvReport::CsvReport(std::filesystem::path const& path) : file_{path, std::ios::
     throw std::runtime_error{"Cannot create report file: " + path.string()};
   }
   file_ << "scene;N;representation;traversal;view;boundary_voxels;generation_ms;build_ms;memory_bytes;"
-           "cpu_rays;cpu_mean_steps;cpu_mean_fetches;hit_rate;gpu_status;gpu_ms_mean;gpu_ms_std;mrays_per_s\n";
+           "cpu_rays;cpu_mean_steps;cpu_mean_fetches;hit_rate;gpu_status;gpu_ms_mean;gpu_ms_std;mrays_per_s;gpu_ms_min\n";
 }
 
 void CsvReport::Append(MeasurementRow const& row) {
@@ -19,7 +19,7 @@ void CsvReport::Append(MeasurementRow const& row) {
         << ';' << row.traversal << ';' << row.view << ';' << row.boundary_voxels << ';' << row.generation_ms << ';'
         << row.build_ms << ';' << row.memory_bytes << ';' << row.cpu_rays << ';' << row.cpu_mean_steps << ';'
         << row.cpu_mean_fetches << ';' << row.hit_rate << ';' << row.gpu_status << ';' << row.gpu_ms_mean << ';'
-        << row.gpu_ms_std << ';' << row.mrays_per_second << '\n';
+        << row.gpu_ms_std << ';' << row.mrays_per_second << ';' << row.gpu_ms_min << '\n';
   file_.flush();  // результаты не теряются, если прогон прервётся
 }
 

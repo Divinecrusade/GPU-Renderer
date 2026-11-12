@@ -81,6 +81,8 @@ def fmt_alpha(fit: tuple[float, float | None]) -> str:
 
 
 class Rows:
+    time_column = "gpu_ms_mean"
+
     def __init__(self, paths: list[Path], legacy_traversal: str) -> None:
         self.rows: list[dict] = []
         for path in paths:
@@ -120,7 +122,9 @@ class Rows:
             "steps": steps,
             "fetches": fetches,
             "status": raw["gpu_status"],
-            "ms": number("gpu_ms_mean") if raw["gpu_status"] == "ok" else float("nan"),
+            "ms": number(Rows.time_column if raw.get(Rows.time_column) not in (None, "") else "gpu_ms_mean")
+            if raw["gpu_status"] == "ok" else float("nan"),
+            "ms_mean": number("gpu_ms_mean") if raw["gpu_status"] == "ok" else float("nan"),
             "ms_std": number("gpu_ms_std") if raw["gpu_status"] == "ok" else float("nan"),
         }
 
@@ -351,6 +355,29 @@ def dense_section(data: Rows, out: list[str]) -> None:
     out.append("")
 
 
+def noise_section(data: Rows, out: list[str]) -> None:
+    """Замеры с разбросом по сериям больше 5 %: признак помех, время ненадёжно."""
+    noisy = defaultdict(list)
+    total = 0
+    for r in data.rows:
+        if math.isnan(r["ms_mean"]) or r["ms_mean"] <= 0:
+            continue
+        total += 1
+        if r["ms_std"] / r["ms_mean"] > 0.05:
+            noisy[(r["scene"], r["N"])].append(r["ms_std"] / r["ms_mean"])
+    if not noisy:
+        return
+    count = sum(len(v) for v in noisy.values())
+    out.append("## Замеры с разбросом по сериям больше 5 %\n")
+    out.append(f"Всего {count} из {total}. Время в этих строках ненадёжно (помехи от других процессов "
+               "или смена частоты GPU).\n")
+    out.append("| Сцена | N | Замеров | Наибольший разброс, % |")
+    out.append("|---|---|---|---|")
+    for (scene, n), values in noisy.items():
+        out.append(f"| {scene} | {n} | {len(values)} | {fmt(100 * max(values), 0)} |")
+    out.append("")
+
+
 def status_section(data: Rows, out: list[str]) -> None:
     problems = sorted({(r["scene"], r["N"], variant_name(r["rep"], r["traversal"]), r["status"])
                        for r in data.rows if r["status"] != "ok"})
@@ -368,7 +395,10 @@ def main() -> int:
     parser.add_argument("--fit-min-n", type=int, default=0, help="показатели роста только по N >= этого значения")
     parser.add_argument("--legacy-traversal", default="restart", choices=["restart", "stack"],
                         help="способ спуска SVO/SVDAG для CSV старого формата (по умолчанию restart)")
+    parser.add_argument("--time", default="mean", choices=["mean", "min"],
+                        help="время кадра: среднее по сериям или самый быстрый кадр (столбец gpu_ms_min)")
     args = parser.parse_args()
+    Rows.time_column = "gpu_ms_mean" if args.time == "mean" else "gpu_ms_min"
 
     data = Rows(args.csv, args.legacy_traversal)
     out: list[str] = ["# Результаты эксперимента\n"]
@@ -376,6 +406,7 @@ def main() -> int:
     steps_section(data, args.fit_min_n, out)
     traversal_section(data, out)
     dense_section(data, out)
+    noise_section(data, out)
     status_section(data, out)
     text = "\n".join(out) + "\n"
     if args.out:

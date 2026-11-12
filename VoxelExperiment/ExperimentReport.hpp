@@ -28,6 +28,7 @@ struct MeasurementRow {
   std::string gpu_status;  // "ok", "skipped: ...", "failed: ..."
   double gpu_ms_mean = 0.0;
   double gpu_ms_std = 0.0;
+  double gpu_ms_min = 0.0;  // самый быстрый кадр за все серии: устойчив к помехам от других процессов
   double mrays_per_second = 0.0;
 };
 

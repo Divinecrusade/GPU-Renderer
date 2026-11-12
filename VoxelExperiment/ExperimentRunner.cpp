@@ -1,5 +1,6 @@
 ﻿#include "ExperimentRunner.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -150,6 +151,7 @@ void ExperimentRunner::RenderFrame(Graphics& gfx, FrameTimer::DeltaTime dt) {
 
   if (frame_ms) {
     frame_ms_.push_back(*frame_ms);
+    min_frame_ms_ = min_frame_ms_ == 0.0 ? *frame_ms : std::min(min_frame_ms_, *frame_ms);
   }
   if (frame_in_phase_ >= config_.frames_per_series) {
     if (!frame_ms_.empty()) {
@@ -254,6 +256,7 @@ void ExperimentRunner::PrepareView(Graphics& gfx) {
   series_done_ = 0u;
   frame_ms_.clear();
   series_ms_.clear();
+  min_frame_ms_ = 0.0;
 }
 
 MeasurementRow ExperimentRunner::MakeRow(std::size_t view) const {
@@ -280,6 +283,7 @@ void ExperimentRunner::FinishView(Graphics& gfx) {
   row.gpu_status = series_ms_.empty() ? "failed: all GPU timestamps disjoint" : "ok";
   row.gpu_ms_mean = Mean(series_ms_);
   row.gpu_ms_std = StdDev(series_ms_);
+  row.gpu_ms_min = min_frame_ms_;
   if (row.gpu_ms_mean > 0.0) {
     row.mrays_per_second = static_cast<double>(width_) * height_ / (row.gpu_ms_mean * 1e-3) / 1e6;
   }
