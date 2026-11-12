@@ -33,6 +33,7 @@ struct ExperimentConfig {
   std::vector<Traversal> traversals{Traversal::kStack};
   std::size_t views = 3u;
   std::uint32_t warmup_frames = 30u;
+  std::uint32_t warmup_ms = 1000u;  // прогрев длится не меньше этого времени (--voxel-warmup-ms)
   std::uint32_t series = 10u;
   std::uint32_t frames_per_series = 20u;
   // CPU-обход выполняется для каждого cpu_stride-го пикселя по обеим осям:

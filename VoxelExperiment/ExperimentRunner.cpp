@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <chrono>
+#include <future>
+#include <thread>
 #include <iostream>
 #include <string>
 
@@ -127,7 +129,7 @@ void ExperimentRunner::RenderFrame(Graphics& gfx, FrameTimer::DeltaTime dt) {
     return;
   }
   if (phase_ == Phase::kPrepare) {
-    PrepareRepresentation(gfx);  // тяжёлая CPU-работа; окно на это время не обновляется
+    PrepareRepresentation(gfx);  // построение структуры — здесь; генерация сцены — в фоновом потоке
     gfx.ClearBuffer({0.f, 0.f, 0.f});
     gfx.EndFrame();
     return;
@@ -142,7 +144,8 @@ void ExperimentRunner::RenderFrame(Graphics& gfx, FrameTimer::DeltaTime dt) {
   ++frame_in_phase_;
 
   if (phase_ == Phase::kWarmup) {
-    if (frame_in_phase_ >= config_.warmup_frames) {
+    bool const long_enough = Clock::now() - warmup_start_ >= std::chrono::milliseconds{config_.warmup_ms};
+    if (frame_in_phase_ >= config_.warmup_frames && long_enough) {
       phase_ = Phase::kMeasure;
       frame_in_phase_ = 0u;
     }
@@ -168,7 +171,7 @@ void ExperimentRunner::RenderFrame(Graphics& gfx, FrameTimer::DeltaTime dt) {
 bool ExperimentRunner::LoadScene() {
   SceneCase const& scene = cases_[case_index_];
   try {
-    scene_ = LoadSceneCase(scene);
+    scene_ = scene_future_.get();
   } catch (std::exception const& e) {
     Log(std::string{"Scene loading failed: "} + e.what());
     scene_ = LoadedScene{};
@@ -183,6 +186,14 @@ bool ExperimentRunner::LoadScene() {
 }
 
 void ExperimentRunner::PrepareRepresentation(Graphics& gfx) {
+  if (!scene_loaded_) {
+    if (!scene_future_.valid()) {
+      scene_future_ = std::async(std::launch::async, [scene = cases_[case_index_]] { return LoadSceneCase(scene); });
+    }
+    if (scene_future_.wait_for(std::chrono::milliseconds{10}) != std::future_status::ready) {
+      return;  // кадр выводится, окно отвечает
+    }
+  }
   if (!scene_loaded_ && !LoadScene()) {
     grid_.reset();
     WriteCpuOnlyRows("failed: scene loading");
@@ -252,6 +263,7 @@ void ExperimentRunner::PrepareView(Graphics& gfx) {
   volume_->SetView(gfx, basis, false);
   cpu_stats_ = TraceImage(*grid_, basis, width_, height_, config_.cpu_stride, variants_[representation_index_].traversal);
   phase_ = Phase::kWarmup;
+  warmup_start_ = Clock::now();
   frame_in_phase_ = 0u;
   series_done_ = 0u;
   frame_ms_.clear();

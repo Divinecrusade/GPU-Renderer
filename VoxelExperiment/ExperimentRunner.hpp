@@ -1,6 +1,8 @@
 ﻿#ifndef VOXEL_EXPERIMENT_RUNNER_HPP
 #define VOXEL_EXPERIMENT_RUNNER_HPP
 
+#include <chrono>
+#include <future>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -72,6 +74,11 @@ class ExperimentRunner final {
 
   bool scene_loaded_ = false;
   LoadedScene scene_{};
+  // Сцена генерируется в фоновом потоке, а окно продолжает обрабатывать сообщения и выводить
+  // кадры: окно, не отвечающее дольше 5 с, Windows помечает как зависшее, после чего время
+  // кадра остаётся завышенным в 2–3 раза на десятки секунд (прогон 12.11, N >= 2048).
+  std::future<LoadedScene> scene_future_;
+  std::chrono::steady_clock::time_point warmup_start_{};
 
   std::unique_ptr<IVoxelGrid> grid_;
   std::unique_ptr<drawable::VoxelVolume> volume_;

@@ -173,6 +173,8 @@ ExperimentConfig ParseExperimentConfig(std::wstring_view command_line) {
       }
     } else if (option == L"--voxel-views") {
       config.views = ParseUnsigned(value, option);
+    } else if (option == L"--voxel-warmup-ms") {
+      config.warmup_ms = ParseUnsigned(value, option);
     } else if (option == L"--voxel-warmup") {
       config.warmup_frames = ParseUnsigned(value, option);
     } else if (option == L"--voxel-series") {
