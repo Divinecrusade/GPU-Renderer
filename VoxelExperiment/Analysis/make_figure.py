@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Сборка рисунка 1 статьи из снимков окна просмотра (клавиша P).
+"""Сборка рисунка 2 статьи из снимков окна просмотра (клавиша P).
 
 Четыре панели: а) затенение (SVO); б)–г) тепловые карты числа шагов на луч для плотной
 сетки, блочной сетки и SVO. Справа – шкала цветов той же палитры, что в VoxelTracePS.hlsl:
@@ -133,7 +133,7 @@ def main() -> int:
     parser.add_argument("--dpi", type=int, default=300)
     parser.add_argument("--font", default="Times New Roman")
     parser.add_argument("--font-size", type=float, default=10.0, help="кегль подписей, пт")
-    parser.add_argument("--out", type=Path, default=Path("figure1.tif"))
+    parser.add_argument("--out", type=Path, default=Path("figure2.tif"))
     parser.add_argument("--preview", action="store_true", help="дополнительно сохранить PNG для просмотра")
     args = parser.parse_args()
 
