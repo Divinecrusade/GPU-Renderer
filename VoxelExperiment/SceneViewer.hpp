@@ -2,6 +2,7 @@
 #define VOXEL_SCENE_VIEWER_HPP
 
 #include <cstdint>
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <string>
@@ -19,7 +20,9 @@ namespace gpu_renderer::voxel {
 //   Влево / Вправо — предыдущая / следующая сцена;
 //   Вверх / Вниз   — следующее / предыдущее представление;
 //   H              — тепловая карта числа шагов на луч;
-//   Пробел         — пауза вращения камеры.
+//   Пробел         — пауза вращения камеры;
+//   1 / 2 / 3      — ракурс эксперимента 0 / 1 / 2 (камера ставится в него и останавливается);
+//   P              — сохранить кадр в BMP в текущий каталог (для рисунков статьи).
 // Сцена, которой нет в кэше, генерируется (или читается) при переключении;
 // структура строится заново. И то и другое блокирует окно на время работы.
 class SceneViewer final {
@@ -41,6 +44,8 @@ class SceneViewer final {
   void Rebuild(Graphics& gfx);
   void SetStatus(std::wstring message);
   [[nodiscard]] std::wstring Describe() const;
+  // Имя файла снимка: capture_<сцена>_N<N>_<представление>_<steps|shade>_<ракурс>.bmp
+  [[nodiscard]] std::filesystem::path CaptureFileName() const;
 
   std::vector<SceneCase> cases_;
   std::vector<std::optional<LoadedScene>> cache_;
@@ -62,6 +67,8 @@ class SceneViewer final {
   bool show_steps_ = false;
   bool paused_ = false;
   float azimuth_ = 0.6f;
+  int view_index_ = -1;  // ракурс эксперимента, выбранный клавишей 1–3; -1 — произвольный
+  bool capture_requested_ = false;
   std::wstring status_;
 };
 }  // namespace gpu_renderer::voxel

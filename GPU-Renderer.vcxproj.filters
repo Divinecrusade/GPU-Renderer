@@ -301,6 +301,12 @@
     <ClCompile Include="VoxelExperiment\GpuTimer.cpp">
       <Filter>Исходные файлы\voxel</Filter>
     </ClCompile>
+    <ClCompile Include="VoxelExperiment\FrameCapture.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="VoxelExperiment\ImageFile.cpp">
+      <Filter>Исходные файлы\voxel</Filter>
+    </ClCompile>
     <ClCompile Include="VoxelExperiment\RayTraversal.cpp">
       <Filter>Исходные файлы\voxel</Filter>
     </ClCompile>
@@ -329,6 +335,12 @@
       <Filter>Файлы заголовков\voxel</Filter>
     </ClInclude>
     <ClInclude Include="VoxelExperiment\GpuTimer.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\FrameCapture.hpp">
+      <Filter>Файлы заголовков\voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelExperiment\ImageFile.hpp">
       <Filter>Файлы заголовков\voxel</Filter>
     </ClInclude>
     <ClInclude Include="VoxelExperiment\Morton.hpp">

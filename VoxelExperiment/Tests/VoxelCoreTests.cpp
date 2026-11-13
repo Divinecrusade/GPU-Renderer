@@ -4,6 +4,7 @@
 //       VoxelExperiment/SceneGenerators.cpp VoxelExperiment/RayTraversal.cpp
 //       VoxelExperiment/ExperimentReport.cpp VoxelExperiment/ExperimentConfig.cpp -o voxel_core_tests
 //   MSVC: cl /std:c++20 /O2 /EHsc <те же файлы>
+#include <iterator>
 #include <cmath>
 #include <cstdio>
 #include <filesystem>
@@ -22,6 +23,7 @@
 #include "../RayTraversal.hpp"
 #include "../SceneGenerators.hpp"
 #include "../VoxelGrid.hpp"
+#include "../ImageFile.hpp"
 
 namespace {
 int g_failures = 0;
@@ -233,6 +235,20 @@ int main() {
       rejected = true;
     }
     Check(rejected, "Конфигурация: N не степень двойки отклоняется");
+  }
+
+  {  // BMP: 3 x 2, RGBA сверху вниз -> BGR снизу вверх, строки выровнены до 4 байт
+    std::uint8_t const rgba[] = {255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255,   // верхняя строка: R G B
+                                 10, 20, 30, 255, 40, 50, 60, 255, 70, 80, 90, 255};
+    auto const path = std::filesystem::temp_directory_path() / "voxel_core_test.bmp";
+    WriteBmp24(path, 3u, 2u, rgba, 12u, PixelOrder::kRgba);
+    std::ifstream in{path, std::ios::binary};
+    std::vector<unsigned char> bytes{std::istreambuf_iterator<char>{in}, {}};
+    bool const ok = bytes.size() == 54u + 2u * 12u && bytes[0] == 'B' && bytes[1] == 'M' &&
+                    bytes[54] == 30 && bytes[55] == 20 && bytes[56] == 10 &&   // нижняя строка, первый пиксель
+                    bytes[66] == 0 && bytes[67] == 0 && bytes[68] == 255;      // верхняя строка, красный
+    Check(ok, "BMP: заголовок, порядок строк и каналов, выравнивание");
+    std::filesystem::remove(path);
   }
 
   std::printf("\n%s: %d ошибок\n", g_failures == 0 ? "ВСЕ ТЕСТЫ ПРОЙДЕНЫ" : "ЕСТЬ ОШИБКИ", g_failures);

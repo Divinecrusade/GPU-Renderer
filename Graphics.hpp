@@ -16,10 +16,14 @@ namespace gpu_renderer {
 namespace profiling {
 class GpuTimer;
 }  // namespace profiling
+namespace voxel {
+class FrameCapture;
+}  // namespace voxel
 
 class Graphics final {
  friend class Bindable;
  friend class profiling::GpuTimer;
+ friend class voxel::FrameCapture;
 
  public:
   // TODO: Separate it

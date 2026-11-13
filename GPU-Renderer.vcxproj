@@ -201,7 +201,9 @@
     <ClCompile Include="VoxelExperiment\ExperimentConfig.cpp" />
     <ClCompile Include="VoxelExperiment\ExperimentReport.cpp" />
     <ClCompile Include="VoxelExperiment\ExperimentRunner.cpp" />
+    <ClCompile Include="VoxelExperiment\FrameCapture.cpp" />
     <ClCompile Include="VoxelExperiment\GpuTimer.cpp" />
+    <ClCompile Include="VoxelExperiment\ImageFile.cpp" />
     <ClCompile Include="VoxelExperiment\RayTraversal.cpp" />
     <ClCompile Include="VoxelExperiment\SceneGenerators.cpp" />
     <ClCompile Include="VoxelExperiment\SceneViewer.cpp" />
@@ -262,7 +264,9 @@
     <ClInclude Include="VoxelExperiment\ExperimentConfig.hpp" />
     <ClInclude Include="VoxelExperiment\ExperimentReport.hpp" />
     <ClInclude Include="VoxelExperiment\ExperimentRunner.hpp" />
+    <ClInclude Include="VoxelExperiment\FrameCapture.hpp" />
     <ClInclude Include="VoxelExperiment\GpuTimer.hpp" />
+    <ClInclude Include="VoxelExperiment\ImageFile.hpp" />
     <ClInclude Include="VoxelExperiment\Morton.hpp" />
     <ClInclude Include="VoxelExperiment\RayTraversal.hpp" />
     <ClInclude Include="VoxelExperiment\SceneGenerators.hpp" />

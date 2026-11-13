@@ -1,10 +1,13 @@
 ﻿#include "SceneViewer.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
+#include <numbers>
 #include <stdexcept>
 
 #include "../Error.hpp"
+#include "FrameCapture.hpp"
 #include "RayTraversal.hpp"
 
 namespace gpu_renderer::voxel {
@@ -15,9 +18,13 @@ constexpr std::uint8_t kKeyUp = 0x26u;     // VK_UP
 constexpr std::uint8_t kKeyRight = 0x27u;  // VK_RIGHT
 constexpr std::uint8_t kKeyDown = 0x28u;   // VK_DOWN
 constexpr std::uint8_t kKeyH = 0x48u;      // 'H'
+constexpr std::uint8_t kKeyP = 0x50u;      // 'P'
+constexpr std::uint8_t kKey1 = 0x31u;      // '1'
+constexpr std::uint8_t kKey3 = 0x33u;      // '3'
+constexpr std::size_t kExperimentViews = 3u;  // как --voxel-views по умолчанию
 
 constexpr float kAngularSpeed = 0.3f;  // рад/с
-constexpr wchar_t kHelp[] = L"   [←→ сцена, ↑↓ представление, H шаги, Пробел пауза]";
+constexpr wchar_t kHelp[] = L"   [←→ сцена, ↑↓ представление, H шаги, Пробел пауза, 1–3 ракурс, P снимок]";
 
 [[nodiscard]] std::wstring Widen(std::string_view text) {
   std::wstring result;
@@ -91,8 +98,19 @@ void SceneViewer::OnKeyPressed(std::uint8_t key) noexcept {
         return;
       case kKeySpace:
         paused_ = !paused_;
+        view_index_ = -1;
+        return;
+      case kKeyP:
+        capture_requested_ = true;
         return;
       default:
+        if (key >= kKey1 && key <= kKey3) {
+          // тот же азимут, что у ракурса эксперимента (MakeOrbitCamera в RayTraversal.cpp)
+          view_index_ = key - kKey1;
+          azimuth_ = 0.6f + 2.f * std::numbers::pi_v<float> * static_cast<float>(view_index_) /
+                                static_cast<float>(kExperimentViews);
+          paused_ = true;
+        }
         return;
     }
     SetStatus(L"Подготовка: " + Describe() + L"…");
@@ -100,6 +118,23 @@ void SceneViewer::OnKeyPressed(std::uint8_t key) noexcept {
   } catch (...) {
     // нехватка памяти под строку статуса не должна ронять цикл сообщений
   }
+}
+
+std::filesystem::path SceneViewer::CaptureFileName() const {
+  SceneCase const& scene = cases_[case_index_];
+  std::string name = "capture_" + std::string{ToString(scene.kind)};
+  if (scene.kind == SceneKind::kModel) {
+    name += "-" + scene.model_path.stem().string();
+  }
+  name += "_N" + std::to_string(resolution_) + "_" + std::string{ToString(representations_[representation_index_])} +
+          (show_steps_ ? "_steps" : "_shade");
+  if (view_index_ >= 0) {
+    name += "_view" + std::to_string(view_index_);
+  } else {
+    double const degrees = std::fmod(static_cast<double>(azimuth_) * 180.0 / std::numbers::pi, 360.0);
+    name += "_az" + std::to_string(static_cast<int>(std::lround(degrees)));
+  }
+  return std::filesystem::current_path() / (name + ".bmp");
 }
 
 void SceneViewer::Rebuild(Graphics& gfx) {
@@ -168,6 +203,18 @@ void SceneViewer::RenderFrame(Graphics& gfx, FrameTimer::DeltaTime dt) {
                                      static_cast<float>(width_) / static_cast<float>(height_)),
                      show_steps_);
     volume_->Draw(gfx);
+  }
+  if (capture_requested_) {
+    capture_requested_ = false;
+    if (volume_) {
+      try {
+        std::filesystem::path const path = CaptureFileName();
+        FrameCapture::SaveBackBuffer(gfx, path);
+        SetStatus(Describe() + L" | сохранён " + path.filename().wstring());
+      } catch (std::exception const& e) {
+        SetStatus(Describe() + L" | снимок не сохранён: " + Widen(e.what()));
+      }
+    }
   }
   gfx.EndFrame();
 }
